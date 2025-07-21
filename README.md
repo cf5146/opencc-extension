@@ -13,6 +13,9 @@
   <a href="https://addons.mozilla.org/firefox/addon/opencc">
     <img src="https://user-images.githubusercontent.com/585534/107280546-7b9b2a00-6a26-11eb-8f9f-f95932f4bfec.png" />
   </a>
+  <a href="https://microsoftedge.microsoft.com/addons/">
+    <img src="https://user-images.githubusercontent.com/585534/107280622-91a8ea80-6a26-11eb-8d07-77c548b28665.png" alt="Microsoft Edge Add-ons">
+  </a>
 </p>
 
 A browser extension that converts text in the current active tab between different Chinese variants.
@@ -30,8 +33,8 @@ Most of the variants supported by OpenCC are supported:
 - ~~`jp`: Japanese Shinjitai~~
 
 > [!NOTE]
-> Only Chrome and Firefox are tested.
-> Other browsers may also work but are not guaranteed to.
+> Chrome, Firefox, and Microsoft Edge are supported.
+> Other Chromium-based browsers may also work but are not guaranteed to.
 
 ## Features
 
@@ -90,6 +93,32 @@ Specify the language settings in the extension popup.
 When auto mode is enabled, a grey badge with the letter `A` appears on the corner of the extension icon.
 
 All text in the webpage of the current active tab is converted whenever it loads or is updated.
+
+## Development
+
+This extension supports Chrome, Firefox, and Microsoft Edge. To build for each platform:
+
+### Chrome
+```bash
+npm run dist:chrome
+```
+
+### Firefox
+```bash
+npm run dist:firefox
+```
+
+### Microsoft Edge
+```bash
+npm run dist:edge
+```
+
+### All platforms
+```bash
+npm run dist
+```
+
+The Edge extension uses the same Chromium-based manifest (Manifest V3) as Chrome, making it fully compatible with Microsoft Edge.
 
 ## Credits
 

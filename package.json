@@ -12,13 +12,20 @@
   "license": "MIT",
   "scripts": {
     "build": "./build.mjs",
-    "build:watch": "pnpm build watch",
+    "build:watch": "npm run build watch",
     "start": "web-ext run -s ./build",
-    "start:firefox": "concurrently \"MODE='development' BROWSER='firefox' pnpm build:watch\" \"wait-on ./build/manifest.json && pnpm start\"",
-    "start:chromium": "concurrently \"MODE='development' BROWSER='chrome' pnpm build:watch\" \"wait-on ./build/manifest.json && pnpm start -t chromium\"",
-    "dist:chrome": "MODE='production' BROWSER='chrome' pnpm build ./dist/chrome && web-ext build -s ./dist/chrome -a . -n opencc.chrome.zip",
-    "dist:firefox": "MODE='production' BROWSER='firefox' pnpm build ./dist/firefox && web-ext build -s ./dist/firefox -a . -n opencc.firefox.zip",
-    "dist": "concurrently \"pnpm dist:chrome\" \"pnpm dist:firefox\" && rm -rf ./dist"
+    "start:firefox": "concurrently \"cross-env MODE=development BROWSER=firefox npm run build:watch\" \"wait-on ./build/manifest.json && npm run start\"",
+    "start:chromium": "concurrently \"cross-env MODE=development BROWSER=chrome npm run build:watch\" \"wait-on ./build/manifest.json && npm run start -- -t chromium\"",
+    "start:edge": "concurrently \"cross-env MODE=development BROWSER=edge npm run build:watch\" \"wait-on ./build/manifest.json && npm run start -- -t chromium\"",
+    "lint": "eslint src --ext .js",
+    "lint:fix": "eslint src --ext .js --fix",
+    "format": "prettier --write src",
+    "format:check": "prettier --check src",
+    "validate": "npm run lint && npm run format:check",
+    "dist:chrome": "cross-env MODE=production BROWSER=chrome node build.mjs ./dist/chrome && web-ext build -s ./dist/chrome -a . -n opencc.chrome.zip --overwrite-dest",
+    "dist:firefox": "cross-env MODE=production BROWSER=firefox node build.mjs ./dist/firefox && web-ext build -s ./dist/firefox -a . -n opencc.firefox.zip --overwrite-dest",
+    "dist:edge": "cross-env MODE=production BROWSER=edge node build.mjs ./dist/edge && web-ext build -s ./dist/edge -a . -n opencc.edge.zip --overwrite-dest",
+    "dist": "concurrently \"npm run dist:chrome\" \"npm run dist:firefox\" \"npm run dist:edge\" && rimraf ./dist"
   },
   "dependencies": {
     "opencc-js": "^1.0.5"
@@ -27,10 +34,12 @@
     "@types/chrome": "^0.0.287",
     "@types/opencc-js": "^1.0.3",
     "concurrently": "^9.1.0",
+    "cross-env": "^7.0.3",
     "esbuild": "^0.24.0",
     "eslint": "^8.57.1",
     "eslint-config-prettier": "^9.1.0",
     "prettier": "^3.4.1",
+    "rimraf": "^6.0.1",
     "wait-on": "^8.0.1",
     "web-ext": "^8.3.0"
   },

@@ -1,0 +1,77 @@
+name: Version Management
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_type:
+        description: 'Version bump type'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+jobs:
+  bump-version:
+    name: Bump Version
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm install
+        
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+      - name: Bump version
+        run: npm version ${{ github.event.inputs.version_type }} --no-git-tag-version
+        
+      - name: Get new version
+        id: version
+        run: echo "new_version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+        
+      - name: Update manifest versions
+        run: |
+          sed -i 's/"version": "[^"]*"/"version": "${{ steps.version.outputs.new_version }}"/g' src/manifest.chrome.json
+          sed -i 's/"version": "[^"]*"/"version": "${{ steps.version.outputs.new_version }}"/g' src/manifest.firefox.json
+          sed -i 's/"version": "[^"]*"/"version": "${{ steps.version.outputs.new_version }}"/g' src/manifest.edge.json
+          
+      - name: Generate changelog
+        id: changelog
+        uses: mikepenz/release-changelog-builder-action@v4
+        with:
+          configuration: ".github/changelog-config.json"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Commit changes
+        run: |
+          git add package.json package-lock.json src/manifest.*.json
+          git commit -m "chore: bump version to ${{ steps.version.outputs.new_version }}"
+          git push
+          
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.new_version }}
+          name: Release v${{ steps.version.outputs.new_version }}
+          body: ${{ steps.changelog.outputs.changelog }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
