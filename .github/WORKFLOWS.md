@@ -69,7 +69,28 @@ This document summarizes the GitHub Actions workflows configured for the OpenCC 
   - Submits to Edge Add-ons (requires API credentials)
   - Creates packaged extension artifacts
 
-### 8. Dependency Updates (`dependency-updates.yml`) ✨ **NEW**
+### 8. Automated Release Creation (`release.yml`) ✨ **NEW**
+
+- **Purpose:** Comprehensive release package creation
+- **Triggers:** Manual dispatch, version tags (v*)
+- **Features:**
+  - Builds all browser extensions
+  - Creates versioned release packages
+  - Generates checksums and metadata
+  - Automatic changelog generation
+  - Draft/prerelease options
+
+### 9. Quick Release (`quick-release.yml`) ✨ **NEW**
+
+- **Purpose:** Quick release from existing tags
+- **Triggers:** Manual dispatch
+- **Features:**
+  - Create releases from existing tags
+  - Skip version management steps
+  - Quick deployment option
+
+### 10. Dependency Updates (`dependency-updates.yml`) ✨ **NEW**
+
 - **Purpose:** Automated dependency maintenance
 - **Triggers:** Weekly schedule (Mondays), manual dispatch
 - **Features:**
@@ -105,6 +126,7 @@ This document summarizes the GitHub Actions workflows configured for the OpenCC 
 ## Required Secrets (Optional)
 
 To enable store submissions:
+
 - `FIREFOX_API_KEY` - Firefox Add-ons API key
 - `FIREFOX_API_SECRET` - Firefox Add-ons API secret
 - `CHROME_WEBSTORE_KEYS` - Chrome Web Store API keys (JSON format)
@@ -116,15 +138,18 @@ To enable store submissions:
 ## Improvements Made
 
 ### Package Manager Migration
+
 - **Migrated from npm to pnpm:** All workflows now use pnpm for better performance and consistency
 - **Added proper caching:** Uses pnpm cache for faster CI runs
 - **Frozen lockfile:** Uses `--frozen-lockfile` for reproducible builds
 
 ### New Workflows Added
+
 - **Chrome Web Store submission:** Automated Chrome extension publishing
 - **Dependency updates:** Weekly automated dependency maintenance
 
 ### Enhanced Features
+
 - **Better error handling:** Improved workflow reliability
 - **Consistent tooling:** All workflows use the same Node.js and pnpm versions
 - **Security improvements:** Better secret handling and validation
@@ -139,6 +164,7 @@ To enable store submissions:
 ## Usage Examples
 
 ### Creating a Release
+
 1. Go to Actions tab
 2. Select "Version Management" workflow
 3. Click "Run workflow"
@@ -146,12 +172,14 @@ To enable store submissions:
 5. Wait for automated release creation
 
 ### Testing Changes
+
 1. Create PR to `develop` branch
 2. Preview builds will be generated automatically
 3. Download artifacts from Actions tab
 4. Test in browser developer mode
 
 ### Store Submission
+
 1. Create a GitHub release
 2. Workflows will automatically build and submit to stores
 3. Monitor the Actions tab for submission status

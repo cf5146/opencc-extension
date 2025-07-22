@@ -76,7 +76,14 @@ jobs:
           tag_name: v${{ steps.version.outputs.new_version }}
           name: Release v${{ steps.version.outputs.new_version }}
           body: ${{ steps.changelog.outputs.changelog }}
-          draft: false
+          draft: true
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Trigger release workflow
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          event-type: create-release
+          client-payload: '{"version": "v${{ steps.version.outputs.new_version }}", "draft": true}'

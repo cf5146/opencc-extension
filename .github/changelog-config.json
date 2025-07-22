@@ -1,0 +1,63 @@
+{
+  "categories": [
+    {
+      "title": "## 🚀 Features",
+      "labels": ["feature", "enhancement", "feat"]
+    },
+    {
+      "title": "## 🐛 Bug Fixes",
+      "labels": ["bug", "bugfix", "fix"]
+    },
+    {
+      "title": "## 📚 Documentation",
+      "labels": ["documentation", "docs"]
+    },
+    {
+      "title": "## 🔧 Maintenance",
+      "labels": ["maintenance", "chore", "refactor"]
+    },
+    {
+      "title": "## 🔒 Security",
+      "labels": ["security"]
+    },
+    {
+      "title": "## ⚡ Performance",
+      "labels": ["performance", "perf"]
+    },
+    {
+      "title": "## 🎨 Style",
+      "labels": ["style", "ui", "ux"]
+    }
+  ],
+  "ignore_labels": [
+    "ignore-for-release",
+    "duplicate",
+    "invalid",
+    "wontfix"
+  ],
+  "sort": "ASC",
+  "template": "#{{CHANGELOG}}",
+  "pr_template": "- #{{TITLE}} by @#{{AUTHOR}} in #{{URL}}",
+  "empty_template": "- No changes",
+  "transformers": [
+    {
+      "pattern": "\\[(.+)\\]",
+      "target": "**$1**"
+    }
+  ],
+  "max_tags_to_fetch": 200,
+  "max_pull_requests": 200,
+  "max_back_track_time_days": 365,
+  "exclude_merge_branches": [
+    "main",
+    "master",
+    "develop"
+  ],
+  "tag_resolver": {
+    "method": "sort",
+    "filter": {
+      "pattern": "v\\d+\\.\\d+\\.\\d+",
+      "flags": "gu"
+    }
+  }
+}

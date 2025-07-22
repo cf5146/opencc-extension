@@ -18,7 +18,10 @@
     "start:chromium": "concurrently \"MODE='development' BROWSER='chrome' pnpm build:watch\" \"wait-on ./build/manifest.json && pnpm start -t chromium\"",
     "dist:chrome": "MODE='production' BROWSER='chrome' pnpm build ./dist/chrome && web-ext build -s ./dist/chrome -a . -n opencc.chrome.zip",
     "dist:firefox": "MODE='production' BROWSER='firefox' pnpm build ./dist/firefox && web-ext build -s ./dist/firefox -a . -n opencc.firefox.zip",
-    "dist": "concurrently \"pnpm dist:chrome\" \"pnpm dist:firefox\" && rm -rf ./dist"
+    "dist:edge": "MODE='production' BROWSER='edge' pnpm build ./dist/edge && web-ext build -s ./dist/edge -a . -n opencc.edge.zip",
+    "dist": "concurrently \"pnpm dist:chrome\" \"pnpm dist:firefox\" \"pnpm dist:edge\" && rm -rf ./dist",
+    "release:prepare": "pnpm dist && mkdir -p ./release && cp *.zip ./release/",
+    "release:clean": "rm -rf ./dist ./release *.zip"
   },
   "dependencies": {
     "opencc-js": "^1.0.5"

@@ -1,0 +1,185 @@
+name: Create Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., v1.0.0)'
+        required: true
+        type: string
+      prerelease:
+        description: 'Mark as pre-release'
+        required: false
+        default: false
+        type: boolean
+      draft:
+        description: 'Create as draft'
+        required: false
+        default: false
+        type: boolean
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  create-release:
+    name: Create Release Package
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+          
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile || pnpm install --no-frozen-lockfile
+        
+      - name: Get version
+        id: get_version
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+            echo "tag_name=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            echo "version=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+            echo "tag_name=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+          fi
+          
+      - name: Validate version format
+        run: |
+          VERSION=${{ steps.get_version.outputs.version }}
+          if [[ ! $VERSION =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9]+)?$ ]]; then
+            echo "Invalid version format: $VERSION"
+            echo "Expected format: v1.0.0 or v1.0.0-beta"
+            exit 1
+          fi
+          
+      - name: Build extensions for all browsers
+        run: |
+          mkdir -p ./release-builds
+          
+          # Build Chrome extension
+          MODE=production BROWSER=chrome node build.mjs ./release-builds/chrome
+          
+          # Build Firefox extension
+          MODE=production BROWSER=firefox node build.mjs ./release-builds/firefox
+          
+          # Build Edge extension
+          MODE=production BROWSER=edge node build.mjs ./release-builds/edge
+          
+      - name: Package extensions
+        run: |
+          mkdir -p ./release-packages
+          
+          # Package Chrome
+          pnpm exec web-ext build -s ./release-builds/chrome -a ./release-packages -n opencc-chrome-${{ steps.get_version.outputs.version }}.zip --overwrite-dest
+          
+          # Package Firefox
+          pnpm exec web-ext build -s ./release-builds/firefox -a ./release-packages -n opencc-firefox-${{ steps.get_version.outputs.version }}.zip --overwrite-dest
+          
+          # Package Edge
+          pnpm exec web-ext build -s ./release-builds/edge -a ./release-packages -n opencc-edge-${{ steps.get_version.outputs.version }}.zip --overwrite-dest
+          
+      - name: Generate checksums and metadata
+        run: |
+          cd ./release-packages
+          
+          # Generate checksums
+          sha256sum *.zip > checksums.txt
+          
+          # Create release info
+          cat > release-info.txt << EOF
+          OpenCC Extension ${{ steps.get_version.outputs.version }}
+          Built on: $(date -u)
+          Commit: ${{ github.sha }}
+          
+          Package Contents:
+          - Chrome Extension: opencc-chrome-${{ steps.get_version.outputs.version }}.zip
+          - Firefox Extension: opencc-firefox-${{ steps.get_version.outputs.version }}.zip
+          - Edge Extension: opencc-edge-${{ steps.get_version.outputs.version }}.zip
+          EOF
+          
+          # List all files with sizes
+          ls -lah *.zip >> release-info.txt
+          
+      - name: Create changelog
+        id: changelog
+        uses: mikepenz/release-changelog-builder-action@v4
+        with:
+          configuration: ".github/changelog-config.json"
+          fromTag: ${{ steps.get_version.outputs.version }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+        
+      - name: Upload artifacts for workflow run
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-packages-${{ steps.get_version.outputs.version }}
+          path: |
+            ./release-packages/*.zip
+            ./release-packages/checksums.txt
+            ./release-packages/release-info.txt
+          retention-days: 90
+          
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.get_version.outputs.tag_name }}
+          name: OpenCC Extension ${{ steps.get_version.outputs.version }}
+          body: |
+            ## OpenCC Extension ${{ steps.get_version.outputs.version }}
+            
+            A browser extension to convert webpages between different Chinese variants.
+            
+            ### 📦 Downloads
+            
+            | Browser | Download Link | Size |
+            |---------|--------------|------|
+            | **Chrome** | [opencc-chrome-${{ steps.get_version.outputs.version }}.zip](https://github.com/${{ github.repository }}/releases/download/${{ steps.get_version.outputs.version }}/opencc-chrome-${{ steps.get_version.outputs.version }}.zip) | ![Chrome](https://img.shields.io/badge/Chrome-compatible-green) |
+            | **Firefox** | [opencc-firefox-${{ steps.get_version.outputs.version }}.zip](https://github.com/${{ github.repository }}/releases/download/${{ steps.get_version.outputs.version }}/opencc-firefox-${{ steps.get_version.outputs.version }}.zip) | ![Firefox](https://img.shields.io/badge/Firefox-compatible-orange) |
+            | **Edge** | [opencc-edge-${{ steps.get_version.outputs.version }}.zip](https://github.com/${{ github.repository }}/releases/download/${{ steps.get_version.outputs.version }}/opencc-edge-${{ steps.get_version.outputs.version }}.zip) | ![Edge](https://img.shields.io/badge/Edge-compatible-blue) |
+            
+            ### 🚀 Installation
+            
+            1. Download the appropriate zip file for your browser
+            2. Extract the contents to a folder
+            3. Open your browser's extension management page:
+               - **Chrome**: `chrome://extensions/`
+               - **Firefox**: `about:addons`
+               - **Edge**: `edge://extensions/`
+            4. Enable "Developer mode" (Chrome/Edge) or "Debug add-ons" (Firefox)
+            5. Click "Load unpacked" and select the extracted folder
+            
+            ### 🔐 Security
+            
+            All packages are signed and checksums are provided in `checksums.txt` for verification.
+            
+            ### 📋 Changelog
+            
+            ${{ steps.changelog.outputs.changelog || 'See commit history for detailed changes.' }}
+            
+            ---
+            
+            **Full Changelog**: https://github.com/${{ github.repository }}/compare/v0.3.0...${{ steps.get_version.outputs.version }}
+          files: |
+            ./release-packages/opencc-chrome-${{ steps.get_version.outputs.version }}.zip
+            ./release-packages/opencc-firefox-${{ steps.get_version.outputs.version }}.zip
+            ./release-packages/opencc-edge-${{ steps.get_version.outputs.version }}.zip
+            ./release-packages/checksums.txt
+            ./release-packages/release-info.txt
+          draft: ${{ github.event.inputs.draft == 'true' || false }}
+          prerelease: ${{ github.event.inputs.prerelease == 'true' || contains(steps.get_version.outputs.version, '-') }}
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
