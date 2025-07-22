@@ -1,0 +1,56 @@
+name: Edge Add-ons Submission
+
+on:
+  release:
+    types: [ published ]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag to submit'
+        required: true
+        default: 'latest'
+
+jobs:
+  submit-to-edge:
+    name: Submit to Edge Add-ons
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+          
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        
+      - name: Build Edge extension
+        run: MODE=production BROWSER=edge node build.mjs ./dist/edge
+        
+      - name: Package Edge extension
+        run: pnpm exec web-ext build -s ./dist/edge -a ./artifacts -n opencc.edge.zip --overwrite-dest
+        
+      - name: Upload to Edge Add-ons
+        uses: wdzeng/edge-addon@v1
+        with:
+          product-id: ${{ secrets.EDGE_PRODUCT_ID }}
+          zip-path: ./artifacts/opencc.edge.zip
+          client-id: ${{ secrets.EDGE_CLIENT_ID }}
+          client-secret: ${{ secrets.EDGE_CLIENT_SECRET }}
+          access-token-url: ${{ secrets.EDGE_ACCESS_TOKEN_URL }}
+          
+      - name: Upload packaged extension
+        uses: actions/upload-artifact@v4
+        with:
+          name: edge-submitted-${{ github.sha }}
+          path: ./artifacts/
+          retention-days: 30

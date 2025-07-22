@@ -61,7 +61,15 @@ This document summarizes the GitHub Actions workflows configured for the OpenCC 
   - Submits to Chrome Web Store (requires API credentials)
   - Creates packaged extension artifacts
 
-### 7. Dependency Updates (`dependency-updates.yml`) ✨ **NEW**
+### 7. Edge Add-ons Submission (`edge-submission.yml`) ✨ **NEW**
+- **Purpose:** Microsoft Edge Add-ons store submission
+- **Triggers:** GitHub releases, manual dispatch
+- **Features:**
+  - Builds Edge extension
+  - Submits to Edge Add-ons (requires API credentials)
+  - Creates packaged extension artifacts
+
+### 8. Dependency Updates (`dependency-updates.yml`) ✨ **NEW**
 - **Purpose:** Automated dependency maintenance
 - **Triggers:** Weekly schedule (Mondays), manual dispatch
 - **Features:**
@@ -100,6 +108,10 @@ To enable store submissions:
 - `FIREFOX_API_KEY` - Firefox Add-ons API key
 - `FIREFOX_API_SECRET` - Firefox Add-ons API secret
 - `CHROME_WEBSTORE_KEYS` - Chrome Web Store API keys (JSON format)
+- `EDGE_PRODUCT_ID` - Edge Add-ons product ID
+- `EDGE_CLIENT_ID` - Edge Add-ons client ID
+- `EDGE_CLIENT_SECRET` - Edge Add-ons client secret
+- `EDGE_ACCESS_TOKEN_URL` - Edge Add-ons access token URL
 
 ## Improvements Made
 
