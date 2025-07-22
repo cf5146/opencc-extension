@@ -5,8 +5,9 @@ This document summarizes the GitHub Actions workflows configured for the OpenCC 
 ## Workflows Overview
 
 ### 1. Main CI/CD Pipeline (`ci.yml`)
+
 - **Purpose:** Main build, test, and release pipeline
-- **Triggers:** 
+- **Triggers:**
   - Push to `main` and `develop` branches
   - Pull requests to `main`
   - GitHub releases
@@ -17,6 +18,7 @@ This document summarizes the GitHub Actions workflows configured for the OpenCC 
   - **Updated:** Now uses pnpm instead of npm
 
 ### 2. Code Quality Checks (`code-quality.yml`)
+
 - **Purpose:** Security and dependency analysis
 - **Triggers:** Push and PRs to `main`/`develop`
 - **Features:**
@@ -26,6 +28,7 @@ This document summarizes the GitHub Actions workflows configured for the OpenCC 
   - **Updated:** Now uses pnpm instead of npm
 
 ### 3. Development Environment (`development.yml`)
+
 - **Purpose:** Development branch and PR previews
 - **Triggers:** Push and PRs to `develop`
 - **Features:**
@@ -35,6 +38,7 @@ This document summarizes the GitHub Actions workflows configured for the OpenCC 
   - **Updated:** Now uses pnpm instead of npm
 
 ### 4. Version Management (`version.yml`)
+
 - **Purpose:** Automated versioning and releases
 - **Triggers:** Manual workflow dispatch
 - **Features:**
@@ -45,6 +49,7 @@ This document summarizes the GitHub Actions workflows configured for the OpenCC 
   - **Updated:** Now uses pnpm and updates pnpm-lock.yaml
 
 ### 5. Firefox Add-ons Submission (`firefox-submission.yml`)
+
 - **Purpose:** Firefox Add-ons store submission
 - **Triggers:** GitHub releases, manual dispatch
 - **Features:**
@@ -54,6 +59,7 @@ This document summarizes the GitHub Actions workflows configured for the OpenCC 
   - **Updated:** Now uses pnpm instead of npm
 
 ### 6. Chrome Web Store Submission (`chrome-submission.yml`) ✨ **NEW**
+
 - **Purpose:** Chrome Web Store submission
 - **Triggers:** GitHub releases, manual dispatch
 - **Features:**
@@ -62,6 +68,7 @@ This document summarizes the GitHub Actions workflows configured for the OpenCC 
   - Creates packaged extension artifacts
 
 ### 7. Edge Add-ons Submission (`edge-submission.yml`) ✨ **NEW**
+
 - **Purpose:** Microsoft Edge Add-ons store submission
 - **Triggers:** GitHub releases, manual dispatch
 - **Features:**
@@ -72,7 +79,7 @@ This document summarizes the GitHub Actions workflows configured for the OpenCC 
 ### 8. Automated Release Creation (`release.yml`) ✨ **NEW**
 
 - **Purpose:** Comprehensive release package creation
-- **Triggers:** Manual dispatch, version tags (v*)
+- **Triggers:** Manual dispatch, version tags (v\*)
 - **Features:**
   - Builds all browser extensions
   - Creates versioned release packages
@@ -108,7 +115,7 @@ This document summarizes the GitHub Actions workflows configured for the OpenCC 
 ✅ **Automated Releases:** Version bumping and changelog generation  
 ✅ **Store Submission:** Firefox Add-ons and Chrome Web Store integration  
 ✅ **Dependency Management:** Automated weekly dependency updates  
-✅ **Package Manager:** Consistent pnpm usage across all workflows  
+✅ **Package Manager:** Consistent pnpm usage across all workflows
 
 ## Configuration Files
 
