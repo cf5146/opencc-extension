@@ -8,14 +8,38 @@ const converterCache = new Map();
 // Pre-compiled regex for better performance
 const zeroWidthSpaceRegex = new RegExp(zeroWidthSpace, "g");
 
-// Utility functions for zero-width space handling
+// Utility functions for zero-width space handling with original text preservation
 const removeZeroWidthSpaces = (text) => {
+  // Remove our marking pattern: converted_text + ZWS + original_text + ZWS
   return text.replace(zeroWidthSpaceRegex, "");
 };
 
-const addZeroWidthSpaces = (text) => {
-  // Insert zero-width spaces at word boundaries instead of between every character
-  return text.replace(/(\S+)/g, `$1${zeroWidthSpace}`);
+const addZeroWidthSpaces = (text, originalText = null) => {
+  // If we have the original text, store it as a marker to prevent re-conversion
+  // Format: converted_text + ZWS + original_text + ZWS
+  if (originalText && originalText !== text) {
+    return text + zeroWidthSpace + originalText + zeroWidthSpace;
+  }
+  // Fallback to simple ZWS at the end if no original text provided
+  return text + zeroWidthSpace;
+};
+
+// Extract the converted text and original text from marked text
+const extractFromMarkedText = (text) => {
+  const markerPattern = new RegExp(`(.+)${zeroWidthSpace}(.+)${zeroWidthSpace}$`);
+  const match = text.match(markerPattern);
+  if (match) {
+    return {
+      convertedText: match[1],
+      originalText: match[2],
+      wasConverted: true,
+    };
+  }
+  return {
+    convertedText: text,
+    originalText: null,
+    wasConverted: false,
+  };
 };
 
 // Get or create cached converter
@@ -46,19 +70,29 @@ function textboxConvert() {
 
   const convert = getConverter(origin, target);
 
-  // Remove existing zero-width spaces before conversion to avoid interference
-  const cleanText = once ? removeZeroWidthSpaces(originalText) : originalText;
-  let convertedText = convert(cleanText);
-
-  // Only proceed if conversion actually occurred
-  if (convertedText === cleanText) return;
-
-  // Add zero-width spaces if once mode is enabled and conversion occurred
   if (once) {
-    convertedText = addZeroWidthSpaces(convertedText);
-  }
+    // Check if text was already converted
+    const { convertedText: existingConverted, wasConverted } = extractFromMarkedText(originalText);
+    if (wasConverted) {
+      // Already converted, just display the converted text
+      $textbox.value = existingConverted;
+      return;
+    }
 
-  $textbox.value = convertedText;
+    // Convert and mark with original if conversion occurred
+    let newConverted = convert(existingConverted);
+    if (newConverted !== existingConverted) {
+      newConverted = addZeroWidthSpaces(newConverted, existingConverted);
+      $textbox.value = newConverted;
+    }
+  } else {
+    // Normal conversion without marking
+    const cleanText = removeZeroWidthSpaces(originalText);
+    let convertedText = convert(cleanText);
+    if (convertedText !== cleanText) {
+      $textbox.value = convertedText;
+    }
+  }
 }
 
 /* Retrieve values from local storage and restore options when shown. */

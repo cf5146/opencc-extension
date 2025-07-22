@@ -9,15 +9,38 @@ const converterCache = new Map();
 // Pre-compiled regex for better performance
 const zeroWidthSpaceRegex = new RegExp(zeroWidthSpace, "g");
 
-// Utility functions for zero-width space handling
+// Utility functions for zero-width space handling with original text preservation
 const removeZeroWidthSpaces = (text) => {
+  // Remove our marking pattern: converted_text + ZWS + original_text + ZWS
   return text.replace(zeroWidthSpaceRegex, "");
 };
 
-const addZeroWidthSpaces = (text) => {
-  // Insert zero-width spaces at word boundaries instead of between every character
-  // This is more performance-friendly and less intrusive
-  return text.replace(/(\S+)/g, `$1${zeroWidthSpace}`);
+const addZeroWidthSpaces = (text, originalText = null) => {
+  // If we have the original text, store it as a marker to prevent re-conversion
+  // Format: converted_text + ZWS + original_text + ZWS
+  if (originalText && originalText !== text) {
+    return text + zeroWidthSpace + originalText + zeroWidthSpace;
+  }
+  // Fallback to simple ZWS at the end if no original text provided
+  return text + zeroWidthSpace;
+};
+
+// Extract the converted text and original text from marked text
+const extractFromMarkedText = (text) => {
+  const markerPattern = new RegExp(`(.+)${zeroWidthSpace}(.+)${zeroWidthSpace}$`);
+  const match = text.match(markerPattern);
+  if (match) {
+    return {
+      convertedText: match[1],
+      originalText: match[2],
+      wasConverted: true,
+    };
+  }
+  return {
+    convertedText: text,
+    originalText: null,
+    wasConverted: false,
+  };
 };
 
 // Get or create cached converter
@@ -33,16 +56,26 @@ const matchWhitelist = (whitelist, url) => whitelist.map((p) => new RegExp(p)).s
 
 function convertTitle({ origin, target, once }) {
   const convert = getConverter(origin, target);
-  // Remove existing zero-width spaces before conversion to avoid interference
-  const cleanTitle = once ? removeZeroWidthSpaces(document.title) : document.title;
-  let convertedTitle = convert(cleanTitle);
 
-  // Only add zero-width spaces if conversion actually occurred and once mode is enabled
-  if (once && convertedTitle !== cleanTitle) {
-    convertedTitle = addZeroWidthSpaces(convertedTitle);
+  if (once) {
+    // Check if title was already converted
+    const { convertedText, wasConverted } = extractFromMarkedText(document.title);
+    if (wasConverted) {
+      // Title was already converted, just update the display
+      document.title = convertedText;
+      return;
+    }
+    // Convert and mark with original
+    let convertedTitle = convert(convertedText);
+    if (convertedTitle !== convertedText) {
+      convertedTitle = addZeroWidthSpaces(convertedTitle, convertedText);
+    }
+    document.title = convertedTitle;
+  } else {
+    // Normal conversion without marking
+    const cleanTitle = removeZeroWidthSpaces(document.title);
+    document.title = convert(cleanTitle);
   }
-
-  document.title = convertedTitle;
 }
 
 function convertAllTextNodes({ origin, target, once }) {
@@ -61,20 +94,31 @@ function convertAllTextNodes({ origin, target, once }) {
     // Skip empty or whitespace-only text nodes
     if (!originalText || originalText.trim().length === 0) return;
 
-    // Remove existing zero-width spaces before conversion to avoid interference
-    const cleanText = once ? removeZeroWidthSpaces(originalText) : originalText;
-    let convertedText = convert(cleanText);
-
-    // Skip if no conversion occurred
-    if (convertedText === cleanText) return;
-
-    // Add zero-width spaces if once mode is enabled and conversion occurred
     if (once) {
-      convertedText = addZeroWidthSpaces(convertedText);
-    }
+      // Check if this text node was already converted
+      const { convertedText: existingConverted, wasConverted } = extractFromMarkedText(originalText);
+      if (wasConverted) {
+        // Already converted, just display the converted text
+        textNode.nodeValue = existingConverted;
+        return;
+      }
 
-    textNode.nodeValue = convertedText;
-    count++;
+      // Convert and mark with original if conversion occurred
+      let newConverted = convert(existingConverted);
+      if (newConverted !== existingConverted) {
+        newConverted = addZeroWidthSpaces(newConverted, existingConverted);
+        textNode.nodeValue = newConverted;
+        count++;
+      }
+    } else {
+      // Normal conversion without marking
+      const cleanText = removeZeroWidthSpaces(originalText);
+      let convertedText = convert(cleanText);
+      if (convertedText !== cleanText) {
+        textNode.nodeValue = convertedText;
+        count++;
+      }
+    }
   });
   return count;
 }
@@ -94,22 +138,36 @@ function convertSelectedTextNodes({ origin, target, once }) {
     // Skip empty or whitespace-only text nodes
     if (!originalText || originalText.trim().length === 0) return false;
 
-    // Remove existing zero-width spaces before conversion to avoid interference
-    const cleanText = once ? removeZeroWidthSpaces(originalText) : originalText;
-    let convertedText = convert(cleanText);
-
-    // Skip if no conversion occurred
-    if (convertedText === cleanText) return false;
-
-    // Add zero-width spaces if once mode is enabled and conversion occurred
     if (once) {
-      convertedText = addZeroWidthSpaces(convertedText);
+      // Check if this text was already converted
+      const { convertedText: existingConverted, wasConverted } = extractFromMarkedText(originalText);
+      if (wasConverted) {
+        // Already converted, replace with clean converted text
+        const fullText = textNode.nodeValue;
+        textNode.nodeValue = fullText.substring(0, startOffset) + existingConverted + fullText.substring(endOffset);
+        return true;
+      }
+
+      // Convert and mark with original if conversion occurred
+      let newConverted = convert(existingConverted);
+      if (newConverted !== existingConverted) {
+        newConverted = addZeroWidthSpaces(newConverted, existingConverted);
+        const fullText = textNode.nodeValue;
+        textNode.nodeValue = fullText.substring(0, startOffset) + newConverted + fullText.substring(endOffset);
+        return true;
+      }
+    } else {
+      // Normal conversion without marking
+      const cleanText = removeZeroWidthSpaces(originalText);
+      let convertedText = convert(cleanText);
+      if (convertedText !== cleanText) {
+        const fullText = textNode.nodeValue;
+        textNode.nodeValue = fullText.substring(0, startOffset) + convertedText + fullText.substring(endOffset);
+        return true;
+      }
     }
 
-    // Replace the specific portion of the text node
-    const fullText = textNode.nodeValue;
-    textNode.nodeValue = fullText.substring(0, startOffset) + convertedText + fullText.substring(endOffset);
-    return true;
+    return false;
   };
 
   // Handle single text node selection

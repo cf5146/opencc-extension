@@ -8,15 +8,38 @@ const converterCache = new Map();
 // Pre-compiled regex for better performance
 const zeroWidthSpaceRegex = new RegExp(zeroWidthSpace, "g");
 
-// Utility functions for zero-width space handling
+// Utility functions for zero-width space handling with original text preservation
 export const removeZeroWidthSpaces = (text) => {
+  // Remove our marking pattern: converted_text + ZWS + original_text + ZWS
   return text.replace(zeroWidthSpaceRegex, "");
 };
 
-export const addZeroWidthSpaces = (text) => {
-  // Insert zero-width spaces at word boundaries instead of between every character
-  // This is more performance-friendly and less intrusive
-  return text.replace(/(\S+)/g, `$1${zeroWidthSpace}`);
+export const addZeroWidthSpaces = (text, originalText = null) => {
+  // If we have the original text, store it as a marker to prevent re-conversion
+  // Format: converted_text + ZWS + original_text + ZWS
+  if (originalText && originalText !== text) {
+    return text + zeroWidthSpace + originalText + zeroWidthSpace;
+  }
+  // Fallback to simple ZWS at the end if no original text provided
+  return text + zeroWidthSpace;
+};
+
+// Extract the converted text and original text from marked text
+export const extractFromMarkedText = (text) => {
+  const markerPattern = new RegExp(`(.+)${zeroWidthSpace}(.+)${zeroWidthSpace}$`);
+  const match = text.match(markerPattern);
+  if (match) {
+    return {
+      convertedText: match[1],
+      originalText: match[2],
+      wasConverted: true,
+    };
+  }
+  return {
+    convertedText: text,
+    originalText: null,
+    wasConverted: false,
+  };
 };
 
 // Get or create cached converter
