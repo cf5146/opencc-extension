@@ -42,7 +42,7 @@ const options = {
   sourcemap: mode === "development",
   treeShaking: true, // Enable tree shaking for smaller bundles
   splitting: false, // Disable code splitting for browser extensions
-  format: "esm", // Use ES modules format
+  format: "iife", // Use IIFE format for browser extensions
   platform: "browser", // Optimize for browser environment
   // Advanced optimizations for production
   ...(mode === "production" && {
