@@ -1,31 +1,70 @@
 import { Converter } from "opencc-js";
 
-const defaultSettings = { origin: "cn", target: "hk", auto: false, whitelist: [] };
+const defaultSettings = { origin: "cn", target: "hk", auto: false, once: true, whitelist: [] };
+const zeroWidthSpace = String.fromCharCode(8203);
+
+// Utility functions for zero-width space handling
+const removeZeroWidthSpaces = (text) => {
+  return text.replace(new RegExp(zeroWidthSpace, 'g'), "");
+};
+
+const addZeroWidthSpaces = (text) => {
+  // Insert zero-width spaces at word boundaries instead of between every character
+  // This is more performance-friendly and less intrusive
+  return text.replace(/(\S+)/g, `$1${zeroWidthSpace}`);
+};
 
 const matchWhitelist = (whitelist, url) => whitelist.map((p) => new RegExp(p)).some((re) => re.test(url));
 
-function convertTitle(origin, target) {
+function convertTitle({ origin, target, once }) {
   const convert = Converter({ from: origin, to: target });
-  document.title = convert(document.title);
+  // Remove existing zero-width spaces before conversion to avoid interference
+  const cleanTitle = once ? removeZeroWidthSpaces(document.title) : document.title;
+  let convertedTitle = convert(cleanTitle);
+  
+  // Only add zero-width spaces if conversion actually occurred and once mode is enabled
+  if (once && convertedTitle !== cleanTitle) {
+    convertedTitle = addZeroWidthSpaces(convertedTitle);
+  }
+  
+  document.title = convertedTitle;
 }
 
-function convertAllTextNodes(origin, target) {
+function convertAllTextNodes({ origin, target, once }) {
   const convert = Converter({ from: origin, to: target });
   const iterateTextNodes = (node, callback) => {
     const walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT, null, false);
-    for (let textNode; (textNode = walker.nextNode()); ) callback(textNode);
+    let textNode;
+    while ((textNode = walker.nextNode())) {
+      callback(textNode);
+    }
   };
   let count = 0;
   iterateTextNodes(document.body, (textNode) => {
     const originalText = textNode.nodeValue;
-    const convertedText = convert(originalText);
-    if (convertedText === originalText) return;
-    (textNode.nodeValue = convertedText) && count++;
+    
+    // Skip empty or whitespace-only text nodes
+    if (!originalText || originalText.trim().length === 0) return;
+    
+    // Remove existing zero-width spaces before conversion to avoid interference
+    const cleanText = once ? removeZeroWidthSpaces(originalText) : originalText;
+    let convertedText = convert(cleanText);
+    
+    // Skip if no conversion occurred
+    if (convertedText === cleanText) return;
+    
+    // Add zero-width spaces if once mode is enabled and conversion occurred
+    if (once) {
+      convertedText = addZeroWidthSpaces(convertedText);
+    }
+    
+    textNode.nodeValue = convertedText;
+    count++;
   });
   return count;
 }
 
-function convertSelectedTextNodes(origin, target) {
+function convertSelectedTextNodes({ origin, target, once }) {
   const convert = Converter({ from: origin, to: target });
   const iterateTextNodes = (nodes, callback) => {
     for (const node of nodes) {
@@ -37,12 +76,27 @@ function convertSelectedTextNodes(origin, target) {
   const contents = range.cloneContents();
   iterateTextNodes([contents], (textNode) => {
     const originalText = textNode.nodeValue;
-    const convertedText = convert(originalText);
-    if (convertedText === originalText) return;
-    return (textNode.nodeValue = convertedText);
+    
+    // Skip empty or whitespace-only text nodes
+    if (!originalText || originalText.trim().length === 0) return;
+    
+    // Remove existing zero-width spaces before conversion to avoid interference
+    const cleanText = once ? removeZeroWidthSpaces(originalText) : originalText;
+    let convertedText = convert(cleanText);
+    
+    // Skip if no conversion occurred
+    if (convertedText === cleanText) return;
+    
+    // Add zero-width spaces if once mode is enabled and conversion occurred
+    if (once) {
+      convertedText = addZeroWidthSpaces(convertedText);
+    }
+    
+    textNode.nodeValue = convertedText;
+    return true;
   });
-  // FIXME: the DOM structure messes up
-  //   when the selected text spans across multiple containers
+  // TODO: Improve handling of selected text spanning multiple containers
+  // Currently this may disrupt DOM structure when selection spans multiple elements
   range.deleteContents() || range.insertNode(contents);
 }
 
@@ -56,17 +110,17 @@ if (!lang || lang.startsWith("zh"))
     if (matchWhitelist(settings.whitelist, window.location.href)) return;
     if (currentURL !== window.location.href) {
       currentURL = window.location.href;
-      convertTitle(settings.origin, settings.target);
+      convertTitle(settings);
     }
-    convertAllTextNodes(settings.origin, settings.target);
+    convertAllTextNodes(settings);
   }).observe(document.body, { childList: true, subtree: true });
 
 /* Run convert once DOM ready when in auto mode. */
 chrome.storage.local.get(defaultSettings).then((settings) => {
   if (!settings.auto) return;
   if (matchWhitelist(settings.whitelist, window.location.href)) return;
-  convertTitle(settings.origin, settings.target);
-  convertAllTextNodes(settings.origin, settings.target);
+  convertTitle(settings);
+  convertAllTextNodes(settings);
 });
 
 /* Run convert on all nodes when triggered by button click in popup. */
@@ -77,10 +131,10 @@ chrome.runtime.onMessage.addListener(({ action }, _, sendResponse) => {
     if (settings.origin !== settings.target) {
       if (action === "click") {
         const start = Date.now();
-        convertTitle(settings.origin, settings.target);
-        const count = convertAllTextNodes(settings.origin, settings.target);
+        convertTitle(settings);
+        const count = convertAllTextNodes(settings);
         sendResponse({ count, time: Date.now() - start });
-      } else if (action === "select") convertSelectedTextNodes(settings.origin, settings.target);
+      } else if (action === "select") convertSelectedTextNodes(settings);
     }
   })();
   return true; // eliminate error: 'the message port closed before a response was received'

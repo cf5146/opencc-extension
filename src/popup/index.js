@@ -1,5 +1,17 @@
 import { Converter } from "opencc-js";
 
+const zeroWidthSpace = String.fromCharCode(8203);
+
+// Utility functions for zero-width space handling
+const removeZeroWidthSpaces = (text) => {
+  return text.replace(new RegExp(zeroWidthSpace, 'g'), "");
+};
+
+const addZeroWidthSpaces = (text) => {
+  // Insert zero-width spaces at word boundaries instead of between every character
+  return text.replace(/(\S+)/g, `$1${zeroWidthSpace}`);
+};
+
 const $originSelect = document.getElementById("origin");
 const $targetSelect = document.getElementById("target");
 const $swapButton = document.getElementById("swap");
@@ -7,15 +19,31 @@ const $resetButton = document.getElementById("reset");
 const $textbox = document.getElementById("textbox");
 const $convertButton = document.getElementById("convert");
 const $autoCheckbox = document.getElementById("auto");
+const $onceCheckbox = document.getElementById("once");
 const $footer = document.getElementsByTagName("footer")[0];
 
 function textboxConvert() {
-  const [origin, target] = [$originSelect.value, $targetSelect.value];
+  const [origin, target, once] = [$originSelect.value, $targetSelect.value, $onceCheckbox.checked];
   if (origin === target) return;
-  const convert = Converter({ from: origin, to: target });
+  
   const originalText = $textbox.value;
-  const convertedText = convert(originalText);
-  if (convertedText !== originalText) $textbox.value = convertedText;
+  if (!originalText || originalText.trim().length === 0) return;
+  
+  const convert = Converter({ from: origin, to: target });
+  
+  // Remove existing zero-width spaces before conversion to avoid interference
+  const cleanText = once ? removeZeroWidthSpaces(originalText) : originalText;
+  let convertedText = convert(cleanText);
+  
+  // Only proceed if conversion actually occurred
+  if (convertedText === cleanText) return;
+  
+  // Add zero-width spaces if once mode is enabled and conversion occurred
+  if (once) {
+    convertedText = addZeroWidthSpaces(convertedText);
+  }
+  
+  $textbox.value = convertedText;
 }
 
 /* Retrieve values from local storage and restore options when shown. */
@@ -24,6 +52,7 @@ chrome.storage.local
     origin: "cn",
     target: "hk",
     auto: false,
+    once: true,
     textboxSize: {
       width: null,
       height: null,
@@ -33,6 +62,7 @@ chrome.storage.local
     $originSelect.value = settings.origin;
     $targetSelect.value = settings.target;
     $autoCheckbox.checked = settings.auto;
+    $onceCheckbox.checked = settings.once;
     $convertButton.disabled = settings.origin === settings.target;
     // restore textbox size
     const { width, height } = settings.textboxSize;
@@ -102,4 +132,12 @@ $autoCheckbox.addEventListener("change", (event) => {
   const auto = event.currentTarget.checked;
   chrome.storage.local.set({ auto });
   chrome.action.setBadgeText({ text: auto ? "A" : "" });
+});
+
+/* User checks once convert mode. */
+$onceCheckbox.addEventListener("change", (event) => {
+  const once = event.currentTarget.checked;
+  chrome.storage.local.set({ once });
+  // Re-convert textbox content if there's any, to show immediate effect
+  if ($textbox.value) textboxConvert();
 });
