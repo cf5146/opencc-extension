@@ -45,10 +45,25 @@ jobs:
           keys: ${{ secrets.CHROME_WEBSTORE_KEYS }}
           artifact: ./artifacts/opencc.chrome.zip
           verbose: true
+        continue-on-error: true
+        id: chrome_upload
           
       - name: Upload packaged extension
         uses: actions/upload-artifact@v4
         with:
-          name: chrome-submitted-${{ github.sha }}
+          name: chrome-extension-${{ github.sha }}
           path: ./artifacts/
           retention-days: 30
+          
+      - name: Check submission result
+        run: |
+          if [ "${{ steps.chrome_upload.outcome }}" = "failure" ]; then
+            echo "⚠️ Chrome Web Store submission failed"
+            echo "This could be due to missing credentials or API errors"
+            echo "Extension built successfully and uploaded as artifact"
+            echo ""
+            echo "To enable automatic Chrome submission, add this secret:"
+            echo "- CHROME_WEBSTORE_KEYS (JSON format with clientId, clientSecret, refreshToken)"
+          else
+            echo "✅ Chrome Web Store submission successful"
+          fi
