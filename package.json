@@ -24,15 +24,16 @@
     "opencc-js": "^1.0.5"
   },
   "devDependencies": {
-    "@types/chrome": "^0.0.287",
+    "@eslint/js": "^9.31.0",
+    "@types/chrome": "^0.1.1",
     "@types/opencc-js": "^1.0.3",
-    "concurrently": "^9.1.0",
-    "esbuild": "^0.24.0",
-    "eslint": "^8.57.1",
-    "eslint-config-prettier": "^9.1.0",
-    "prettier": "^3.4.1",
-    "wait-on": "^8.0.1",
-    "web-ext": "^8.3.0"
+    "concurrently": "^9.2.0",
+    "esbuild": "^0.25.8",
+    "eslint": "^9.31.0",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.6.2",
+    "wait-on": "^8.0.3",
+    "web-ext": "^8.9.0"
   },
   "prettier": {
     "tabWidth": 2,

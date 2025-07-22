@@ -34,7 +34,9 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           
       - name: Update dependencies
-        run: pnpm update
+        run: |
+          pnpm update
+          pnpm audit --fix || echo "Some vulnerabilities may require manual intervention"
         
       - name: Check for changes
         id: changes
