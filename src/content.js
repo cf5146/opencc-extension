@@ -5,7 +5,7 @@ const zeroWidthSpace = String.fromCharCode(8203);
 
 // Utility functions for zero-width space handling
 const removeZeroWidthSpaces = (text) => {
-  return text.replace(new RegExp(zeroWidthSpace, 'g'), "");
+  return text.replace(new RegExp(zeroWidthSpace, "g"), "");
 };
 
 const addZeroWidthSpaces = (text) => {
@@ -21,12 +21,12 @@ function convertTitle({ origin, target, once }) {
   // Remove existing zero-width spaces before conversion to avoid interference
   const cleanTitle = once ? removeZeroWidthSpaces(document.title) : document.title;
   let convertedTitle = convert(cleanTitle);
-  
+
   // Only add zero-width spaces if conversion actually occurred and once mode is enabled
   if (once && convertedTitle !== cleanTitle) {
     convertedTitle = addZeroWidthSpaces(convertedTitle);
   }
-  
+
   document.title = convertedTitle;
 }
 
@@ -42,22 +42,22 @@ function convertAllTextNodes({ origin, target, once }) {
   let count = 0;
   iterateTextNodes(document.body, (textNode) => {
     const originalText = textNode.nodeValue;
-    
+
     // Skip empty or whitespace-only text nodes
     if (!originalText || originalText.trim().length === 0) return;
-    
+
     // Remove existing zero-width spaces before conversion to avoid interference
     const cleanText = once ? removeZeroWidthSpaces(originalText) : originalText;
     let convertedText = convert(cleanText);
-    
+
     // Skip if no conversion occurred
     if (convertedText === cleanText) return;
-    
+
     // Add zero-width spaces if once mode is enabled and conversion occurred
     if (once) {
       convertedText = addZeroWidthSpaces(convertedText);
     }
-    
+
     textNode.nodeValue = convertedText;
     count++;
   });
@@ -76,22 +76,22 @@ function convertSelectedTextNodes({ origin, target, once }) {
   const contents = range.cloneContents();
   iterateTextNodes([contents], (textNode) => {
     const originalText = textNode.nodeValue;
-    
+
     // Skip empty or whitespace-only text nodes
     if (!originalText || originalText.trim().length === 0) return;
-    
+
     // Remove existing zero-width spaces before conversion to avoid interference
     const cleanText = once ? removeZeroWidthSpaces(originalText) : originalText;
     let convertedText = convert(cleanText);
-    
+
     // Skip if no conversion occurred
     if (convertedText === cleanText) return;
-    
+
     // Add zero-width spaces if once mode is enabled and conversion occurred
     if (once) {
       convertedText = addZeroWidthSpaces(convertedText);
     }
-    
+
     textNode.nodeValue = convertedText;
     return true;
   });

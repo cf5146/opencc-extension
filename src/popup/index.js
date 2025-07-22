@@ -4,7 +4,7 @@ const zeroWidthSpace = String.fromCharCode(8203);
 
 // Utility functions for zero-width space handling
 const removeZeroWidthSpaces = (text) => {
-  return text.replace(new RegExp(zeroWidthSpace, 'g'), "");
+  return text.replace(new RegExp(zeroWidthSpace, "g"), "");
 };
 
 const addZeroWidthSpaces = (text) => {
@@ -25,24 +25,24 @@ const $footer = document.getElementsByTagName("footer")[0];
 function textboxConvert() {
   const [origin, target, once] = [$originSelect.value, $targetSelect.value, $onceCheckbox.checked];
   if (origin === target) return;
-  
+
   const originalText = $textbox.value;
   if (!originalText || originalText.trim().length === 0) return;
-  
+
   const convert = Converter({ from: origin, to: target });
-  
+
   // Remove existing zero-width spaces before conversion to avoid interference
   const cleanText = once ? removeZeroWidthSpaces(originalText) : originalText;
   let convertedText = convert(cleanText);
-  
+
   // Only proceed if conversion actually occurred
   if (convertedText === cleanText) return;
-  
+
   // Add zero-width spaces if once mode is enabled and conversion occurred
   if (once) {
     convertedText = addZeroWidthSpaces(convertedText);
   }
-  
+
   $textbox.value = convertedText;
 }
 
