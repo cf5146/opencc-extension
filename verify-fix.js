@@ -42,23 +42,23 @@ const testCases = [
 testCases.forEach((testCase, index) => {
   console.log(`\nTest ${index + 1}: "${testCase.text}" (${testCase.from} -> ${testCase.to})`);
   console.log("-".repeat(30));
-  
+
   const converter = Converter({ from: testCase.from, to: testCase.to });
-  
+
   // First conversion
   const firstConversion = converter(testCase.text);
   console.log(`1. First conversion: "${firstConversion}"`);
-  
+
   // Mark with original (simulate "once" mode)
   const marked = addZeroWidthSpaces(firstConversion, testCase.text);
   console.log(`2. Marked text length: ${marked.length}`);
-  
+
   // Extract and check (simulate second conversion attempt)
   const { convertedText, originalText, wasConverted } = extractFromMarkedText(marked);
   console.log(`3. Extracted converted: "${convertedText}"`);
   console.log(`4. Extracted original: "${originalText}"`);
   console.log(`5. Was already converted: ${wasConverted}`);
-  
+
   if (wasConverted) {
     console.log(`✅ SUCCESS: Skipped re-conversion, showing: "${convertedText}"`);
   } else {

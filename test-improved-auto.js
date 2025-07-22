@@ -42,7 +42,7 @@ const getConverter = (origin, target) => {
 // Helper function to check if conversion seems like cascading
 const isCascadingConversion = (original, converted) => {
   if (converted === original) return false;
-  
+
   // Check for obvious cascading patterns
   // Pattern 1: Repeated characters (e.g., "演算法" -> "演演算法")
   if (converted.length > original.length) {
@@ -50,18 +50,18 @@ const isCascadingConversion = (original, converted) => {
     if (converted.includes(original)) {
       return true;
     }
-    
+
     // Check for character repetition patterns
     const firstChar = original.charAt(0);
     if (firstChar && converted.startsWith(firstChar + firstChar)) {
       return true;
     }
   }
-  
+
   // Pattern 2: Length ratio that suggests cascading
   const lengthRatio = converted.length / original.length;
   if (lengthRatio > 1.4) return true;
-  
+
   // Pattern 3: Check if original appears to already be converted Chinese text
   // Most original Chinese text should convert to similar length or shorter
   // If converting Chinese text makes it much longer, it's likely cascading
@@ -71,7 +71,7 @@ const isCascadingConversion = (original, converted) => {
 // Helper function to process text node in once mode
 const processTextNodeOnceMode = (textNode, originalText, convert) => {
   const { convertedText: existingConverted, wasConverted } = extractFromMarkedText(originalText);
-  
+
   if (wasConverted) {
     // Already converted, just display the converted text
     if (textNode.nodeValue !== existingConverted) {
@@ -94,7 +94,7 @@ const processTextNodeOnceMode = (textNode, originalText, convert) => {
 const processTextNodeNormalMode = (textNode, originalText, convert) => {
   const cleanText = originalText.replace(zeroWidthSpaceRegex, "");
   const convertedText = convert(cleanText);
-  
+
   if (convertedText !== cleanText && !isCascadingConversion(cleanText, convertedText)) {
     textNode.nodeValue = convertedText;
     return true;
@@ -106,18 +106,18 @@ const processTextNodeNormalMode = (textNode, originalText, convert) => {
 function simulateImprovedAutoMode(textNodes, settings) {
   const convert = getConverter(settings.origin, settings.target);
   let count = 0;
-  
+
   const processedNodes = textNodes.map((originalText, index) => {
     // Skip empty or whitespace-only text nodes
     if (!originalText || originalText.trim().length === 0) return originalText;
 
     // Create a mock text node
     const mockTextNode = { nodeValue: originalText };
-    
-    const wasConverted = settings.once 
+
+    const wasConverted = settings.once
       ? processTextNodeOnceMode(mockTextNode, originalText, convert)
       : processTextNodeNormalMode(mockTextNode, originalText, convert);
-    
+
     if (wasConverted) {
       count++;
       console.log(`  🔄 Converted: "${originalText}" -> "${mockTextNode.nodeValue}"`);
@@ -129,7 +129,7 @@ function simulateImprovedAutoMode(textNodes, settings) {
         console.log(`  ⏸️  Skipped (cascading prevention): "${originalText}"`);
       }
     }
-    
+
     return mockTextNode.nodeValue;
   });
 
@@ -155,17 +155,19 @@ const problemScenarios = [
     name: "Test mixed content with potential cascading",
     settings: { origin: "cn", target: "twp", auto: true, once: true },
     textNodes: ["算法", "演算法", "演演算法", "新算法"],
-  }
+  },
 ];
 
 problemScenarios.forEach((scenario, index) => {
   console.log(`\nTest ${index + 1}: ${scenario.name}`);
   console.log("-".repeat(40));
-  console.log(`Settings: auto=${scenario.settings.auto}, once=${scenario.settings.once}, ${scenario.settings.origin}->${scenario.settings.target}`);
-  console.log(`Text nodes: [${scenario.textNodes.map(t => `"${t}"`).join(", ")}]`);
-  
+  console.log(
+    `Settings: auto=${scenario.settings.auto}, once=${scenario.settings.once}, ${scenario.settings.origin}->${scenario.settings.target}`,
+  );
+  console.log(`Text nodes: [${scenario.textNodes.map((t) => `"${t}"`).join(", ")}]`);
+
   const { processedNodes, count } = simulateImprovedAutoMode(scenario.textNodes, scenario.settings);
-  
+
   console.log(`Result: ${count} nodes converted`);
   console.log("Final result:");
   processedNodes.forEach((node, i) => {
@@ -189,12 +191,14 @@ const cascadingTests = [
 ];
 
 const converter = getConverter("cn", "twp");
-cascadingTests.forEach(test => {
+cascadingTests.forEach((test) => {
   const converted = converter(test.text);
   const lengthRatio = converted.length / test.text.length;
   const wouldBlock = isCascadingConversion(test.text, converted);
-  
-  console.log(`"${test.text}" -> "${converted}" (ratio: ${lengthRatio.toFixed(2)}, blocked: ${wouldBlock}) - ${test.expected}`);
+
+  console.log(
+    `"${test.text}" -> "${converted}" (ratio: ${lengthRatio.toFixed(2)}, blocked: ${wouldBlock}) - ${test.expected}`,
+  );
 });
 
 console.log("\n✨ Improved auto mode testing completed!");

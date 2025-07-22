@@ -44,8 +44,8 @@ const getConverter = (origin, target) => {
 function simulateAutoModeConversion(textNodes, settings) {
   const convert = getConverter(settings.origin, settings.target);
   let count = 0;
-  
-  const processedNodes = textNodes.map(originalText => {
+
+  const processedNodes = textNodes.map((originalText) => {
     // Skip empty or whitespace-only text nodes
     if (!originalText || originalText.trim().length === 0) return originalText;
 
@@ -107,17 +107,19 @@ const testScenarios = [
     name: "Auto mode with once=false",
     settings: { origin: "cn", target: "twp", auto: true, once: false },
     textNodes: ["算法", "演算法​算法​", "新算法"],
-  }
+  },
 ];
 
 testScenarios.forEach((scenario, index) => {
   console.log(`\nTest ${index + 1}: ${scenario.name}`);
   console.log("-".repeat(40));
-  console.log(`Settings: auto=${scenario.settings.auto}, once=${scenario.settings.once}, ${scenario.settings.origin}->${scenario.settings.target}`);
-  console.log(`Text nodes: [${scenario.textNodes.map(t => `"${t}"`).join(", ")}]`);
-  
+  console.log(
+    `Settings: auto=${scenario.settings.auto}, once=${scenario.settings.once}, ${scenario.settings.origin}->${scenario.settings.target}`,
+  );
+  console.log(`Text nodes: [${scenario.textNodes.map((t) => `"${t}"`).join(", ")}]`);
+
   const { processedNodes, count } = simulateAutoModeConversion(scenario.textNodes, scenario.settings);
-  
+
   console.log(`Result: ${count} nodes converted`);
   console.log("Final text nodes:");
   processedNodes.forEach((node, i) => {
@@ -142,8 +144,8 @@ for (let cycle = 1; cycle <= 3; cycle++) {
   console.log(`\nMutation Cycle ${cycle}:`);
   const { processedNodes, count } = simulateAutoModeConversion(dynamicContent, autoSettings);
   console.log(`  Converted ${count} nodes`);
-  console.log(`  Content: [${processedNodes.map(t => `"${t}"`).join(", ")}]`);
-  
+  console.log(`  Content: [${processedNodes.map((t) => `"${t}"`).join(", ")}]`);
+
   // Update the content for next cycle (simulate DOM mutations)
   dynamicContent = processedNodes;
   if (cycle === 1) {
@@ -158,6 +160,6 @@ for (let cycle = 1; cycle <= 3; cycle++) {
 console.log("\n✨ Auto mode testing completed!");
 console.log("\nKey Findings:");
 console.log("✅ Already converted text is correctly detected and not re-converted");
-console.log("✅ New content is properly converted and marked"); 
+console.log("✅ New content is properly converted and marked");
 console.log("✅ Mixed content (converted + new) is handled correctly");
 console.log("✅ Multiple mutation cycles work without cascading conversions");

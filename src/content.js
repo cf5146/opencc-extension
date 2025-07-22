@@ -84,7 +84,7 @@ const processedNodes = new WeakSet();
 // Helper function to check if conversion seems like cascading
 const isCascadingConversion = (original, converted) => {
   if (converted === original) return false;
-  
+
   // Only check for very obvious cascading patterns
   if (converted.length > original.length) {
     // Pattern 1: Check if the converted text contains the original as a complete substring
@@ -92,7 +92,7 @@ const isCascadingConversion = (original, converted) => {
     if (converted.includes(original) && original.length >= 2) {
       return true;
     }
-    
+
     // Pattern 2: Check for character repetition patterns at the beginning
     // This catches "演算法" -> "演演算法" pattern
     const firstChar = original.charAt(0);
@@ -101,7 +101,7 @@ const isCascadingConversion = (original, converted) => {
       return true;
     }
   }
-  
+
   // Only block if ratio is extremely high (indicating obvious cascading)
   const lengthRatio = converted.length / original.length;
   return lengthRatio > 2.5; // Allow normal CN->TWP length increases
@@ -110,7 +110,7 @@ const isCascadingConversion = (original, converted) => {
 // Helper function to process text node in once mode
 const processTextNodeOnceMode = (textNode, originalText, convert) => {
   const { convertedText: existingConverted, wasConverted } = extractFromMarkedText(originalText);
-  
+
   if (wasConverted) {
     // Already converted, just display the converted text without changing nodeValue
     // to avoid triggering MutationObserver again
@@ -136,22 +136,22 @@ const processTextNodeNormalMode = (textNode, originalText, convert, isAutoMode =
   if (isAutoMode && processedNodes.has(textNode)) {
     return false;
   }
-  
+
   const cleanText = removeZeroWidthSpaces(originalText);
   const convertedText = convert(cleanText);
-  
+
   // For auto mode, rely on node tracking instead of cascading detection
   // For manual mode, still check for cascading to prevent obvious issues
   const shouldBlock = !isAutoMode && isCascadingConversion(cleanText, convertedText);
-  
+
   if (convertedText !== cleanText && !shouldBlock) {
     textNode.nodeValue = convertedText;
-    
+
     // Mark node as processed in auto mode
     if (isAutoMode) {
       processedNodes.add(textNode);
     }
-    
+
     return true;
   }
   return false;
@@ -166,7 +166,7 @@ function convertAllTextNodes({ origin, target, once }, isAutoMode = false) {
       callback(textNode);
     }
   };
-  
+
   let count = 0;
   iterateTextNodes(document.body, (textNode) => {
     const originalText = textNode.nodeValue;
@@ -174,13 +174,13 @@ function convertAllTextNodes({ origin, target, once }, isAutoMode = false) {
     // Skip empty or whitespace-only text nodes
     if (!originalText || originalText.trim().length === 0) return;
 
-    const wasConverted = once 
+    const wasConverted = once
       ? processTextNodeOnceMode(textNode, originalText, convert)
       : processTextNodeNormalMode(textNode, originalText, convert, isAutoMode);
-    
+
     if (wasConverted) count++;
   });
-  
+
   return count;
 }
 

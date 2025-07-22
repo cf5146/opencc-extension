@@ -34,7 +34,7 @@ const removeZeroWidthSpaces = (text) => text.replace(new RegExp(zeroWidthSpace, 
 
 const isCascadingConversion = (original, converted) => {
   if (converted === original) return false;
-  
+
   // Only check for very obvious cascading patterns
   if (converted.length > original.length) {
     // Pattern 1: Check if the converted text contains the original as a complete substring
@@ -42,7 +42,7 @@ const isCascadingConversion = (original, converted) => {
     if (converted.includes(original) && original.length >= 2) {
       return true;
     }
-    
+
     // Pattern 2: Check for character repetition patterns at the beginning
     // This catches "演算法" -> "演演算法" pattern
     const firstChar = original.charAt(0);
@@ -51,7 +51,7 @@ const isCascadingConversion = (original, converted) => {
       return true;
     }
   }
-  
+
   // Only block if ratio is extremely high (indicating obvious cascading)
   const lengthRatio = converted.length / original.length;
   return lengthRatio > 2.5; // Allow normal CN->TWP length increases
@@ -62,25 +62,25 @@ const processTextNodeNormalMode = (textNode, originalText, convert, isAutoMode =
     console.log(`  ⏸️  Skipped (already processed): "${originalText}"`);
     return false;
   }
-  
+
   const cleanText = removeZeroWidthSpaces(originalText);
   const convertedText = convert(cleanText);
-  
+
   // For auto mode, rely on node tracking instead of cascading detection
   // For manual mode, still check for cascading to prevent obvious issues
   const shouldBlock = !isAutoMode && isCascadingConversion(cleanText, convertedText);
-  
+
   if (convertedText !== cleanText && !shouldBlock) {
     console.log(`  ✅ Converting: "${cleanText}" -> "${convertedText}"`);
     textNode.nodeValue = convertedText;
-    
+
     if (isAutoMode) {
       processedNodes.add(textNode);
     }
-    
+
     return true;
   }
-  
+
   if (convertedText === cleanText) {
     console.log(`  ⏸️  Skipped (no change): "${cleanText}"`);
   } else {
@@ -101,7 +101,7 @@ const nodes1 = [
 ];
 
 let count = 0;
-nodes1.forEach(node => {
+nodes1.forEach((node) => {
   if (processTextNodeNormalMode(node, node.nodeValue, converter, true)) {
     count++;
   }
@@ -116,7 +116,7 @@ nodes1.forEach((node, i) => {
 console.log("\nTest 2: Second mutation cycle (should skip already processed nodes)");
 console.log("----------------------------------------");
 count = 0;
-nodes1.forEach(node => {
+nodes1.forEach((node) => {
   if (processTextNodeNormalMode(node, node.nodeValue, converter, true)) {
     count++;
   }
@@ -130,13 +130,10 @@ nodes1.forEach((node, i) => {
 
 console.log("\nTest 3: New nodes added to page (should convert)");
 console.log("----------------------------------------");
-const newNodes = [
-  new MockTextNode("node4", "新算法"),
-  new MockTextNode("node5", "机器学习"),
-];
+const newNodes = [new MockTextNode("node4", "新算法"), new MockTextNode("node5", "机器学习")];
 
 count = 0;
-newNodes.forEach(node => {
+newNodes.forEach((node) => {
   if (processTextNodeNormalMode(node, node.nodeValue, converter, true)) {
     count++;
   }
@@ -156,7 +153,7 @@ const manualNodes = [
 ];
 
 count = 0;
-manualNodes.forEach(node => {
+manualNodes.forEach((node) => {
   if (processTextNodeNormalMode(node, node.nodeValue, converter, false)) {
     count++;
   }
