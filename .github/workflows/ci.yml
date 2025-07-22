@@ -32,7 +32,7 @@ jobs:
         run: pnpm install --frozen-lockfile
         
       - name: Run ESLint
-        run: pnpm exec eslint src --ext .js
+        run: pnpm exec eslint src
         
       - name: Check Prettier formatting
         run: pnpm exec prettier --check src

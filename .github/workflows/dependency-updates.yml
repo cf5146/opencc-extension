@@ -70,5 +70,5 @@ jobs:
         if: steps.changes.outputs.has_changes == 'true'
         run: |
           pnpm install --frozen-lockfile
-          pnpm exec eslint src --ext .js
+          pnpm exec eslint src
           pnpm exec prettier --check src
