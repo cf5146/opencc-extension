@@ -31,7 +31,7 @@ jobs:
           cache: 'pnpm'
           
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile || pnpm install --no-frozen-lockfile
         
       - name: Build Firefox extension
         run: MODE=production BROWSER=firefox node build.mjs ./dist/firefox

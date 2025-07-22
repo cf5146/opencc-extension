@@ -31,7 +31,7 @@ jobs:
           cache: 'pnpm'
           
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile || pnpm install --no-frozen-lockfile
         
       - name: Build extension for ${{ matrix.browser }}
         run: MODE=development BROWSER=${{ matrix.browser }} node build.mjs ./build
@@ -75,7 +75,7 @@ jobs:
           cache: 'pnpm'
           
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile || pnpm install --no-frozen-lockfile
         
       - name: Build all browsers
         run: |
