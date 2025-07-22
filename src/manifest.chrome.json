@@ -10,12 +10,8 @@
   },
   "content_scripts": [
     {
-      "js": [
-        "content.js"
-      ],
-      "matches": [
-        "<all_urls>"
-      ],
+      "js": ["content.js"],
+      "matches": ["<all_urls>"],
       "run_at": "document_idle"
     }
   ],
@@ -34,9 +30,5 @@
     "service_worker": "background.js",
     "type": "module"
   },
-  "permissions": [
-    "storage",
-    "tabs",
-    "contextMenus"
-  ]
+  "permissions": ["storage", "tabs", "contextMenus"]
 }

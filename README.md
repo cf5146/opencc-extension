@@ -91,6 +91,64 @@ When auto mode is enabled, a grey badge with the letter `A` appears on the corne
 
 All text in the webpage of the current active tab is converted whenever it loads or is updated.
 
+## Development
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org/) 20+
+- [pnpm](https://pnpm.io/) 8+
+
+### Setup
+
+```bash
+# Clone the repository
+git clone https://github.com/cf5146/opencc-extension.git
+cd opencc-extension
+
+# Install dependencies
+pnpm install
+```
+
+### Building
+
+```bash
+# Development build with watch mode
+pnpm build:watch
+
+# Production builds
+pnpm dist:chrome    # Chrome Web Store package
+pnpm dist:firefox   # Firefox Add-ons package
+pnpm dist           # All platforms
+```
+
+### Testing Locally
+
+```bash
+# Chrome/Chromium
+pnpm start:chromium
+
+# Firefox
+pnpm start:firefox
+```
+
+### CI/CD Pipeline
+
+This project uses GitHub Actions for automated testing, building, and deployment:
+
+- **🔍 Code Quality**: ESLint, Prettier, security audits
+- **🚀 Multi-Browser Builds**: Chrome, Firefox, Edge extensions
+- **📦 Automated Releases**: Version management and GitHub releases
+- **🏪 Store Submission**: Firefox Add-ons and Chrome Web Store
+- **🔄 Dependency Updates**: Weekly automated dependency maintenance
+
+The workflows automatically:
+- Run tests on every PR and push
+- Build preview versions for pull requests
+- Create release packages when a new version is tagged
+- Submit to browser extension stores (with proper API credentials)
+
+See [`.github/WORKFLOWS.md`](.github/WORKFLOWS.md) for detailed workflow documentation.
+
 ## Credits
 
 - https://github.com/BYVoid/OpenCC

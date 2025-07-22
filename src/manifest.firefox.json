@@ -10,12 +10,8 @@
   },
   "content_scripts": [
     {
-      "js": [
-        "content.js"
-      ],
-      "matches": [
-        "<all_urls>"
-      ],
+      "js": ["content.js"],
+      "matches": ["<all_urls>"],
       "run_at": "document_idle"
     }
   ],
@@ -31,15 +27,9 @@
     "default_popup": "popup/index.html"
   },
   "background": {
-    "scripts": [
-      "background.js"
-    ]
+    "scripts": ["background.js"]
   },
-  "permissions": [
-    "storage",
-    "tabs",
-    "contextMenus"
-  ],
+  "permissions": ["storage", "tabs", "contextMenus"],
   "browser_specific_settings": {
     "gecko": {
       "id": "opencc.extension@tnychn"

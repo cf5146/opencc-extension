@@ -1,0 +1,112 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  release:
+    types: [ published ]
+
+jobs:
+  lint-and-test:
+    name: Lint and Test
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+          
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8
+          
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        
+      - name: Run ESLint
+        run: pnpm exec eslint src --ext .js
+        
+      - name: Check Prettier formatting
+        run: pnpm exec prettier --check src
+        
+      - name: Validate manifest files
+        run: |
+          node -e "JSON.parse(require('fs').readFileSync('src/manifest.chrome.json', 'utf8'))"
+          node -e "JSON.parse(require('fs').readFileSync('src/manifest.firefox.json', 'utf8'))"
+          node -e "JSON.parse(require('fs').readFileSync('src/manifest.edge.json', 'utf8'))"
+
+  build:
+    name: Build Extension
+    runs-on: ubuntu-latest
+    needs: lint-and-test
+    
+    strategy:
+      matrix:
+        browser: [chrome, firefox, edge]
+        
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+          
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8
+          
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        
+      - name: Build extension for ${{ matrix.browser }}
+        run: MODE=production BROWSER=${{ matrix.browser }} node build.mjs ./dist/${{ matrix.browser }}
+        
+      - name: Package extension for ${{ matrix.browser }}
+        run: pnpm exec web-ext build -s ./dist/${{ matrix.browser }} -a ./artifacts -n opencc.${{ matrix.browser }}.zip --overwrite-dest
+        
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: opencc-${{ matrix.browser }}-${{ github.sha }}
+          path: ./artifacts/opencc.${{ matrix.browser }}.zip
+          retention-days: 30
+
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name == 'release'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ./artifacts
+          
+      - name: Upload release assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            ./artifacts/opencc-chrome-${{ github.sha }}/opencc.chrome.zip
+            ./artifacts/opencc-firefox-${{ github.sha }}/opencc.firefox.zip
+            ./artifacts/opencc-edge-${{ github.sha }}/opencc.edge.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Note: Firefox submission job can be added when you have Firefox Add-ons API credentials
+  # See CONTRIBUTING.md for instructions on setting up Firefox submission
