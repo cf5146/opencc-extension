@@ -21,7 +21,9 @@
     "dist:edge": "MODE='production' BROWSER='edge' pnpm build ./dist/edge && web-ext build -s ./dist/edge -a . -n opencc.edge.zip",
     "dist": "concurrently \"pnpm dist:chrome\" \"pnpm dist:firefox\" \"pnpm dist:edge\" && rm -rf ./dist",
     "release:prepare": "pnpm dist && mkdir -p ./release && cp *.zip ./release/",
-    "release:clean": "rm -rf ./dist ./release *.zip"
+    "release:clean": "rm -rf ./dist ./release *.zip",
+    "analyze": "MODE='production' BROWSER='chrome' esbuild --analyze ./src/content.js --bundle --target=es2020 --format=esm",
+    "size": "MODE='production' BROWSER='chrome' pnpm build ./temp && du -sh ./temp && rm -rf ./temp"
   },
   "dependencies": {
     "opencc-js": "^1.0.5"

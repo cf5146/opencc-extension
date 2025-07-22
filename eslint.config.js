@@ -16,11 +16,11 @@ export default [
         NodeFilter: "readonly",
         MutationObserver: "readonly",
         ResizeObserver: "readonly",
-        
+
         // WebExtension globals
         chrome: "readonly",
         browser: "readonly",
-        
+
         // Node.js globals (for build scripts)
         process: "readonly",
         __dirname: "readonly",

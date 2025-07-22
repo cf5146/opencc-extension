@@ -4,16 +4,16 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Existing tag to create release for (e.g., v1.0.0)'
+        description: "Existing tag to create release for (e.g., v1.0.0)"
         required: true
         type: string
       draft:
-        description: 'Create as draft'
+        description: "Create as draft"
         required: false
         default: false
         type: boolean
       prerelease:
-        description: 'Mark as pre-release'
+        description: "Mark as pre-release"
         required: false
         default: false
         type: boolean
@@ -22,55 +22,55 @@ jobs:
   quick-release:
     name: Create Release from Existing Tag
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code at tag
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.inputs.tag }}
-          
+
       - name: Validate tag exists
         run: |
           if ! git tag -l | grep -q "^${{ github.event.inputs.tag }}$"; then
             echo "Tag ${{ github.event.inputs.tag }} does not exist"
             exit 1
           fi
-          
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 8
-        
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
-          
+          node-version: "20"
+          cache: "pnpm"
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile || pnpm install --no-frozen-lockfile
-        
+
       - name: Build and package extensions
         run: |
           mkdir -p ./release-packages
-          
+
           # Build and package Chrome
           MODE=production BROWSER=chrome node build.mjs ./build/chrome
           pnpm exec web-ext build -s ./build/chrome -a ./release-packages -n opencc-chrome-${{ github.event.inputs.tag }}.zip --overwrite-dest
-          
+
           # Build and package Firefox  
           MODE=production BROWSER=firefox node build.mjs ./build/firefox
           pnpm exec web-ext build -s ./build/firefox -a ./release-packages -n opencc-firefox-${{ github.event.inputs.tag }}.zip --overwrite-dest
-          
+
           # Build and package Edge
           MODE=production BROWSER=edge node build.mjs ./build/edge  
           pnpm exec web-ext build -s ./build/edge -a ./release-packages -n opencc-edge-${{ github.event.inputs.tag }}.zip --overwrite-dest
-          
+
       - name: Generate checksums
         run: |
           cd ./release-packages
           sha256sum *.zip > checksums.txt
-          
+
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
@@ -78,14 +78,14 @@ jobs:
           name: OpenCC Extension ${{ github.event.inputs.tag }}
           body: |
             ## OpenCC Extension ${{ github.event.inputs.tag }}
-            
+
             Browser extension packages for Chrome, Firefox, and Edge.
-            
+
             ### Downloads
             - **Chrome**: `opencc-chrome-${{ github.event.inputs.tag }}.zip`
             - **Firefox**: `opencc-firefox-${{ github.event.inputs.tag }}.zip`  
             - **Edge**: `opencc-edge-${{ github.event.inputs.tag }}.zip`
-            
+
             See `checksums.txt` for file verification.
           files: |
             ./release-packages/opencc-chrome-${{ github.event.inputs.tag }}.zip

@@ -35,11 +35,21 @@ const options = {
   },
   outbase: "src",
   outdir: arg === "watch" ? "./build" : arg,
-  target: "es6",
+  target: "es2020", // Updated to newer ES target for better optimization
   bundle: true,
   allowOverwrite: true,
   minify: mode === "production",
   sourcemap: mode === "development",
+  treeShaking: true, // Enable tree shaking for smaller bundles
+  splitting: false, // Disable code splitting for browser extensions
+  format: "esm", // Use ES modules format
+  platform: "browser", // Optimize for browser environment
+  // Advanced optimizations for production
+  ...(mode === "production" && {
+    drop: ["console", "debugger"], // Remove console.log and debugger statements
+    legalComments: "none", // Remove license comments to reduce size
+    mangleProps: /^_/, // Mangle private properties starting with _
+  }),
 };
 
 if (arg === "watch") {

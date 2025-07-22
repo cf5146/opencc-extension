@@ -2,43 +2,43 @@ name: Chrome Web Store Submission
 
 on:
   release:
-    types: [ published ]
+    types: [published]
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Release tag to submit'
+        description: "Release tag to submit"
         required: true
-        default: 'latest'
+        default: "latest"
 
 jobs:
   submit-to-chrome:
     name: Submit to Chrome Web Store
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 8
-        
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
-          
+          node-version: "20"
+          cache: "pnpm"
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile || pnpm install --no-frozen-lockfile
-        
+
       - name: Build Chrome extension
         run: MODE=production BROWSER=chrome node build.mjs ./dist/chrome
-        
+
       - name: Package Chrome extension
         run: pnpm exec web-ext build -s ./dist/chrome -a ./artifacts -n opencc.chrome.zip --overwrite-dest
-        
+
       - name: Upload to Chrome Web Store
         uses: PlasmoHQ/bpp@v3
         with:
@@ -47,14 +47,14 @@ jobs:
           verbose: true
         continue-on-error: true
         id: chrome_upload
-          
+
       - name: Upload packaged extension
         uses: actions/upload-artifact@v4
         with:
           name: chrome-extension-${{ github.sha }}
           path: ./artifacts/
           retention-days: 30
-          
+
       - name: Check submission result
         run: |
           if [ "${{ steps.chrome_upload.outcome }}" = "failure" ]; then

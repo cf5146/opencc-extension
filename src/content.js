@@ -3,9 +3,15 @@ import { Converter } from "opencc-js";
 const defaultSettings = { origin: "cn", target: "hk", auto: false, once: true, whitelist: [] };
 const zeroWidthSpace = String.fromCharCode(8203);
 
+// Cached converters to avoid repeated initialization
+const converterCache = new Map();
+
+// Pre-compiled regex for better performance
+const zeroWidthSpaceRegex = new RegExp(zeroWidthSpace, "g");
+
 // Utility functions for zero-width space handling
 const removeZeroWidthSpaces = (text) => {
-  return text.replace(new RegExp(zeroWidthSpace, "g"), "");
+  return text.replace(zeroWidthSpaceRegex, "");
 };
 
 const addZeroWidthSpaces = (text) => {
@@ -14,10 +20,19 @@ const addZeroWidthSpaces = (text) => {
   return text.replace(/(\S+)/g, `$1${zeroWidthSpace}`);
 };
 
+// Get or create cached converter
+const getConverter = (origin, target) => {
+  const key = `${origin}-${target}`;
+  if (!converterCache.has(key)) {
+    converterCache.set(key, Converter({ from: origin, to: target }));
+  }
+  return converterCache.get(key);
+};
+
 const matchWhitelist = (whitelist, url) => whitelist.map((p) => new RegExp(p)).some((re) => re.test(url));
 
 function convertTitle({ origin, target, once }) {
-  const convert = Converter({ from: origin, to: target });
+  const convert = getConverter(origin, target);
   // Remove existing zero-width spaces before conversion to avoid interference
   const cleanTitle = once ? removeZeroWidthSpaces(document.title) : document.title;
   let convertedTitle = convert(cleanTitle);
@@ -31,7 +46,7 @@ function convertTitle({ origin, target, once }) {
 }
 
 function convertAllTextNodes({ origin, target, once }) {
-  const convert = Converter({ from: origin, to: target });
+  const convert = getConverter(origin, target);
   const iterateTextNodes = (node, callback) => {
     const walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT, null, false);
     let textNode;
@@ -65,55 +80,104 @@ function convertAllTextNodes({ origin, target, once }) {
 }
 
 function convertSelectedTextNodes({ origin, target, once }) {
-  const convert = Converter({ from: origin, to: target });
-  const iterateTextNodes = (nodes, callback) => {
-    for (const node of nodes) {
-      if (node.nodeType === 3) callback(node);
-      else iterateTextNodes(node.childNodes, callback);
-    }
-  };
-  const range = window.getSelection().getRangeAt(0);
-  const contents = range.cloneContents();
-  iterateTextNodes([contents], (textNode) => {
-    const originalText = textNode.nodeValue;
+  const convert = getConverter(origin, target);
+
+  const selection = window.getSelection();
+  if (!selection.rangeCount) return;
+
+  const range = selection.getRangeAt(0);
+
+  // Improved handling for text spanning multiple containers
+  const processTextNode = (textNode, startOffset = 0, endOffset = textNode.length) => {
+    const originalText = textNode.nodeValue.substring(startOffset, endOffset);
 
     // Skip empty or whitespace-only text nodes
-    if (!originalText || originalText.trim().length === 0) return;
+    if (!originalText || originalText.trim().length === 0) return false;
 
     // Remove existing zero-width spaces before conversion to avoid interference
     const cleanText = once ? removeZeroWidthSpaces(originalText) : originalText;
     let convertedText = convert(cleanText);
 
     // Skip if no conversion occurred
-    if (convertedText === cleanText) return;
+    if (convertedText === cleanText) return false;
 
     // Add zero-width spaces if once mode is enabled and conversion occurred
     if (once) {
       convertedText = addZeroWidthSpaces(convertedText);
     }
 
-    textNode.nodeValue = convertedText;
+    // Replace the specific portion of the text node
+    const fullText = textNode.nodeValue;
+    textNode.nodeValue = fullText.substring(0, startOffset) + convertedText + fullText.substring(endOffset);
     return true;
-  });
-  // TODO: Improve handling of selected text spanning multiple containers
-  // Currently this may disrupt DOM structure when selection spans multiple elements
-  range.deleteContents() || range.insertNode(contents);
+  };
+
+  // Handle single text node selection
+  if (range.startContainer === range.endContainer && range.startContainer.nodeType === 3) {
+    processTextNode(range.startContainer, range.startOffset, range.endOffset);
+    return;
+  }
+
+  // Handle multi-node selection by processing each text node within the range
+  const walker = document.createTreeWalker(
+    range.commonAncestorContainer,
+    NodeFilter.SHOW_TEXT,
+    {
+      acceptNode: (node) => {
+        return range.intersectsNode(node) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+      },
+    },
+    false,
+  );
+
+  let textNode;
+  while ((textNode = walker.nextNode())) {
+    if (textNode === range.startContainer && textNode === range.endContainer) {
+      // Single text node case (already handled above, but for completeness)
+      processTextNode(textNode, range.startOffset, range.endOffset);
+    } else if (textNode === range.startContainer) {
+      // First text node in selection
+      processTextNode(textNode, range.startOffset, textNode.length);
+    } else if (textNode === range.endContainer) {
+      // Last text node in selection
+      processTextNode(textNode, 0, range.endOffset);
+    } else {
+      // Middle text nodes - convert entirely
+      processTextNode(textNode, 0, textNode.length);
+    }
+  }
 }
 
 /* Mount trigger to auto convert when DOM changes. */
 let currentURL = "";
+let mutationTimeout = null;
+
+// Debounced function to handle mutations
+const debouncedMutationHandler = async () => {
+  const settings = await chrome.storage.local.get(defaultSettings);
+  if (!settings.auto || settings.origin === settings.target) return;
+  if (matchWhitelist(settings.whitelist, window.location.href)) return;
+
+  if (currentURL !== window.location.href) {
+    currentURL = window.location.href;
+    convertTitle(settings);
+  }
+  convertAllTextNodes(settings);
+};
+
 const lang = document.documentElement.lang;
-if (!lang || lang.startsWith("zh"))
-  new MutationObserver(async () => {
-    const settings = await chrome.storage.local.get(defaultSettings);
-    if (!settings.auto || settings.origin === settings.target) return;
-    if (matchWhitelist(settings.whitelist, window.location.href)) return;
-    if (currentURL !== window.location.href) {
-      currentURL = window.location.href;
-      convertTitle(settings);
-    }
-    convertAllTextNodes(settings);
-  }).observe(document.body, { childList: true, subtree: true });
+if (!lang || lang.startsWith("zh")) {
+  new MutationObserver(() => {
+    // Debounce mutations to avoid excessive conversions
+    if (mutationTimeout) clearTimeout(mutationTimeout);
+    mutationTimeout = setTimeout(debouncedMutationHandler, 100);
+  }).observe(document.body, {
+    childList: true,
+    subtree: true,
+    // Only observe text changes, not all attribute changes
+    characterData: true,
+  });
+}
 
 /* Run convert once DOM ready when in auto mode. */
 chrome.storage.local.get(defaultSettings).then((settings) => {

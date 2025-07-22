@@ -2,43 +2,43 @@ name: CI/CD
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
     tags:
-      - 'v*'
+      - "v*"
   pull_request:
-    branches: [ main ]
+    branches: [main]
   release:
-    types: [ published ]
+    types: [published]
 
 jobs:
   lint-and-test:
     name: Lint and Test
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 8
-        
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
-          
+          node-version: "20"
+          cache: "pnpm"
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile || pnpm install --no-frozen-lockfile
-        
+
       - name: Run ESLint
         run: pnpm exec eslint src
-        
+
       - name: Check Prettier formatting
         run: pnpm exec prettier --check src
-        
+
       - name: Validate manifest files
         run: |
           node -e "JSON.parse(require('fs').readFileSync('src/manifest.chrome.json', 'utf8'))"
@@ -49,35 +49,35 @@ jobs:
     name: Build Extension
     runs-on: ubuntu-latest
     needs: lint-and-test
-    
+
     strategy:
       matrix:
         browser: [chrome, firefox, edge]
-        
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 8
-        
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
-          
+          node-version: "20"
+          cache: "pnpm"
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile || pnpm install --no-frozen-lockfile
-        
+
       - name: Build extension for ${{ matrix.browser }}
         run: MODE=production BROWSER=${{ matrix.browser }} node build.mjs ./dist/${{ matrix.browser }}
-        
+
       - name: Package extension for ${{ matrix.browser }}
         run: pnpm exec web-ext build -s ./dist/${{ matrix.browser }} -a ./artifacts -n opencc.${{ matrix.browser }}.zip --overwrite-dest
-        
+
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
@@ -90,28 +90,28 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     if: github.event_name == 'release' || startsWith(github.ref, 'refs/tags/v')
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        
+
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
           path: ./artifacts
-          
+
       - name: Display structure of downloaded files
         run: ls -la ./artifacts/
-        
+
       - name: Create release directory
         run: mkdir -p ./release-packages
-        
+
       - name: Copy and rename artifacts
         run: |
           cp ./artifacts/opencc-chrome-${{ github.sha }}/opencc.chrome.zip ./release-packages/
           cp ./artifacts/opencc-firefox-${{ github.sha }}/opencc.firefox.zip ./release-packages/
           cp ./artifacts/opencc-edge-${{ github.sha }}/opencc.edge.zip ./release-packages/
-          
+
       - name: Get version from tag or release
         id: get_version
         run: |
@@ -120,7 +120,7 @@ jobs:
           else
             echo "version=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
           fi
-          
+
       - name: Create versioned release packages
         run: |
           VERSION=${{ steps.get_version.outputs.version }}
@@ -128,12 +128,12 @@ jobs:
           mv opencc.chrome.zip opencc-chrome-${VERSION}.zip
           mv opencc.firefox.zip opencc-firefox-${VERSION}.zip
           mv opencc.edge.zip opencc-edge-${VERSION}.zip
-          
+
       - name: Generate checksums
         run: |
           cd ./release-packages
           sha256sum *.zip > checksums.txt
-          
+
       - name: Create release if tag push
         if: startsWith(github.ref, 'refs/tags/v') && github.event_name != 'release'
         uses: softprops/action-gh-release@v2
@@ -142,19 +142,19 @@ jobs:
           name: Release ${{ steps.get_version.outputs.version }}
           body: |
             ## OpenCC Extension ${{ steps.get_version.outputs.version }}
-            
+
             This release contains browser extensions for Chrome, Firefox, and Edge.
-            
+
             ### Downloads
             - **Chrome**: `opencc-chrome-${{ steps.get_version.outputs.version }}.zip`
             - **Firefox**: `opencc-firefox-${{ steps.get_version.outputs.version }}.zip`
             - **Edge**: `opencc-edge-${{ steps.get_version.outputs.version }}.zip`
-            
+
             ### Installation
             1. Download the appropriate zip file for your browser
             2. Extract the contents
             3. Load the extension in developer mode
-            
+
             ### Checksums
             See `checksums.txt` for file integrity verification.
           files: |
@@ -166,7 +166,7 @@ jobs:
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          
+
       - name: Upload release assets to existing release
         if: github.event_name == 'release'
         uses: softprops/action-gh-release@v2

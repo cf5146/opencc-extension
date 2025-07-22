@@ -142,6 +142,7 @@ This project uses GitHub Actions for automated testing, building, and deployment
 - **🔄 Dependency Updates**: Weekly automated dependency maintenance
 
 The workflows automatically:
+
 - Run tests on every PR and push
 - Build preview versions for pull requests
 - Create release packages when a new version is tagged

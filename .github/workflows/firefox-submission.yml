@@ -2,43 +2,43 @@ name: Firefox Add-ons Submission
 
 on:
   release:
-    types: [ published ]
+    types: [published]
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Release tag to submit'
+        description: "Release tag to submit"
         required: true
-        default: 'latest'
+        default: "latest"
 
 jobs:
   submit-to-firefox:
     name: Submit to Firefox Add-ons
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 8
-        
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
-          
+          node-version: "20"
+          cache: "pnpm"
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile || pnpm install --no-frozen-lockfile
-        
+
       - name: Build Firefox extension
         run: MODE=production BROWSER=firefox node build.mjs ./dist/firefox
-        
+
       - name: Package Firefox extension
         run: pnpm exec web-ext build -s ./dist/firefox -a ./artifacts -n opencc.firefox.zip --overwrite-dest
-        
+
       - name: Submit to Firefox Add-ons
         run: |
           if [ -z "$FIREFOX_API_KEY" ] || [ -z "$FIREFOX_API_SECRET" ]; then
@@ -66,7 +66,7 @@ jobs:
         env:
           FIREFOX_API_KEY: ${{ secrets.FIREFOX_API_KEY }}
           FIREFOX_API_SECRET: ${{ secrets.FIREFOX_API_SECRET }}
-          
+
       - name: Upload signed extension
         uses: actions/upload-artifact@v4
         with:

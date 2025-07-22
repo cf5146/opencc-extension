@@ -2,14 +2,29 @@ import { Converter } from "opencc-js";
 
 const zeroWidthSpace = String.fromCharCode(8203);
 
+// Cached converters to avoid repeated initialization
+const converterCache = new Map();
+
+// Pre-compiled regex for better performance
+const zeroWidthSpaceRegex = new RegExp(zeroWidthSpace, "g");
+
 // Utility functions for zero-width space handling
 const removeZeroWidthSpaces = (text) => {
-  return text.replace(new RegExp(zeroWidthSpace, "g"), "");
+  return text.replace(zeroWidthSpaceRegex, "");
 };
 
 const addZeroWidthSpaces = (text) => {
   // Insert zero-width spaces at word boundaries instead of between every character
   return text.replace(/(\S+)/g, `$1${zeroWidthSpace}`);
+};
+
+// Get or create cached converter
+const getConverter = (origin, target) => {
+  const key = `${origin}-${target}`;
+  if (!converterCache.has(key)) {
+    converterCache.set(key, Converter({ from: origin, to: target }));
+  }
+  return converterCache.get(key);
 };
 
 const $originSelect = document.getElementById("origin");
@@ -29,7 +44,7 @@ function textboxConvert() {
   const originalText = $textbox.value;
   if (!originalText || originalText.trim().length === 0) return;
 
-  const convert = Converter({ from: origin, to: target });
+  const convert = getConverter(origin, target);
 
   // Remove existing zero-width spaces before conversion to avoid interference
   const cleanText = once ? removeZeroWidthSpaces(originalText) : originalText;
@@ -95,11 +110,12 @@ $swapButton.addEventListener("click", () => {
 
 /* User inputs text in textbox. */
 let timeout;
-$textbox.addEventListener("input", () => {
-  // debounce 750ms: wait for typing to stop
+const debouncedTextboxConvert = () => {
   if (timeout) clearTimeout(timeout);
-  timeout = setTimeout(textboxConvert, 750);
-});
+  timeout = setTimeout(textboxConvert, 500); // Reduced from 750ms for better responsiveness
+};
+
+$textbox.addEventListener("input", debouncedTextboxConvert);
 
 /* User clicks reset button. */
 $resetButton.addEventListener("click", () => {
@@ -108,13 +124,18 @@ $resetButton.addEventListener("click", () => {
 });
 
 /* User resizes textbox. */
+let resizeTimeout;
 new ResizeObserver(() => {
-  chrome.storage.local.set({
-    textboxSize: {
-      width: $textbox.offsetWidth,
-      height: $textbox.offsetHeight,
-    },
-  });
+  // Throttle resize events to avoid excessive storage writes
+  if (resizeTimeout) clearTimeout(resizeTimeout);
+  resizeTimeout = setTimeout(() => {
+    chrome.storage.local.set({
+      textboxSize: {
+        width: $textbox.offsetWidth,
+        height: $textbox.offsetHeight,
+      },
+    });
+  }, 200);
 }).observe($textbox);
 
 /* User clicks convert button. */
