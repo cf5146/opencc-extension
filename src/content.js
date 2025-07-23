@@ -5,7 +5,7 @@ const whitelistRegexCache = new Map();
 const MAX_REGEX_CACHE_SIZE = 50; // Limit cache size
 
 const matchWhitelist = (whitelist, url) => {
-  if (whitelist.length === 0) return false;
+  if (!Array.isArray(whitelist) || whitelist.length === 0) return false;
   return whitelist.some((pattern) => {
     if (!whitelistRegexCache.has(pattern)) {
       // Clean cache if it gets too large
@@ -208,7 +208,13 @@ const getCachedSettings = async () => {
   if (cachedSettings && Date.now() < settingsExpiry) {
     return cachedSettings;
   }
-  cachedSettings = await chrome.storage.local.get(defaultSettings);
+  const storedSettings = await chrome.storage.local.get(defaultSettings);
+  // Ensure all required properties exist and are of correct type
+  cachedSettings = {
+    ...defaultSettings,
+    ...storedSettings,
+    whitelist: Array.isArray(storedSettings.whitelist) ? storedSettings.whitelist : defaultSettings.whitelist,
+  };
   settingsExpiry = Date.now() + 5000; // Cache for 5 seconds
   return cachedSettings;
 };
@@ -217,20 +223,25 @@ const getCachedSettings = async () => {
 const debouncedMutationHandler = async () => {
   if (isProcessing || !observerActive) return; // Prevent overlapping processing
 
-  const settings = await getCachedSettings();
-  if (!settings.auto || isSameConversion(settings.origin, settings.target)) return;
-  if (matchWhitelist(settings.whitelist, window.location.href)) return;
-
-  isProcessing = true;
-
   try {
-    if (currentURL !== window.location.href) {
-      currentURL = window.location.href;
-      convertTitle(settings);
+    const settings = await getCachedSettings();
+    if (!settings.auto || isSameConversion(settings.origin, settings.target)) return;
+    if (matchWhitelist(settings.whitelist, window.location.href)) return;
+
+    isProcessing = true;
+
+    try {
+      if (currentURL !== window.location.href) {
+        currentURL = window.location.href;
+        convertTitle(settings);
+      }
+      convertAllTextNodes(settings, true); // Pass true for auto mode
+    } finally {
+      isProcessing = false;
     }
-    convertAllTextNodes(settings, true); // Pass true for auto mode
-  } finally {
-    isProcessing = false;
+  } catch (error) {
+    console.error("OpenCC Extension: Error in mutation handler:", error);
+    isProcessing = false; // Ensure processing flag is reset
   }
 };
 
@@ -269,18 +280,32 @@ if (!lang || lang.startsWith("zh")) {
 }
 
 /* Run convert once DOM ready when in auto mode. */
-getCachedSettings().then((settings) => {
-  if (!settings.auto) return;
-  if (matchWhitelist(settings.whitelist, window.location.href)) return;
-  convertTitle(settings);
-  convertAllTextNodes(settings, true); // Pass true for auto mode
-});
+getCachedSettings()
+  .then((settings) => {
+    try {
+      if (!settings.auto) return;
+      if (matchWhitelist(settings.whitelist, window.location.href)) return;
+      convertTitle(settings);
+      convertAllTextNodes(settings, true); // Pass true for auto mode
+    } catch (error) {
+      console.error("OpenCC Extension: Error during initial conversion:", error);
+    }
+  })
+  .catch((error) => {
+    console.error("OpenCC Extension: Error loading settings:", error);
+  });
 
 /* Run convert on all nodes when triggered by button click in popup. */
 // NOTE: listener itself cannot be async function, see https://stackoverflow.com/questions/48107746.
 chrome.runtime.onMessage.addListener(({ action }, _, sendResponse) => {
   (async () => {
-    const settings = await chrome.storage.local.get(defaultSettings);
+    const storedSettings = await chrome.storage.local.get(defaultSettings);
+    // Ensure all required properties exist and are of correct type
+    const settings = {
+      ...defaultSettings,
+      ...storedSettings,
+      whitelist: Array.isArray(storedSettings.whitelist) ? storedSettings.whitelist : defaultSettings.whitelist,
+    };
     if (!isSameConversion(settings.origin, settings.target)) {
       if (action === "click") {
         const start = Date.now();
