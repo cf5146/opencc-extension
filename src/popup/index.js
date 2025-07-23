@@ -9,7 +9,7 @@ const elements = {
   textbox: document.getElementById("textbox"),
   convertButton: document.getElementById("convert"),
   autoCheckbox: document.getElementById("auto"),
-  footer: document.getElementsByTagName("footer")[0]
+  footer: document.getElementsByTagName("footer")[0],
 };
 
 const { originSelect, targetSelect, swapButton, resetButton, textbox, convertButton, autoCheckbox, footer } = elements;
@@ -49,7 +49,7 @@ chrome.storage.local
     targetSelect.value = settings.target;
     autoCheckbox.checked = settings.auto;
     updateConvertButtonState();
-    
+
     // restore textbox size
     const { width, height } = settings.textboxSize;
     if (width) textbox.style.width = `${width}px`;
@@ -62,11 +62,11 @@ let storageUpdateTimeout = null;
 
 const updateStorage = (updates) => {
   Object.assign(pendingStorageUpdates, updates);
-  
+
   if (storageUpdateTimeout) clearTimeout(storageUpdateTimeout);
   storageUpdateTimeout = setTimeout(() => {
     chrome.storage.local.set(pendingStorageUpdates);
-    Object.keys(pendingStorageUpdates).forEach(key => delete pendingStorageUpdates[key]);
+    Object.keys(pendingStorageUpdates).forEach((key) => delete pendingStorageUpdates[key]);
   }, 100);
 };
 
@@ -90,7 +90,7 @@ targetSelect.addEventListener("change", (event) => {
 swapButton.addEventListener("click", () => {
   const newOrigin = targetSelect.value;
   const newTarget = originSelect.value;
-  
+
   updateStorage({ origin: newOrigin, target: newTarget });
   originSelect.value = newOrigin;
   targetSelect.value = newTarget;
@@ -124,11 +124,11 @@ new ResizeObserver(throttledResizeHandler).observe(textbox);
 /* User clicks convert button. */
 convertButton.addEventListener("click", async () => {
   convertButton.disabled = true;
-  
+
   try {
     const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
     const response = await chrome.tabs.sendMessage(tabs[0].id, { action: "click" });
-    
+
     if (response !== undefined) {
       footer.innerText = `${response.count} nodes changed in ${response.time}ms`;
     } else {

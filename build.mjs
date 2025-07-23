@@ -44,6 +44,8 @@ const options = {
   splitting: false, // Disable code splitting for browser extensions
   format: "iife", // Use IIFE format for browser extensions
   platform: "browser", // Optimize for browser environment
+  // Optimize external dependencies
+  external: [], // Let esbuild bundle everything for better tree shaking
   // Advanced optimizations for production
   ...(mode === "production" && {
     drop: ["console", "debugger"], // Remove console.log and debugger statements
@@ -55,17 +57,21 @@ const options = {
     minifyWhitespace: true, // Remove unnecessary whitespace
     // Advanced compression settings
     define: {
-      'process.env.NODE_ENV': '"production"'
+      "process.env.NODE_ENV": '"production"',
+      // Help with opencc-js optimization
+      global: "globalThis",
     },
     // Pure annotations for better tree shaking
-    pure: ['console.log', 'console.warn', 'console.error']
+    pure: ["console.log", "console.warn", "console.error"],
+    // Aggressive tree shaking for opencc-js
+    ignoreAnnotations: false, // Respect /*#__PURE__*/ annotations
   }),
   // Development optimizations
   ...(mode === "development" && {
     keepNames: true, // Keep names in development for debugging
     minifyIdentifiers: false,
-    sourcesContent: true
-  })
+    sourcesContent: true,
+  }),
 };
 
 if (arg === "watch") {

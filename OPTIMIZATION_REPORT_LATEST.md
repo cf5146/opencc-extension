@@ -7,6 +7,7 @@ Your OpenCC extension has been significantly optimized with advanced performance
 ## Key Optimizations Implemented
 
 ### 1. **Advanced Build Configuration** 🚀
+
 - **ES2022 Target**: Updated from ES2020 for better optimization opportunities
 - **Enhanced Minification**: Comprehensive minification with identifier mangling
 - **Tree Shaking**: Improved dead code elimination
@@ -14,18 +15,21 @@ Your OpenCC extension has been significantly optimized with advanced performance
 - **Bundle Analysis**: Advanced tooling for size monitoring
 
 ### 2. **Memory Management** 🧠
+
 - **LRU Cache Limits**: All caches now have size limits with cleanup
 - **WeakSet Usage**: Automatic garbage collection for processed nodes
 - **Reference Cleanup**: Debounce/throttle functions include cancel methods
 - **Observer Lifecycle**: Proper cleanup on page unload
 
 ### 3. **Performance Monitoring** 📊
+
 - **Development-Only Monitoring**: Performance tracking stripped in production
 - **Advanced Bundle Analyzer**: Detailed composition analysis
 - **Automated Testing**: Performance test suite with metrics
 - **Size Tracking**: Continuous monitoring of bundle sizes
 
 ### 4. **Runtime Optimizations** ⚡
+
 - **Filtered Mutations**: Only process relevant DOM changes
 - **Early Returns**: Fast paths for common cases
 - **Batch Processing**: Efficient node collection and processing
@@ -34,12 +38,14 @@ Your OpenCC extension has been significantly optimized with advanced performance
 ## Performance Results
 
 ### Bundle Analysis
+
 - **Total Size**: 2,057.89 KB (primarily OpenCC conversion data)
 - **Compression**: ~70% potential (617KB gzipped)
 - **Dependencies**: OpenCC-js is the main contributor (1,093KB)
 - **Code Size**: Extension code is only ~15KB
 
 ### Runtime Improvements
+
 - **Processing Speed**: 15-20% faster text conversion
 - **Memory Usage**: 30-40% reduction in memory growth
 - **DOM Processing**: 25-30% fewer unnecessary operations

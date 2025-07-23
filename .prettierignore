@@ -1,0 +1,21 @@
+# Build outputs
+build/
+dist/
+artifacts/
+
+# Dependencies
+node_modules/
+
+# Package manager
+pnpm-lock.yaml
+
+# Generated files
+*.min.js
+*.map
+
+# Binary files
+*.png
+*.gif
+*.jpg
+*.jpeg
+*.zip

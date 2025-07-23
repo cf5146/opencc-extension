@@ -6,7 +6,7 @@
 
 - **Target**: Updated from `es2020` to `es2022` for even better optimization
 - **Advanced Minification**: Added comprehensive minification options
-  - `keepNames: false` - Allow name mangling for smaller bundles  
+  - `keepNames: false` - Allow name mangling for smaller bundles
   - `minifyIdentifiers: true` - Minify variable names
   - `minifySyntax: true` - Minify syntax
   - `minifyWhitespace: true` - Remove unnecessary whitespace
@@ -60,7 +60,7 @@
 ### Bundle Size Analysis
 
 - **JavaScript Files**: ~2.06MB total (primarily OpenCC conversion data)
-- **Content Script**: 2,057.89 KB 
+- **Content Script**: 2,057.89 KB
 - **Background Script**: 0.54 KB (minimal overhead)
 - **Estimated Gzipped**: ~617 KB (70% compression potential)
 
@@ -78,7 +78,7 @@
 # Performance testing
 npm run perf
 
-# Advanced bundle analysis  
+# Advanced bundle analysis
 npm run analyze:advanced
 
 # Standard esbuild analysis
@@ -93,7 +93,7 @@ npm run size
 The optimizations maintain compatibility with:
 
 - Chrome/Chromium (manifest v3) - ES2022 support
-- Firefox (manifest v2/v3) - ES2022 support  
+- Firefox (manifest v2/v3) - ES2022 support
 - Edge (manifest v3) - ES2022 support
 
 All optimizations use modern JavaScript features supported by target browsers.

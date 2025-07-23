@@ -1,68 +1,53 @@
-import { Converter } from "opencc-js";
-
-// Cached converters to avoid repeated initialization with LRU-like behavior
-const converterCache = new Map();
-const MAX_CACHE_SIZE = 20; // Limit cache size to prevent memory leaks
+import { getOptimizedConverter, getOptimizedConverterSync } from "./opencc-optimized.js";
 
 // Performance monitoring (only in development)
-const isDevelopment = typeof process !== 'undefined' && process.env?.NODE_ENV === 'development';
+const isDevelopment = typeof process !== "undefined" && process.env?.NODE_ENV === "development";
 
-// Get or create cached converter with optimized caching
+// Use optimized converter with built-in caching, preloading, and tree shaking
+export const getConverterAsync = async (origin, target) => {
+  try {
+    return await getOptimizedConverter(origin, target);
+  } catch (error) {
+    console.error(`Failed to create converter ${origin}-${target}:`, error);
+    throw error;
+  }
+};
+
+// Synchronous version for backward compatibility
 export const getConverter = (origin, target) => {
-  const key = `${origin}-${target}`;
-  
-  if (converterCache.has(key)) {
-    // Move to end (most recently used)
-    const converter = converterCache.get(key);
-    converterCache.delete(key);
-    converterCache.set(key, converter);
-    return converter;
+  try {
+    return getOptimizedConverterSync(origin, target);
+  } catch (error) {
+    console.error(`Failed to create converter ${origin}-${target}:`, error);
+    throw error;
   }
-  
-  // Create new converter
-  const converter = Converter({ from: origin, to: target });
-  
-  // If cache is full, remove oldest entry
-  if (converterCache.size >= MAX_CACHE_SIZE) {
-    const firstKey = converterCache.keys().next().value;
-    converterCache.delete(firstKey);
-  }
-  
-  converterCache.set(key, converter);
-  return converter;
 };
 
 // Optimized debounce utility function with immediate option and memory cleanup
 export const debounce = (func, delay, immediate = false) => {
   let timeout;
-  let lastArgs;
-  
+
   const debounced = function executedFunction(...args) {
-    lastArgs = args; // Store for potential immediate execution
-    
     const later = () => {
       timeout = null;
-      lastArgs = null; // Clean up reference
       if (!immediate) func.apply(this, args);
     };
-    
+
     const callNow = immediate && !timeout;
     clearTimeout(timeout);
     timeout = setTimeout(later, delay);
-    
+
     if (callNow) {
       func.apply(this, args);
-      lastArgs = null;
     }
   };
-  
+
   // Add cancel method for cleanup
   debounced.cancel = () => {
     clearTimeout(timeout);
     timeout = null;
-    lastArgs = null;
   };
-  
+
   return debounced;
 };
 
@@ -72,17 +57,17 @@ export const throttle = (func, delay, options = {}) => {
   let timeout;
   let lastExecTime = 0;
   let lastArgs;
-  
+
   const throttled = function executedFunction(...args) {
     const currentTime = Date.now();
-    
+
     if (!lastExecTime && !leading) {
       lastExecTime = currentTime;
     }
-    
+
     const remaining = delay - (currentTime - lastExecTime);
     lastArgs = args;
-    
+
     if (remaining <= 0 || remaining > delay) {
       if (timeout) {
         clearTimeout(timeout);
@@ -102,21 +87,21 @@ export const throttle = (func, delay, options = {}) => {
       }, remaining);
     }
   };
-  
+
   // Add cancel method for cleanup
   throttled.cancel = () => {
     clearTimeout(timeout);
     timeout = null;
     lastArgs = null;
   };
-  
+
   return throttled;
 };
 
 // Performance monitoring utility (only enabled in development)
 export const measurePerformance = (fn, name) => {
   if (!isDevelopment) return fn; // Return original function in production
-  
+
   return (...args) => {
     const start = performance.now();
     const result = fn(...args);
@@ -129,7 +114,7 @@ export const measurePerformance = (fn, name) => {
 // Async performance monitoring utility (only enabled in development)
 export const measureAsyncPerformance = (fn, name) => {
   if (!isDevelopment) return fn; // Return original function in production
-  
+
   return async (...args) => {
     const start = performance.now();
     const result = await fn(...args);
@@ -152,17 +137,17 @@ export const isEmptyText = (text) => {
 export const isSameConversion = (origin, target) => origin === target;
 
 // Memory-efficient settings object
-export const defaultSettings = Object.freeze({ 
-  origin: "cn", 
-  target: "hk", 
-  auto: false, 
-  whitelist: Object.freeze([])
+export const defaultSettings = Object.freeze({
+  origin: "cn",
+  target: "hk",
+  auto: false,
+  whitelist: Object.freeze([]),
 });
 
 // Utility for cleaning up references to prevent memory leaks
 export const cleanup = () => {
-  if (converterCache.size > MAX_CACHE_SIZE * 2) {
-    const keysToDelete = Array.from(converterCache.keys()).slice(0, MAX_CACHE_SIZE);
-    keysToDelete.forEach(key => converterCache.delete(key));
-  }
+  // Use optimized module's cleanup
+  import("./opencc-optimized.js").then(({ cleanupConverters }) => {
+    cleanupConverters();
+  });
 };

@@ -13,7 +13,7 @@ const matchWhitelist = (whitelist, url) => {
         const firstKey = whitelistRegexCache.keys().next().value;
         whitelistRegexCache.delete(firstKey);
       }
-      
+
       try {
         whitelistRegexCache.set(pattern, new RegExp(pattern));
       } catch {
@@ -44,9 +44,10 @@ const isCascadingConversion = (original, converted) => {
   // Fast path - check length first
   const lengthDiff = converted.length - original.length;
   if (lengthDiff <= 0) return false;
-  
+
   // Only check for very obvious cascading patterns
-  if (lengthDiff > original.length * 1.5) { // More than 150% increase
+  if (lengthDiff > original.length * 1.5) {
+    // More than 150% increase
     // Pattern 1: Check if the converted text contains the original as a complete substring
     if (converted.includes(original) && original.length >= 2) {
       return true;
@@ -85,7 +86,7 @@ const processTextNode = (textNode, originalText, convert, isAutoMode = false) =>
     if (isAutoMode) {
       processedNodes.add(textNode);
       processedNodeCount++;
-      
+
       // Clean up memory if we have too many processed nodes
       if (processedNodeCount > MAX_PROCESSED_NODES) {
         // Note: WeakSet doesn't allow iteration, so we reset the counter
@@ -101,25 +102,21 @@ const processTextNode = (textNode, originalText, convert, isAutoMode = false) =>
 
 function convertAllTextNodes({ origin, target }, isAutoMode = false) {
   if (isSameConversion(origin, target)) return 0;
-  
+
   const convert = getConverter(origin, target);
   let count = 0;
-  
+
   // Use faster NodeIterator instead of TreeWalker for better performance
-  const nodeIterator = document.createNodeIterator(
-    document.body,
-    NodeFilter.SHOW_TEXT,
-    {
-      acceptNode: (node) => {
-        // Early filtering to skip empty nodes
-        return isEmptyText(node.nodeValue) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT;
-      }
-    }
-  );
+  const nodeIterator = document.createNodeIterator(document.body, NodeFilter.SHOW_TEXT, {
+    acceptNode: (node) => {
+      // Early filtering to skip empty nodes
+      return isEmptyText(node.nodeValue) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT;
+    },
+  });
 
   const nodesToProcess = [];
   let textNode;
-  
+
   // Collect nodes first to avoid live NodeList issues
   while ((textNode = nodeIterator.nextNode())) {
     nodesToProcess.push(textNode);
@@ -137,7 +134,7 @@ function convertAllTextNodes({ origin, target }, isAutoMode = false) {
 
 function convertSelectedTextNodes({ origin, target }) {
   if (isSameConversion(origin, target)) return;
-  
+
   const convert = getConverter(origin, target);
 
   const selection = window.getSelection();
@@ -219,13 +216,13 @@ const getCachedSettings = async () => {
 // Optimized debounced function to handle mutations with processing lock
 const debouncedMutationHandler = async () => {
   if (isProcessing || !observerActive) return; // Prevent overlapping processing
-  
+
   const settings = await getCachedSettings();
   if (!settings.auto || isSameConversion(settings.origin, settings.target)) return;
   if (matchWhitelist(settings.whitelist, window.location.href)) return;
 
   isProcessing = true;
-  
+
   try {
     if (currentURL !== window.location.href) {
       currentURL = window.location.href;
@@ -242,13 +239,13 @@ const lang = document.documentElement.lang;
 if (!lang || lang.startsWith("zh")) {
   const observer = new MutationObserver((mutations) => {
     // Filter mutations to only relevant ones
-    const hasRelevantMutations = mutations.some(mutation => 
-      mutation.type === 'childList' && mutation.addedNodes.length > 0 ||
-      mutation.type === 'characterData'
+    const hasRelevantMutations = mutations.some(
+      (mutation) =>
+        (mutation.type === "childList" && mutation.addedNodes.length > 0) || mutation.type === "characterData",
     );
-    
+
     if (!hasRelevantMutations) return;
-    
+
     // Debounce mutations to avoid excessive conversions
     if (mutationTimeout) clearTimeout(mutationTimeout);
     mutationTimeout = setTimeout(debouncedMutationHandler, 100);
@@ -260,11 +257,11 @@ if (!lang || lang.startsWith("zh")) {
     // Only observe text changes, not all attribute changes
     characterData: true,
     // Don't observe attributes to reduce overhead
-    attributes: false
+    attributes: false,
   });
 
   // Cleanup observer when page is about to unload
-  window.addEventListener('beforeunload', () => {
+  window.addEventListener("beforeunload", () => {
     observerActive = false;
     observer.disconnect();
     if (mutationTimeout) clearTimeout(mutationTimeout);
