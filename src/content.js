@@ -1,20 +1,14 @@
-import { Converter } from "opencc-js";
+import { getConverter, defaultSettings, isEmptyText, isSameConversion } from "./shared/utils.js";// Cache compiled regexes for whitelist matching
+const whitelistRegexCache = new Map();
 
-const defaultSettings = { origin: "cn", target: "hk", auto: false, whitelist: [] };
-
-// Cached converters to avoid repeated initialization
-const converterCache = new Map();
-
-// Get or create cached converter
-const getConverter = (origin, target) => {
-  const key = `${origin}-${target}`;
-  if (!converterCache.has(key)) {
-    converterCache.set(key, Converter({ from: origin, to: target }));
-  }
-  return converterCache.get(key);
+const matchWhitelist = (whitelist, url) => {
+  return whitelist.some((pattern) => {
+    if (!whitelistRegexCache.has(pattern)) {
+      whitelistRegexCache.set(pattern, new RegExp(pattern));
+    }
+    return whitelistRegexCache.get(pattern).test(url);
+  });
 };
-
-const matchWhitelist = (whitelist, url) => whitelist.map((p) => new RegExp(p)).some((re) => re.test(url));
 
 function convertTitle({ origin, target }) {
   const convert = getConverter(origin, target);
@@ -77,6 +71,8 @@ const processTextNode = (textNode, originalText, convert, isAutoMode = false) =>
 };
 
 function convertAllTextNodes({ origin, target }, isAutoMode = false) {
+  if (isSameConversion(origin, target)) return 0;
+  
   const convert = getConverter(origin, target);
   const iterateTextNodes = (node, callback) => {
     const walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT, null, false);
@@ -91,7 +87,7 @@ function convertAllTextNodes({ origin, target }, isAutoMode = false) {
     const originalText = textNode.nodeValue;
 
     // Skip empty or whitespace-only text nodes
-    if (!originalText || originalText.trim().length === 0) return;
+    if (isEmptyText(originalText)) return;
 
     const wasConverted = processTextNode(textNode, originalText, convert, isAutoMode);
 
@@ -102,6 +98,8 @@ function convertAllTextNodes({ origin, target }, isAutoMode = false) {
 }
 
 function convertSelectedTextNodes({ origin, target }) {
+  if (isSameConversion(origin, target)) return;
+  
   const convert = getConverter(origin, target);
 
   const selection = window.getSelection();
@@ -114,7 +112,7 @@ function convertSelectedTextNodes({ origin, target }) {
     const originalText = textNode.nodeValue.substring(startOffset, endOffset);
 
     // Skip empty or whitespace-only text nodes
-    if (!originalText || originalText.trim().length === 0) return false;
+    if (isEmptyText(originalText)) return false;
 
     const convertedText = convert(originalText);
     if (convertedText !== originalText) {
@@ -165,11 +163,23 @@ function convertSelectedTextNodes({ origin, target }) {
 /* Mount trigger to auto convert when DOM changes. */
 let currentURL = "";
 let mutationTimeout = null;
+let cachedSettings = null;
+let settingsExpiry = 0;
+
+// Cache settings for a short time to reduce storage calls
+const getCachedSettings = async () => {
+  if (cachedSettings && Date.now() < settingsExpiry) {
+    return cachedSettings;
+  }
+  cachedSettings = await chrome.storage.local.get(defaultSettings);
+  settingsExpiry = Date.now() + 5000; // Cache for 5 seconds
+  return cachedSettings;
+};
 
 // Debounced function to handle mutations
 const debouncedMutationHandler = async () => {
-  const settings = await chrome.storage.local.get(defaultSettings);
-  if (!settings.auto || settings.origin === settings.target) return;
+  const settings = await getCachedSettings();
+  if (!settings.auto || isSameConversion(settings.origin, settings.target)) return;
   if (matchWhitelist(settings.whitelist, window.location.href)) return;
 
   if (currentURL !== window.location.href) {
@@ -194,7 +204,7 @@ if (!lang || lang.startsWith("zh")) {
 }
 
 /* Run convert once DOM ready when in auto mode. */
-chrome.storage.local.get(defaultSettings).then((settings) => {
+getCachedSettings().then((settings) => {
   if (!settings.auto) return;
   if (matchWhitelist(settings.whitelist, window.location.href)) return;
   convertTitle(settings);
@@ -206,7 +216,7 @@ chrome.storage.local.get(defaultSettings).then((settings) => {
 chrome.runtime.onMessage.addListener(({ action }, _, sendResponse) => {
   (async () => {
     const settings = await chrome.storage.local.get(defaultSettings);
-    if (settings.origin !== settings.target) {
+    if (!isSameConversion(settings.origin, settings.target)) {
       if (action === "click") {
         const start = Date.now();
         convertTitle(settings);

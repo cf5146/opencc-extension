@@ -43,4 +43,10 @@ export const throttle = (func, delay) => {
   };
 };
 
+// Check if text is empty or whitespace-only
+export const isEmptyText = (text) => !text || text.trim().length === 0;
+
+// Check if two settings objects have the same conversion parameters
+export const isSameConversion = (origin, target) => origin === target;
+
 export const defaultSettings = { origin: "cn", target: "hk", auto: false, whitelist: [] };

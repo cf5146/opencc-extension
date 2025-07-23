@@ -1,16 +1,4 @@
-import { Converter } from "opencc-js";
-
-// Cached converters to avoid repeated initialization
-const converterCache = new Map();
-
-// Get or create cached converter
-const getConverter = (origin, target) => {
-  const key = `${origin}-${target}`;
-  if (!converterCache.has(key)) {
-    converterCache.set(key, Converter({ from: origin, to: target }));
-  }
-  return converterCache.get(key);
-};
+import { getConverter, debounce, throttle, isEmptyText, isSameConversion } from "../shared/utils.js";
 
 const $originSelect = document.getElementById("origin");
 const $targetSelect = document.getElementById("target");
@@ -23,10 +11,10 @@ const $footer = document.getElementsByTagName("footer")[0];
 
 function textboxConvert() {
   const [origin, target] = [$originSelect.value, $targetSelect.value];
-  if (origin === target) return;
+  if (isSameConversion(origin, target)) return;
 
   const originalText = $textbox.value;
-  if (!originalText || originalText.trim().length === 0) return;
+  if (isEmptyText(originalText)) return;
 
   const convert = getConverter(origin, target);
   const convertedText = convert(originalText);
@@ -57,35 +45,49 @@ chrome.storage.local
     $textbox.style.height = height ? `${height}px` : "";
   });
 
+// Batch storage updates to improve performance
+const pendingStorageUpdates = {};
+let storageUpdateTimeout = null;
+
+const updateStorage = (updates) => {
+  Object.assign(pendingStorageUpdates, updates);
+  
+  if (storageUpdateTimeout) clearTimeout(storageUpdateTimeout);
+  storageUpdateTimeout = setTimeout(() => {
+    chrome.storage.local.set(pendingStorageUpdates);
+    Object.keys(pendingStorageUpdates).forEach(key => delete pendingStorageUpdates[key]);
+  }, 100);
+};
+
 /* User changes origin option. */
 $originSelect.addEventListener("change", (event) => {
-  chrome.storage.local.set({ origin: event.currentTarget.value });
-  $convertButton.disabled = $targetSelect.value === event.currentTarget.value;
+  const value = event.currentTarget.value;
+  updateStorage({ origin: value });
+  $convertButton.disabled = $targetSelect.value === value;
   if ($textbox.value) textboxConvert();
 });
 
 /* User changes target option. */
 $targetSelect.addEventListener("change", (event) => {
-  chrome.storage.local.set({ target: event.currentTarget.value });
-  $convertButton.disabled = $originSelect.value === event.currentTarget.value;
+  const value = event.currentTarget.value;
+  updateStorage({ target: value });
+  $convertButton.disabled = $originSelect.value === value;
   if ($textbox.value) textboxConvert();
 });
 
 /* User clicks swap button. */
 $swapButton.addEventListener("click", () => {
-  chrome.storage.local.set({ origin: $targetSelect.value, target: $originSelect.value });
-  const originValue = $originSelect.value;
-  $originSelect.value = $targetSelect.value;
-  $targetSelect.value = originValue;
+  const newOrigin = $targetSelect.value;
+  const newTarget = $originSelect.value;
+  
+  updateStorage({ origin: newOrigin, target: newTarget });
+  $originSelect.value = newOrigin;
+  $targetSelect.value = newTarget;
   if ($textbox.value) textboxConvert();
 });
 
 /* User inputs text in textbox. */
-let timeout;
-const debouncedTextboxConvert = () => {
-  if (timeout) clearTimeout(timeout);
-  timeout = setTimeout(textboxConvert, 500); // Reduced from 750ms for better responsiveness
-};
+const debouncedTextboxConvert = debounce(textboxConvert, 500);
 
 $textbox.addEventListener("input", debouncedTextboxConvert);
 
@@ -96,19 +98,16 @@ $resetButton.addEventListener("click", () => {
 });
 
 /* User resizes textbox. */
-let resizeTimeout;
-new ResizeObserver(() => {
-  // Throttle resize events to avoid excessive storage writes
-  if (resizeTimeout) clearTimeout(resizeTimeout);
-  resizeTimeout = setTimeout(() => {
-    chrome.storage.local.set({
-      textboxSize: {
-        width: $textbox.offsetWidth,
-        height: $textbox.offsetHeight,
-      },
-    });
-  }, 200);
-}).observe($textbox);
+const throttledResizeHandler = throttle(() => {
+  updateStorage({
+    textboxSize: {
+      width: $textbox.offsetWidth,
+      height: $textbox.offsetHeight,
+    },
+  });
+}, 200);
+
+new ResizeObserver(throttledResizeHandler).observe($textbox);
 
 /* User clicks convert button. */
 $convertButton.addEventListener("click", async () => {
@@ -123,6 +122,6 @@ $convertButton.addEventListener("click", async () => {
 /* User checks auto convert mode. */
 $autoCheckbox.addEventListener("change", (event) => {
   const auto = event.currentTarget.checked;
-  chrome.storage.local.set({ auto });
+  updateStorage({ auto });
   chrome.action.setBadgeText({ text: auto ? "A" : "" });
 });
