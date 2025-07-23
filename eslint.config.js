@@ -14,6 +14,7 @@ export default [
         clearTimeout: "readonly",
         setTimeout: "readonly",
         NodeFilter: "readonly",
+        Node: "readonly",
         MutationObserver: "readonly",
         ResizeObserver: "readonly",
 
