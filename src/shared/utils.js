@@ -1,46 +1,7 @@
 import { Converter } from "opencc-js";
 
-export const zeroWidthSpace = String.fromCharCode(8203);
-
 // Cached converters to avoid repeated initialization
 const converterCache = new Map();
-
-// Pre-compiled regex for better performance
-const zeroWidthSpaceRegex = new RegExp(zeroWidthSpace, "g");
-
-// Utility functions for zero-width space handling with original text preservation
-export const removeZeroWidthSpaces = (text) => {
-  // Remove our marking pattern: converted_text + ZWS + original_text + ZWS
-  return text.replace(zeroWidthSpaceRegex, "");
-};
-
-export const addZeroWidthSpaces = (text, originalText = null) => {
-  // If we have the original text, store it as a marker to prevent re-conversion
-  // Format: converted_text + ZWS + original_text + ZWS
-  if (originalText && originalText !== text) {
-    return text + zeroWidthSpace + originalText + zeroWidthSpace;
-  }
-  // Fallback to simple ZWS at the end if no original text provided
-  return text + zeroWidthSpace;
-};
-
-// Extract the converted text and original text from marked text
-export const extractFromMarkedText = (text) => {
-  const markerPattern = new RegExp(`(.+)${zeroWidthSpace}(.+)${zeroWidthSpace}$`);
-  const match = text.match(markerPattern);
-  if (match) {
-    return {
-      convertedText: match[1],
-      originalText: match[2],
-      wasConverted: true,
-    };
-  }
-  return {
-    convertedText: text,
-    originalText: null,
-    wasConverted: false,
-  };
-};
 
 // Get or create cached converter
 export const getConverter = (origin, target) => {
@@ -82,4 +43,4 @@ export const throttle = (func, delay) => {
   };
 };
 
-export const defaultSettings = { origin: "cn", target: "hk", auto: false, once: true, whitelist: [] };
+export const defaultSettings = { origin: "cn", target: "hk", auto: false, whitelist: [] };
