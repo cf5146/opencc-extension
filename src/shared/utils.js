@@ -4,6 +4,9 @@ import { Converter } from "opencc-js";
 const converterCache = new Map();
 const MAX_CACHE_SIZE = 20; // Limit cache size to prevent memory leaks
 
+// Performance monitoring (only in development)
+const isDevelopment = typeof process !== 'undefined' && process.env?.NODE_ENV === 'development';
+
 // Get or create cached converter with optimized caching
 export const getConverter = (origin, target) => {
   const key = `${origin}-${target}`;
@@ -29,12 +32,17 @@ export const getConverter = (origin, target) => {
   return converter;
 };
 
-// Optimized debounce utility function with immediate option
+// Optimized debounce utility function with immediate option and memory cleanup
 export const debounce = (func, delay, immediate = false) => {
   let timeout;
-  return function executedFunction(...args) {
+  let lastArgs;
+  
+  const debounced = function executedFunction(...args) {
+    lastArgs = args; // Store for potential immediate execution
+    
     const later = () => {
       timeout = null;
+      lastArgs = null; // Clean up reference
       if (!immediate) func.apply(this, args);
     };
     
@@ -42,8 +50,20 @@ export const debounce = (func, delay, immediate = false) => {
     clearTimeout(timeout);
     timeout = setTimeout(later, delay);
     
-    if (callNow) func.apply(this, args);
+    if (callNow) {
+      func.apply(this, args);
+      lastArgs = null;
+    }
   };
+  
+  // Add cancel method for cleanup
+  debounced.cancel = () => {
+    clearTimeout(timeout);
+    timeout = null;
+    lastArgs = null;
+  };
+  
+  return debounced;
 };
 
 // Optimized throttle utility function with leading and trailing options
@@ -53,7 +73,7 @@ export const throttle = (func, delay, options = {}) => {
   let lastExecTime = 0;
   let lastArgs;
   
-  return function executedFunction(...args) {
+  const throttled = function executedFunction(...args) {
     const currentTime = Date.now();
     
     if (!lastExecTime && !leading) {
@@ -70,46 +90,79 @@ export const throttle = (func, delay, options = {}) => {
       }
       lastExecTime = currentTime;
       func.apply(this, args);
+      lastArgs = null; // Clean up reference
     } else if (!timeout && trailing) {
       timeout = setTimeout(() => {
         lastExecTime = leading ? Date.now() : 0;
         timeout = null;
-        func.apply(this, lastArgs);
+        if (lastArgs) {
+          func.apply(this, lastArgs);
+          lastArgs = null;
+        }
       }, remaining);
     }
   };
+  
+  // Add cancel method for cleanup
+  throttled.cancel = () => {
+    clearTimeout(timeout);
+    timeout = null;
+    lastArgs = null;
+  };
+  
+  return throttled;
 };
 
-// Performance monitoring utility
+// Performance monitoring utility (only enabled in development)
 export const measurePerformance = (fn, name) => {
+  if (!isDevelopment) return fn; // Return original function in production
+  
   return (...args) => {
     const start = performance.now();
     const result = fn(...args);
     const end = performance.now();
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`${name} took ${end - start} milliseconds`);
-    }
+    console.log(`${name} took ${end - start} milliseconds`);
     return result;
   };
 };
 
-// Async performance monitoring utility
+// Async performance monitoring utility (only enabled in development)
 export const measureAsyncPerformance = (fn, name) => {
+  if (!isDevelopment) return fn; // Return original function in production
+  
   return async (...args) => {
     const start = performance.now();
     const result = await fn(...args);
     const end = performance.now();
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`${name} took ${end - start} milliseconds`);
-    }
+    console.log(`${name} took ${end - start} milliseconds`);
     return result;
   };
 };
 
-// Check if text is empty or whitespace-only
-export const isEmptyText = (text) => !text || text.trim().length === 0;
+// Optimized text checking with early returns
+export const isEmptyText = (text) => {
+  // Fast path for common cases
+  if (!text) return true;
+  if (text.length === 0) return true;
+  if (text.length > 100 && text.trim().length === 0) return true; // Early detection for long whitespace
+  return text.trim().length === 0;
+};
 
 // Check if two settings objects have the same conversion parameters
 export const isSameConversion = (origin, target) => origin === target;
 
-export const defaultSettings = { origin: "cn", target: "hk", auto: false, whitelist: [] };
+// Memory-efficient settings object
+export const defaultSettings = Object.freeze({ 
+  origin: "cn", 
+  target: "hk", 
+  auto: false, 
+  whitelist: Object.freeze([])
+});
+
+// Utility for cleaning up references to prevent memory leaks
+export const cleanup = () => {
+  if (converterCache.size > MAX_CACHE_SIZE * 2) {
+    const keysToDelete = Array.from(converterCache.keys()).slice(0, MAX_CACHE_SIZE);
+    keysToDelete.forEach(key => converterCache.delete(key));
+  }
+};

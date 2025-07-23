@@ -22,8 +22,11 @@
     "dist": "concurrently \"pnpm dist:chrome\" \"pnpm dist:firefox\" \"pnpm dist:edge\" && rm -rf ./dist",
     "release:prepare": "pnpm dist && mkdir -p ./release && cp *.zip ./release/",
     "release:clean": "rm -rf ./dist ./release *.zip",
-    "analyze": "MODE='production' BROWSER='chrome' esbuild --analyze ./src/content.js --bundle --target=es2020 --format=esm",
-    "size": "MODE='production' BROWSER='chrome' pnpm build ./temp && du -sh ./temp && rm -rf ./temp"
+    "analyze": "MODE='production' BROWSER='chrome' esbuild --analyze ./src/content.js --bundle --target=es2022 --format=esm",
+    "analyze:advanced": "node ./scripts/bundle-analyzer.js",
+    "size": "MODE='production' BROWSER='chrome' pnpm build ./temp && du -sh ./temp && rm -rf ./temp",
+    "perf": "node ./scripts/performance-test.js",
+    "prebuild": "node ./scripts/performance-test.js"
   },
   "dependencies": {
     "opencc-js": "^1.0.5"

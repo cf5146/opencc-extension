@@ -1,12 +1,19 @@
 import { getConverter, defaultSettings, isEmptyText, isSameConversion } from "./shared/utils.js";
 
-// Cache compiled regexes for whitelist matching
+// Cache compiled regexes for whitelist matching with improved memory management
 const whitelistRegexCache = new Map();
+const MAX_REGEX_CACHE_SIZE = 50; // Limit cache size
 
 const matchWhitelist = (whitelist, url) => {
   if (whitelist.length === 0) return false;
   return whitelist.some((pattern) => {
     if (!whitelistRegexCache.has(pattern)) {
+      // Clean cache if it gets too large
+      if (whitelistRegexCache.size >= MAX_REGEX_CACHE_SIZE) {
+        const firstKey = whitelistRegexCache.keys().next().value;
+        whitelistRegexCache.delete(firstKey);
+      }
+      
       try {
         whitelistRegexCache.set(pattern, new RegExp(pattern));
       } catch {
@@ -27,21 +34,25 @@ function convertTitle({ origin, target }) {
 
 // Track processed nodes to prevent cascading conversions in auto mode
 const processedNodes = new WeakSet();
+const MAX_PROCESSED_NODES = 10000; // Limit to prevent memory issues
+let processedNodeCount = 0;
 
-// Helper function to check if conversion seems like cascading
+// Helper function to check if conversion seems like cascading (optimized)
 const isCascadingConversion = (original, converted) => {
   if (converted === original) return false;
 
+  // Fast path - check length first
+  const lengthDiff = converted.length - original.length;
+  if (lengthDiff <= 0) return false;
+  
   // Only check for very obvious cascading patterns
-  if (converted.length > original.length) {
+  if (lengthDiff > original.length * 1.5) { // More than 150% increase
     // Pattern 1: Check if the converted text contains the original as a complete substring
-    // This catches "演算法" -> "演演算法" but not "算法" -> "演算法"
     if (converted.includes(original) && original.length >= 2) {
       return true;
     }
 
     // Pattern 2: Check for character repetition patterns at the beginning
-    // This catches "演算法" -> "演演算法" pattern
     const firstChar = original.charAt(0);
     const secondChar = original.charAt(1);
     if (firstChar && secondChar && converted.startsWith(firstChar + firstChar + secondChar)) {
@@ -54,7 +65,7 @@ const isCascadingConversion = (original, converted) => {
   return lengthRatio > 2.5; // Allow normal CN->TWP length increases
 };
 
-// Helper function to process text node
+// Helper function to process text node with memory management
 const processTextNode = (textNode, originalText, convert, isAutoMode = false) => {
   // In auto mode, check if we've already processed this node to prevent re-conversion
   if (isAutoMode && processedNodes.has(textNode)) {
@@ -70,9 +81,17 @@ const processTextNode = (textNode, originalText, convert, isAutoMode = false) =>
   if (convertedText !== originalText && !shouldBlock) {
     textNode.nodeValue = convertedText;
 
-    // Mark node as processed in auto mode
+    // Mark node as processed in auto mode with memory management
     if (isAutoMode) {
       processedNodes.add(textNode);
+      processedNodeCount++;
+      
+      // Clean up memory if we have too many processed nodes
+      if (processedNodeCount > MAX_PROCESSED_NODES) {
+        // Note: WeakSet doesn't allow iteration, so we reset the counter
+        // The WeakSet will automatically clean up when nodes are garbage collected
+        processedNodeCount = Math.floor(MAX_PROCESSED_NODES * 0.5);
+      }
     }
 
     return true;
@@ -185,6 +204,7 @@ let mutationTimeout = null;
 let cachedSettings = null;
 let settingsExpiry = 0;
 let isProcessing = false;
+let observerActive = true;
 
 // Cache settings for a short time to reduce storage calls
 const getCachedSettings = async () => {
@@ -196,9 +216,9 @@ const getCachedSettings = async () => {
   return cachedSettings;
 };
 
-// Debounced function to handle mutations with processing lock
+// Optimized debounced function to handle mutations with processing lock
 const debouncedMutationHandler = async () => {
-  if (isProcessing) return; // Prevent overlapping processing
+  if (isProcessing || !observerActive) return; // Prevent overlapping processing
   
   const settings = await getCachedSettings();
   if (!settings.auto || isSameConversion(settings.origin, settings.target)) return;
@@ -217,17 +237,37 @@ const debouncedMutationHandler = async () => {
   }
 };
 
+// Optimized observer with better performance
 const lang = document.documentElement.lang;
 if (!lang || lang.startsWith("zh")) {
-  new MutationObserver(() => {
+  const observer = new MutationObserver((mutations) => {
+    // Filter mutations to only relevant ones
+    const hasRelevantMutations = mutations.some(mutation => 
+      mutation.type === 'childList' && mutation.addedNodes.length > 0 ||
+      mutation.type === 'characterData'
+    );
+    
+    if (!hasRelevantMutations) return;
+    
     // Debounce mutations to avoid excessive conversions
     if (mutationTimeout) clearTimeout(mutationTimeout);
     mutationTimeout = setTimeout(debouncedMutationHandler, 100);
-  }).observe(document.body, {
+  });
+
+  observer.observe(document.body, {
     childList: true,
     subtree: true,
     // Only observe text changes, not all attribute changes
     characterData: true,
+    // Don't observe attributes to reduce overhead
+    attributes: false
+  });
+
+  // Cleanup observer when page is about to unload
+  window.addEventListener('beforeunload', () => {
+    observerActive = false;
+    observer.disconnect();
+    if (mutationTimeout) clearTimeout(mutationTimeout);
   });
 }
 

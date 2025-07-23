@@ -35,7 +35,7 @@ const options = {
   },
   outbase: "src",
   outdir: arg === "watch" ? "./build" : arg,
-  target: "es2020", // Updated to newer ES target for better optimization
+  target: "es2022", // Updated to even newer ES target for better optimization
   bundle: true,
   allowOverwrite: true,
   minify: mode === "production",
@@ -49,7 +49,23 @@ const options = {
     drop: ["console", "debugger"], // Remove console.log and debugger statements
     legalComments: "none", // Remove license comments to reduce size
     mangleProps: /^_/, // Mangle private properties starting with _
+    keepNames: false, // Allow name mangling for smaller bundles
+    minifyIdentifiers: true, // Minify variable names
+    minifySyntax: true, // Minify syntax
+    minifyWhitespace: true, // Remove unnecessary whitespace
+    // Advanced compression settings
+    define: {
+      'process.env.NODE_ENV': '"production"'
+    },
+    // Pure annotations for better tree shaking
+    pure: ['console.log', 'console.warn', 'console.error']
   }),
+  // Development optimizations
+  ...(mode === "development" && {
+    keepNames: true, // Keep names in development for debugging
+    minifyIdentifiers: false,
+    sourcesContent: true
+  })
 };
 
 if (arg === "watch") {
