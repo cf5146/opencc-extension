@@ -1,12 +1,22 @@
-import { getConverter, defaultSettings, isEmptyText, isSameConversion } from "./shared/utils.js";// Cache compiled regexes for whitelist matching
+import { getConverter, defaultSettings, isEmptyText, isSameConversion } from "./shared/utils.js";
+
+// Cache compiled regexes for whitelist matching
 const whitelistRegexCache = new Map();
 
 const matchWhitelist = (whitelist, url) => {
+  if (whitelist.length === 0) return false;
   return whitelist.some((pattern) => {
     if (!whitelistRegexCache.has(pattern)) {
-      whitelistRegexCache.set(pattern, new RegExp(pattern));
+      try {
+        whitelistRegexCache.set(pattern, new RegExp(pattern));
+      } catch {
+        // Invalid regex pattern, skip it and cache null to avoid retrying
+        whitelistRegexCache.set(pattern, null);
+        return false;
+      }
     }
-    return whitelistRegexCache.get(pattern).test(url);
+    const regex = whitelistRegexCache.get(pattern);
+    return regex?.test(url) ?? false;
   });
 };
 
@@ -74,25 +84,34 @@ function convertAllTextNodes({ origin, target }, isAutoMode = false) {
   if (isSameConversion(origin, target)) return 0;
   
   const convert = getConverter(origin, target);
-  const iterateTextNodes = (node, callback) => {
-    const walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT, null, false);
-    let textNode;
-    while ((textNode = walker.nextNode())) {
-      callback(textNode);
-    }
-  };
-
   let count = 0;
-  iterateTextNodes(document.body, (textNode) => {
-    const originalText = textNode.nodeValue;
+  
+  // Use faster NodeIterator instead of TreeWalker for better performance
+  const nodeIterator = document.createNodeIterator(
+    document.body,
+    NodeFilter.SHOW_TEXT,
+    {
+      acceptNode: (node) => {
+        // Early filtering to skip empty nodes
+        return isEmptyText(node.nodeValue) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT;
+      }
+    }
+  );
 
-    // Skip empty or whitespace-only text nodes
-    if (isEmptyText(originalText)) return;
+  const nodesToProcess = [];
+  let textNode;
+  
+  // Collect nodes first to avoid live NodeList issues
+  while ((textNode = nodeIterator.nextNode())) {
+    nodesToProcess.push(textNode);
+  }
 
-    const wasConverted = processTextNode(textNode, originalText, convert, isAutoMode);
-
+  // Process collected nodes
+  for (const node of nodesToProcess) {
+    const originalText = node.nodeValue;
+    const wasConverted = processTextNode(node, originalText, convert, isAutoMode);
     if (wasConverted) count++;
-  });
+  }
 
   return count;
 }
@@ -165,6 +184,7 @@ let currentURL = "";
 let mutationTimeout = null;
 let cachedSettings = null;
 let settingsExpiry = 0;
+let isProcessing = false;
 
 // Cache settings for a short time to reduce storage calls
 const getCachedSettings = async () => {
@@ -176,17 +196,25 @@ const getCachedSettings = async () => {
   return cachedSettings;
 };
 
-// Debounced function to handle mutations
+// Debounced function to handle mutations with processing lock
 const debouncedMutationHandler = async () => {
+  if (isProcessing) return; // Prevent overlapping processing
+  
   const settings = await getCachedSettings();
   if (!settings.auto || isSameConversion(settings.origin, settings.target)) return;
   if (matchWhitelist(settings.whitelist, window.location.href)) return;
 
-  if (currentURL !== window.location.href) {
-    currentURL = window.location.href;
-    convertTitle(settings);
+  isProcessing = true;
+  
+  try {
+    if (currentURL !== window.location.href) {
+      currentURL = window.location.href;
+      convertTitle(settings);
+    }
+    convertAllTextNodes(settings, true); // Pass true for auto mode
+  } finally {
+    isProcessing = false;
   }
-  convertAllTextNodes(settings, true); // Pass true for auto mode
 };
 
 const lang = document.documentElement.lang;
