@@ -1,4 +1,4 @@
-import { Converter } from "opencc-js";
+import { Converter } from "../opencc.min.js";
 
 const converterCache = {};
 const getConverter = (origin, target) => {
