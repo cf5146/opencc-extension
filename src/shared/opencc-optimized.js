@@ -1,5 +1,5 @@
 // Optimized OpenCC module with dynamic imports for better tree shaking
-import { ConverterFactory } from "opencc-js";
+import { Converter } from "opencc-js";
 
 // Language pairs that are commonly used - prioritize these for preloading
 const COMMON_CONVERSIONS = ["cn-hk", "cn-tw", "cn-twp", "hk-cn", "tw-cn", "twp-cn", "hk-tw", "tw-hk"];
@@ -50,8 +50,8 @@ const createConverter = async (from, to) => {
 
   const promise = new Promise((resolve, reject) => {
     try {
-      // Use ConverterFactory for better tree shaking
-      const converter = ConverterFactory({ from, to });
+      // Use Converter for better compatibility
+      const converter = Converter({ from, to });
       converterCache.set(key, converter);
       loadingPromises.delete(key);
       resolve(converter);
@@ -79,7 +79,7 @@ export const getOptimizedConverterSync = (from, to) => {
   }
 
   // Create synchronously
-  const converter = ConverterFactory({ from, to });
+  const converter = Converter({ from, to });
   converterCache.set(key, converter);
   return converter;
 };
