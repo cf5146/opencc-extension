@@ -1,54 +1,12 @@
 import { Converter } from "opencc-js";
 
-const zeroWidthSpace = String.fromCharCode(8203);
-
-// Cached converters to avoid repeated initialization
-const converterCache = new Map();
-
-// Pre-compiled regex for better performance
-const zeroWidthSpaceRegex = new RegExp(zeroWidthSpace, "g");
-
-// Utility functions for zero-width space handling with original text preservation
-const removeZeroWidthSpaces = (text) => {
-  // Remove our marking pattern: converted_text + ZWS + original_text + ZWS
-  return text.replace(zeroWidthSpaceRegex, "");
-};
-
-const addZeroWidthSpaces = (text, originalText = null) => {
-  // If we have the original text, store it as a marker to prevent re-conversion
-  // Format: converted_text + ZWS + original_text + ZWS
-  if (originalText && originalText !== text) {
-    return text + zeroWidthSpace + originalText + zeroWidthSpace;
-  }
-  // Fallback to simple ZWS at the end if no original text provided
-  return text + zeroWidthSpace;
-};
-
-// Extract the converted text and original text from marked text
-const extractFromMarkedText = (text) => {
-  const markerPattern = new RegExp(`(.+)${zeroWidthSpace}(.+)${zeroWidthSpace}$`);
-  const match = text.match(markerPattern);
-  if (match) {
-    return {
-      convertedText: match[1],
-      originalText: match[2],
-      wasConverted: true,
-    };
-  }
-  return {
-    convertedText: text,
-    originalText: null,
-    wasConverted: false,
-  };
-};
-
-// Get or create cached converter
+const converterCache = {};
 const getConverter = (origin, target) => {
   const key = `${origin}-${target}`;
-  if (!converterCache.has(key)) {
-    converterCache.set(key, Converter({ from: origin, to: target }));
+  if (!converterCache[key]) {
+    converterCache[key] = Converter({ from: origin, to: target });
   }
-  return converterCache.get(key);
+  return converterCache[key];
 };
 
 const $originSelect = document.getElementById("origin");
@@ -58,40 +16,20 @@ const $resetButton = document.getElementById("reset");
 const $textbox = document.getElementById("textbox");
 const $convertButton = document.getElementById("convert");
 const $autoCheckbox = document.getElementById("auto");
-const $onceCheckbox = document.getElementById("once");
 const $footer = document.getElementsByTagName("footer")[0];
 
 function textboxConvert() {
-  const [origin, target, once] = [$originSelect.value, $targetSelect.value, $onceCheckbox.checked];
+  const [origin, target] = [$originSelect.value, $targetSelect.value];
   if (origin === target) return;
 
   const originalText = $textbox.value;
   if (!originalText || originalText.trim().length === 0) return;
 
   const convert = getConverter(origin, target);
+  const convertedText = convert(originalText);
 
-  if (once) {
-    // Check if text was already converted
-    const { convertedText: existingConverted, wasConverted } = extractFromMarkedText(originalText);
-    if (wasConverted) {
-      // Already converted, just display the converted text
-      $textbox.value = existingConverted;
-      return;
-    }
-
-    // Convert and mark with original if conversion occurred
-    let newConverted = convert(existingConverted);
-    if (newConverted !== existingConverted) {
-      newConverted = addZeroWidthSpaces(newConverted, existingConverted);
-      $textbox.value = newConverted;
-    }
-  } else {
-    // Normal conversion without marking
-    const cleanText = removeZeroWidthSpaces(originalText);
-    let convertedText = convert(cleanText);
-    if (convertedText !== cleanText) {
-      $textbox.value = convertedText;
-    }
+  if (convertedText !== originalText) {
+    $textbox.value = convertedText;
   }
 }
 
@@ -101,7 +39,6 @@ chrome.storage.local
     origin: "cn",
     target: "hk",
     auto: false,
-    once: true,
     textboxSize: {
       width: null,
       height: null,
@@ -111,7 +48,6 @@ chrome.storage.local
     $originSelect.value = settings.origin;
     $targetSelect.value = settings.target;
     $autoCheckbox.checked = settings.auto;
-    $onceCheckbox.checked = settings.once;
     $convertButton.disabled = settings.origin === settings.target;
     // restore textbox size
     const { width, height } = settings.textboxSize;
@@ -144,12 +80,11 @@ $swapButton.addEventListener("click", () => {
 
 /* User inputs text in textbox. */
 let timeout;
-const debouncedTextboxConvert = () => {
+$textbox.addEventListener("input", () => {
+  // debounce 750ms: wait for typing to stop
   if (timeout) clearTimeout(timeout);
-  timeout = setTimeout(textboxConvert, 500); // Reduced from 750ms for better responsiveness
-};
-
-$textbox.addEventListener("input", debouncedTextboxConvert);
+  timeout = setTimeout(textboxConvert, 750);
+});
 
 /* User clicks reset button. */
 $resetButton.addEventListener("click", () => {
@@ -158,18 +93,13 @@ $resetButton.addEventListener("click", () => {
 });
 
 /* User resizes textbox. */
-let resizeTimeout;
 new ResizeObserver(() => {
-  // Throttle resize events to avoid excessive storage writes
-  if (resizeTimeout) clearTimeout(resizeTimeout);
-  resizeTimeout = setTimeout(() => {
-    chrome.storage.local.set({
-      textboxSize: {
-        width: $textbox.offsetWidth,
-        height: $textbox.offsetHeight,
-      },
-    });
-  }, 200);
+  chrome.storage.local.set({
+    textboxSize: {
+      width: $textbox.offsetWidth,
+      height: $textbox.offsetHeight,
+    },
+  });
 }).observe($textbox);
 
 /* User clicks convert button. */
@@ -187,12 +117,4 @@ $autoCheckbox.addEventListener("change", (event) => {
   const auto = event.currentTarget.checked;
   chrome.storage.local.set({ auto });
   chrome.action.setBadgeText({ text: auto ? "A" : "" });
-});
-
-/* User checks once convert mode. */
-$onceCheckbox.addEventListener("change", (event) => {
-  const once = event.currentTarget.checked;
-  chrome.storage.local.set({ once });
-  // Re-convert textbox content if there's any, to show immediate effect
-  if ($textbox.value) textboxConvert();
 });
