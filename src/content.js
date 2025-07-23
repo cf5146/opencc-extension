@@ -20,25 +20,19 @@ function convertTitle(origin, target) {
 
 function convertAllTextNodes(origin, target) {
   const convert = getConverter(origin, target);
-  const iterateTextNodes = (node, callback) => {
-    const walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT, null, false);
-    let textNode;
-    while ((textNode = walker.nextNode())) {
-      callback(textNode);
-    }
-  };
-
+  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
   let count = 0;
-  iterateTextNodes(document.body, (textNode) => {
-    const originalText = textNode.nodeValue;
-    if (!originalText || originalText.trim().length === 0) return;
-    const convertedText = convert(originalText);
-    if (convertedText !== originalText) {
-      textNode.nodeValue = convertedText;
-      count++;
+  let node;
+  while ((node = walker.nextNode())) {
+    const originalText = node.nodeValue;
+    if (originalText && originalText.trim().length > 0) {
+      const convertedText = convert(originalText);
+      if (convertedText !== originalText) {
+        node.nodeValue = convertedText;
+        count++;
+      }
     }
-  });
-
+  }
   return count;
 }
 
@@ -49,44 +43,21 @@ function convertSelectedTextNodes(origin, target) {
   if (!selection.rangeCount) return;
 
   const range = selection.getRangeAt(0);
+  const walker = document.createTreeWalker(range.commonAncestorContainer, NodeFilter.SHOW_TEXT, {
+    acceptNode: (node) => (range.intersectsNode(node) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT),
+  });
 
-  const processTextNode = (textNode, startOffset = 0, endOffset = textNode.length) => {
-    const originalText = textNode.nodeValue.substring(startOffset, endOffset);
-    if (!originalText || originalText.trim().length === 0) return;
-
-    const convertedText = convert(originalText);
-    if (convertedText !== originalText) {
-      const fullText = textNode.nodeValue;
-      textNode.nodeValue = fullText.substring(0, startOffset) + convertedText + fullText.substring(endOffset);
-    }
-  };
-
-  if (range.startContainer === range.endContainer && range.startContainer.nodeType === 3) {
-    processTextNode(range.startContainer, range.startOffset, range.endOffset);
-    return;
-  }
-
-  const walker = document.createTreeWalker(
-    range.commonAncestorContainer,
-    NodeFilter.SHOW_TEXT,
-    {
-      acceptNode: (node) => {
-        return range.intersectsNode(node) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
-      },
-    },
-    false,
-  );
-
-  let textNode;
-  while ((textNode = walker.nextNode())) {
-    if (textNode === range.startContainer && textNode === range.endContainer) {
-      processTextNode(textNode, range.startOffset, range.endOffset);
-    } else if (textNode === range.startContainer) {
-      processTextNode(textNode, range.startOffset, textNode.length);
-    } else if (textNode === range.endContainer) {
-      processTextNode(textNode, 0, range.endOffset);
-    } else {
-      processTextNode(textNode, 0, textNode.length);
+  let node;
+  while ((node = walker.nextNode())) {
+    const startOffset = node === range.startContainer ? range.startOffset : 0;
+    const endOffset = node === range.endContainer ? range.endOffset : node.nodeValue.length;
+    const originalText = node.nodeValue.substring(startOffset, endOffset);
+    if (originalText && originalText.trim().length > 0) {
+      const convertedText = convert(originalText);
+      if (convertedText !== originalText) {
+        const fullText = node.nodeValue;
+        node.nodeValue = fullText.substring(0, startOffset) + convertedText + fullText.substring(endOffset);
+      }
     }
   }
 }
@@ -94,8 +65,11 @@ function convertSelectedTextNodes(origin, target) {
 /* Mount trigger to auto convert when DOM changes. */
 let currentURL = "";
 const lang = document.documentElement.lang;
-if (!lang || lang.startsWith("zh")) {
-  new MutationObserver(async () => {
+let mutationDebounceTimer;
+
+const mutationHandler = (mutations) => {
+  clearTimeout(mutationDebounceTimer);
+  mutationDebounceTimer = setTimeout(async () => {
     const settings = await chrome.storage.local.get(defaultSettings);
     if (!settings.auto || settings.origin === settings.target) return;
     if (matchWhitelist(settings.whitelist, window.location.href)) return;
@@ -104,8 +78,39 @@ if (!lang || lang.startsWith("zh")) {
       currentURL = window.location.href;
       convertTitle(settings.origin, settings.target);
     }
-    convertAllTextNodes(settings.origin, settings.target);
-  }).observe(document.body, {
+
+    const convert = getConverter(settings.origin, settings.target);
+    for (const mutation of mutations) {
+      for (const node of mutation.addedNodes) {
+        if (node.nodeType === Node.TEXT_NODE) {
+          const originalText = node.nodeValue;
+          if (originalText && originalText.trim().length > 0) {
+            const convertedText = convert(originalText);
+            if (convertedText !== originalText) {
+              node.nodeValue = convertedText;
+            }
+          }
+        } else if (node.nodeType === Node.ELEMENT_NODE) {
+          const walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT);
+          let textNode;
+          while ((textNode = walker.nextNode())) {
+            const originalText = textNode.nodeValue;
+            if (originalText && originalText.trim().length > 0) {
+              const convertedText = convert(originalText);
+              if (convertedText !== originalText) {
+                textNode.nodeValue = convertedText;
+              }
+            }
+          }
+        }
+      }
+    }
+  }, 500);
+};
+
+if (!lang || lang.startsWith("zh")) {
+  const observer = new MutationObserver(mutationHandler);
+  observer.observe(document.body, {
     childList: true,
     subtree: true,
   });
