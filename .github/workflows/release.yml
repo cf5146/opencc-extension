@@ -43,6 +43,21 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Build extension
+        run: pnpm run build
+
+      - name: Package Chrome extension
+        run: pnpm run package:chrome
+
+      - name: Package Firefox extension
+        run: pnpm run package:firefox
+
+      - name: Package Edge extension
+        run: pnpm run package:edge
+
+      - name: Generate SHA256SUMS
+        run: sha256sum opencc.chrome.zip opencc.firefox.zip opencc.edge.zip > SHA256SUMS
+
       - name: Determine version
         id: version
         shell: bash
@@ -61,7 +76,7 @@ jobs:
           fi
           # Try to get last tag, fallback to input, then package.json
           if LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null); then
-            :
+            true
           elif [[ -n "${{ inputs.default_version }}" ]]; then
             LAST_TAG="v${{ inputs.default_version }}"
           else
@@ -105,8 +120,7 @@ jobs:
             git add .
             git commit -m "chore: bump version and update changelog [skip ci]"
             git tag "v${{ steps.version.outputs.version }}"
-            git push origin HEAD
-            git push origin "v${{ steps.version.outputs.version }}"
+            git push origin HEAD "v${{ steps.version.outputs.version }}"
       - name: Set artifact name
         id: artifact_name
         shell: bash
