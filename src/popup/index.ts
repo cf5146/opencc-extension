@@ -80,13 +80,33 @@ new ResizeObserver(() => {
   });
 }).observe($textbox);
 
+async function sendPageConvert(): Promise<any | undefined> {
+  const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+  const tabId = tabs[0]?.id;
+  if (tabId == null) return undefined;
+  try {
+    return await chrome.tabs.sendMessage(tabId, { action: 'click' });
+  } catch (e) {
+    // Possibly content script not yet registered (dynamic scripting permission) – request registration then retry once.
+    try { await chrome.runtime.sendMessage({ action: 'ensure-script' }); } catch {}
+    await new Promise(r => setTimeout(r, 150));
+    try {
+      return await chrome.tabs.sendMessage(tabId, { action: 'click' });
+    } catch {
+      return undefined;
+    }
+  }
+}
+
 $convertButton.addEventListener('click', async () => {
   $convertButton.disabled = true;
-  const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
-  const response = tabs[0]?.id != null ? await chrome.tabs.sendMessage(tabs[0].id, { action: 'click' }) : undefined;
+  const response = await sendPageConvert();
   $convertButton.disabled = false;
-  if (response !== undefined) $footer.innerText = `${response.count} nodes changed in ${response.time}ms`;
-  else $footer.innerHTML = `<span style="color: red; font-weight: bold;">BROWSER PROTECTED PAGE</span>`;
+  if (response && typeof response.count === 'number') {
+    $footer.innerText = `${response.count} nodes changed in ${response.time}ms`;
+  } else {
+    $footer.innerHTML = `<span style="color: red; font-weight: bold;">NO ACCESS / PROTECTED PAGE</span>`;
+  }
 });
 
 $autoCheckbox.addEventListener('change', (event) => {
