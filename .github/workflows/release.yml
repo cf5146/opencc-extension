@@ -3,8 +3,7 @@ name: Release
 on:
   push:
     branches: [ main ]
-    tags:
-      - 'v*.*.*'
+    tags: [ 'v*.*.*' ]
   workflow_dispatch:
     inputs:
       version:
@@ -12,9 +11,6 @@ on:
         required: false
       notes:
         description: 'Additional release notes'
-        required: false
-      default_version:
-        description: 'Default version fallback (semver, e.g. 0.4.0)'
         required: false
 
 permissions:
@@ -43,21 +39,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build extension
-        run: pnpm run build
-
-      - name: Package Chrome extension
-        run: pnpm run package:chrome
-
-      - name: Package Firefox extension
-        run: pnpm run package:firefox
-
-      - name: Package Edge extension
-        run: pnpm run package:edge
-
-      - name: Generate SHA256SUMS
-        run: sha256sum opencc.chrome.zip opencc.firefox.zip opencc.edge.zip > SHA256SUMS
-
       - name: Determine version
         id: version
         shell: bash
@@ -67,22 +48,14 @@ jobs:
             echo "version=${{ inputs.version }}" >> $GITHUB_OUTPUT
             exit 0
           fi
-          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
-            TAG_NAME="${GITHUB_REF##*/}"
-            VERSION="${TAG_NAME#v}"
-            echo "Using tag version: $VERSION"
-            echo "version=$VERSION" >> $GITHUB_OUTPUT
-            exit 0
-          fi
-          # Try to get last tag, fallback to input, then package.json
-          if LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null); then
-            # Last tag found, proceed
-          elif [[ -n "${{ inputs.default_version }}" ]]; then
-            LAST_TAG="v${{ inputs.default_version }}"
-          else
-            PKG_VERSION=$(node -p "require('./package.json').version")
-            LAST_TAG="v${PKG_VERSION}"
-          fi
+            if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+              TAG_NAME="${GITHUB_REF##*/}"
+              VERSION="${TAG_NAME#v}"
+              echo "Using tag version: $VERSION"
+              echo "version=$VERSION" >> $GITHUB_OUTPUT
+              exit 0
+            fi
+          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
           BASE=${LAST_TAG#v}
           IFS=. read -r MAJOR MINOR PATCH <<< "$BASE"
           PATCH=$((PATCH+1))
@@ -91,58 +64,37 @@ jobs:
           echo "version=$NEXT" >> $GITHUB_OUTPUT
 
       - name: Show computed version
-        shell: bash
-        run: |
-          echo "Computed version: ${{ steps.version.outputs.version }}"
+        run: echo "Version => ${{ steps.version.outputs.version }}"
 
-      - name: Update source versions (only when on main without tag)
+      - name: Bump version in sources (main only, not for tag push)
         if: github.ref == 'refs/heads/main'
-        run: |
-          if [ -f scripts/bump-version.cjs ]; then
-            node scripts/bump-version.cjs ${{ steps.version.outputs.version }}
-          else
-            echo "Version bump script not found, skipping version update."
-          fi
+        run: node scripts/bump-version.cjs ${{ steps.version.outputs.version }}
 
       - name: Generate changelog
-        shell: bash
-        run: |
-          if [ -f scripts/generate-changelog.cjs ]; then
-            node scripts/generate-changelog.cjs ${{ steps.version.outputs.version }} --update
-          else
-            echo "Changelog script not found, skipping changelog generation."
-          fi
+        run: node scripts/generate-changelog.cjs ${{ steps.version.outputs.version }} --update
 
-      - name: Commit & tag (only if main and not tag push and changes exist)
+      - name: Commit & tag (main only if changes)
         if: github.ref == 'refs/heads/main'
         shell: bash
         run: |
           if git diff --quiet; then
-            echo "No changes after version bump/changelog."
-          else
-            git config user.name "github-actions"
-            git config user.email "github-actions@github.com"
-            git add .
-            git commit -m "chore: bump version and update changelog [skip ci]"
-            git tag "v${{ steps.version.outputs.version }}"
-            if ! git push origin HEAD "v${{ steps.version.outputs.version }}"; then
-              echo "git push failed!" >&2
-              exit 1
-            fi
-      - name: Set artifact name
-        id: artifact_name
-        shell: bash
-        run: |
-          if [[ -n "${{ steps.version.outputs.version }}" ]]; then
-            echo "name=build-artifacts-${{ steps.version.outputs.version }}" >> $GITHUB_OUTPUT
-          else
-            echo "name=build-artifacts-${{ github.ref_name }}" >> $GITHUB_OUTPUT
-          fi
+            echo "Nothing to commit"; exit 0; fi
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git commit -am "chore: release v${{ steps.version.outputs.version }}"
+          git tag -a "v${{ steps.version.outputs.version }}" -m "Release v${{ steps.version.outputs.version }}"
+          git push --follow-tags
 
-      - name: Upload workflow artifacts
+      - name: Build distributions
+        run: pnpm dist
+
+      - name: Generate checksums
+        run: sha256sum opencc.chrome.zip opencc.firefox.zip opencc.edge.zip > SHA256SUMS
+
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ steps.artifact_name.outputs.name }}
+          name: build-artifacts-${{ steps.version.outputs.version }}
           path: |
             opencc.chrome.zip
             opencc.firefox.zip
@@ -150,7 +102,7 @@ jobs:
             SHA256SUMS
           retention-days: 14
 
-      - name: Append checksums to summary
+      - name: Add checksum summary
         shell: bash
         run: |
           echo "### Artifact Checksums" >> $GITHUB_STEP_SUMMARY
@@ -158,9 +110,8 @@ jobs:
           echo "| File | SHA256 |" >> $GITHUB_STEP_SUMMARY
           echo "|------|--------|" >> $GITHUB_STEP_SUMMARY
           awk '{printf("| %s | `%s` |\n", $2, $1)}' SHA256SUMS >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
 
-          body_path: CHANGELOG.md
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.version.outputs.version }}

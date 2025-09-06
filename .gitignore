@@ -1,6 +1,79 @@
+############################################################
+# Root .gitignore for opencc-extension
+# Covers Node, browser-extension build artifacts, test output
+# and common OS/editor cruft. Adjust as needed.
+############################################################
+
+# Package managers / dependencies
+node_modules/
+node_modules.nosync/
+.pnpm-store/
+
+# Logs & debug
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build outputs (ephemeral)
+build/
+dist/
+
+# Distribution artifacts produced by release workflow
+opencc.*.zip
+SHA256SUMS
+
+# Coverage / test artifacts
+coverage/
+.vitest/
+*.lcov
+
+# Web-ext artifacts/cache
+web-ext-artifacts/
+.web-ext-cache/
+web-ext-config.mjs
+
+# IDE / Editor
 .idea/
 .vscode/
-build/
-node_modules
-node_modules.nosync/
-web-ext-config.mjs
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+
+# OS metadata
+.DS_Store
+Thumbs.db
+
+# Environment / secrets (keep example)
+.env
+.env.*
+!.env.example
+
+# Temp & swap
+*.swp
+*.swo
+*~
+*.tmp
+*.temp
+
+# TypeScript incremental build (if introduced later)
+*.tsbuildinfo
+
+# Lockfiles (pnpm is used; keep pnpm-lock.yaml tracked)
+package-lock.json
+yarn.lock
+# DO NOT ignore pnpm-lock.yaml
+
+# Misc
+*.bak
+*.orig
+*.rej
+*.patch
+*.tgz
+
+############################################################
+# End of file
+############################################################
