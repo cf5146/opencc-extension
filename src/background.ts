@@ -1,21 +1,31 @@
 // Ensure context menu exists (idempotent) and register click handler at top-level for MV3 service worker.
 function createOrUpdateContextMenu() {
+  // Remove first (ignore errors if not present), then create fresh to avoid duplicate id warnings.
   try {
-    chrome.contextMenus.create({
-      id: 'convert-selection',
-      title: 'Convert Chinese Characters',
-      contexts: ['selection'],
+    chrome.contextMenus.remove('convert-selection', () => {
+      // Touch lastError to clear potential remove warning when item didn't exist.
+      if (chrome.runtime.lastError) {/* ignored */}
+      chrome.contextMenus.create(
+        {
+          id: 'convert-selection',
+          title: 'Convert Chinese Characters',
+          contexts: ['selection'],
+        },
+        () => {
+          // Suppress duplicate warnings (should not happen after remove) but guard anyway.
+            const msg = chrome.runtime.lastError?.message;
+            if (msg && !/duplicate id/i.test(msg)) {
+              console.warn('OpenCC context menu create error:', msg);
+            }
+        },
+      );
     });
-  } catch (e) {
-    // Ignore only duplicate ID errors; rethrow others for visibility.
-    const msg = (e as Error).message || '';
-    if (!/duplicate id/i.test(msg)) throw e;
+  } catch {
+    // No-op; MV3 APIs shouldn't throw synchronously for these operations.
   }
 }
 
-chrome.runtime.onInstalled.addListener(() => {
-  createOrUpdateContextMenu();
-});
+chrome.runtime.onInstalled.addListener(() => createOrUpdateContextMenu());
 
 // In case service worker restarted (not re-installed), recreate menu.
 createOrUpdateContextMenu();
