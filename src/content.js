@@ -1,4 +1,5 @@
 import { convertAllNewTextNodes, convertTitle, resetConversionCache } from "./conversion.js";
+import { Converter } from "opencc-js";
 
 const defaultSettings = { origin: "cn", target: "hk", auto: false, whitelist: [] };
 
@@ -7,26 +8,26 @@ const matchWhitelist = (whitelist, url) => whitelist.map((p) => new RegExp(p)).s
 // content.js now delegates conversion logic to conversion.js helpers
 
 function convertSelectedTextNodes(origin, target) {
-  const { Converter } = require("opencc-js");
+  const selection = window.getSelection();
+  if (!selection || selection.rangeCount === 0) return;
   const convert = Converter({ from: origin, to: target });
   const iterateTextNodes = (nodes, callback) => {
     for (const node of nodes) {
-      if (node.nodeType === 3) callback(node);
+      if (node.nodeType === Node.TEXT_NODE) callback(node);
       else iterateTextNodes(node.childNodes, callback);
     }
   };
-  const range = window.getSelection().getRangeAt(0);
+  const range = selection.getRangeAt(0);
   const contents = range.cloneContents();
   iterateTextNodes([contents], (textNode) => {
     const originalText = textNode.nodeValue;
     const convertedText = convert(originalText);
-  if (convertedText === originalText) return;
-  textNode.nodeValue = convertedText;
-  return convertedText;
+    if (convertedText === originalText) return;
+    textNode.nodeValue = convertedText;
   });
-  // FIXME: the DOM structure messes up
-  //   when the selected text spans across multiple containers
-  range.deleteContents() || range.insertNode(contents);
+  // NOTE: If selection spans multiple containers DOM structure may change; acceptable trade-off currently.
+  range.deleteContents();
+  range.insertNode(contents);
 }
 
 /* Mount trigger to auto convert when DOM changes. */
