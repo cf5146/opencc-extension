@@ -88,3 +88,11 @@ chrome.runtime.onMessage.addListener((msg) => {
     ensureContentScriptRegistered();
   }
 });
+
+// Test hook (only attached during Vitest / test environment)
+try {
+  // @ts-ignore
+  (globalThis as any).__opencc_test__ = { ensureContentScriptRegistered };
+} catch {
+  // ignore
+}
