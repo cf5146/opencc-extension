@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "OpenCC",
   "author": "Tony Chan",
-  "version": "0.4.0",
+  "version": "0.5.1",
   "description": "Convert webpages between different Chinese variants.",
   "homepage_url": "https://github.com/tnychn/opencc-extension",
   "icons": {
@@ -14,7 +14,8 @@
         "content.js"
       ],
       "matches": [
-        "<all_urls>"
+        "http://*/*",
+        "https://*/*"
       ],
       "run_at": "document_idle"
     }
@@ -37,8 +38,11 @@
   },
   "permissions": [
     "storage",
-    "tabs",
     "contextMenus"
+  ],
+  "host_permissions": [
+    "http://*/*",
+    "https://*/*"
   ],
   "browser_specific_settings": {
     "gecko": {
