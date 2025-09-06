@@ -15,27 +15,38 @@ const update = process.argv.includes('--update');
 const releaseBodyPath = 'CHANGELOG_RELEASE.md';
 
 function sh(cmd) {
-  try { return execSync(cmd, { encoding: 'utf8' }).trim(); }
-  catch (err) {
-    console.error(`Error executing command "${cmd}":`, err.message);
+  try {
+    return execSync(cmd, { encoding: 'utf8' }).trim();
+  } catch (err) {
     return '';
   }
 }
 
-const prevTag = sh('git describe --tags --abbrev=0 --match "v*" 2>/dev/null');
-const range = prevTag ? `${prevTag}..HEAD` : '';
-const logCmd = `git log --pretty=format:%s --no-merges ${range}`.trim();
-let commits = sh(logCmd).split(/\r?\n/).map(s => s.trim()).filter(Boolean)
-  .filter(s => !/^chore:\s+release\s+v?\d+\.\d+\.\d+$/i.test(s));
-const buckets = {};
-const other = [];
-if (!commits.length) commits = ['(no changes)'];
+function normalizeRepoUrl(url) {
+  if (!url) return '';
+  // Remove surrounding whitespace
+  url = url.trim();
+  // Strip git+ prefix
+  url = url.replace(/^git\+/, '');
+  // SSH git@github.com:owner/repo(.git)?
+  const sshMatch = /^git@github\.com:([^/]+)\/(.+?)(\.git)?$/.exec(url);
+  if (sshMatch) {
+    url = `https://github.com/${sshMatch[1]}/${sshMatch[2]}`;
+  }
+  // git://github.com/owner/repo(.git)?
+  url = url.replace(/^git:\/\/github\.com\//, 'https://github.com/');
+  // https with .git
+  url = url.replace(/\.git(#.*)?$/i, '');
+  return url;
+}
 
-// Get repo URL from env or package.json
+// Collect repo URL
 let repoUrl = process.env.REPO_URL;
 if (!repoUrl) {
   try {
-    const pkg = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../package.json'), 'utf8'));
+    const pkg = JSON.parse(
+      fs.readFileSync(path.resolve(__dirname, '../package.json'), 'utf8')
+    );
     if (pkg.repository) {
       if (typeof pkg.repository === 'string') {
         repoUrl = pkg.repository;
@@ -43,47 +54,79 @@ if (!repoUrl) {
         repoUrl = pkg.repository.url;
       }
     }
-    // Remove .git suffix if present
-    if (repoUrl && repoUrl.endsWith('.git')) repoUrl = repoUrl.slice(0, -4);
-    // Convert git@github.com:owner/repo to https://github.com/owner/repo
-const repoUrl = 'https://github.com/cf5146/opencc-extension';
-let compare = '';
-if (prevTag) compare = `\n[Compare changes](${repoUrl}/compare/${prevTag}...v${version})\n`;
-
-const prLinkRe = /\(#(\d+)\)/g;
-let section = heading + compare + '\n';
-for (const name of Object.keys(buckets).sort()) {
-  section += `\n### ${name}\n`;
-  for (const item of buckets[name]) {
-    const transformed = item.replace(prLinkRe, (_, id) => `([#${id}](${repoUrl}/pull/${id}))`);
-    section += `- ${transformed}\n`;
+  } catch {
+    /* ignore */
   }
 }
-section += '\n';
-const typeMap = { feat: 'Features', fix: 'Fixes', perf: 'Performance', refactor: 'Refactoring', docs: 'Documentation', test: 'Tests', build: 'Build', ci: 'CI', chore: 'Chore', style: 'Style' };
+if (!repoUrl) {
+  repoUrl = sh('git config --get remote.origin.url');
+}
+repoUrl = normalizeRepoUrl(repoUrl);
+
+// Previous tag (expects v* tags)
+const prevTag = sh('git describe --tags --abbrev=0 --match "v*" 2>/dev/null');
+const range = prevTag ? `${prevTag}..HEAD` : '';
+const logCmd = `git log --pretty=format:%s --no-merges ${range}`.trim();
+let commits = sh(logCmd)
+  .split(/\r?\n/)
+  .map(s => s.trim())
+  .filter(Boolean)
+  // filter out release commits
+  .filter(s => !/^chore:\s+release\s+v?\d+\.\d+\.\d+$/i.test(s));
+
+if (!commits.length) commits = ['(no changes)'];
+
+const typeMap = {
+  feat: 'Features',
+  fix: 'Fixes',
+  perf: 'Performance',
+  refactor: 'Refactoring',
+  docs: 'Documentation',
+  test: 'Tests',
+  build: 'Build',
+  ci: 'CI',
+  chore: 'Chores',
+  style: 'Style'
+};
 const conventionalRe = /^(?<type>feat|fix|perf|refactor|docs|test|build|ci|chore|style)(!?)(\([^)]*\))?:\s*(?<msg>.+)$/i;
+
+const buckets = {};
+const other = [];
 
 for (const c of commits) {
   const m = c.match(conventionalRe);
   if (m) {
     const rawType = m.groups.type.toLowerCase();
-    const section = typeMap[rawType] || 'Other';
-    if (!buckets[section]) buckets[section] = [];
-    buckets[section].push(m.groups.msg.trim());
-  } else other.push(c);
+    const sectionName = typeMap[rawType] || 'Other';
+    if (!buckets[sectionName]) buckets[sectionName] = [];
+    buckets[sectionName].push(m.groups.msg.trim());
+  } else {
+    other.push(c);
+  }
 }
-if (other.length) buckets.Other = (buckets.Other || []).concat(other);
+if (other.length) {
+  if (!buckets.Other) buckets.Other = [];
+  buckets.Other.push(...other);
+}
+
 const today = new Date().toISOString().slice(0, 10);
 const heading = `## v${version} - ${today}`;
 let compare = '';
-if (prevTag) compare = `\n[Compare changes](${repoUrl}/compare/${prevTag}...v${version})\n`;
+if (prevTag && repoUrl) compare = `\n[Compare changes](${repoUrl}/compare/${prevTag}...v${version})\n`;
 
 const prLinkRe = /\(#(\d+)\)/g;
 let section = heading + compare + '\n';
+
 for (const name of Object.keys(buckets).sort()) {
   section += `\n### ${name}\n`;
   for (const item of buckets[name]) {
-    const transformed = item.replace(prLinkRe, (_, id) => `([#${id}](${repoUrl}/pull/${id}))`);
+    let transformed = item;
+    if (repoUrl) {
+      transformed = transformed.replace(
+        prLinkRe,
+        (_, id) => `([#${id}](${repoUrl}/pull/${id}))`
+      );
+    }
     section += `- ${transformed}\n`;
   }
 }
@@ -94,14 +137,20 @@ console.log('Wrote', releaseBodyPath);
 
 if (update) {
   const changelogPath = 'CHANGELOG.md';
-  let existing = fs.existsSync(changelogPath) ? fs.readFileSync(changelogPath, 'utf8') : '';
-  if (!existing.startsWith('# Changelog')) existing = existing ? '# Changelog\n\n' + existing : '# Changelog\n\n';
+  let existing = fs.existsSync(changelogPath)
+    ? fs.readFileSync(changelogPath, 'utf8')
+    : '';
+  if (!existing.startsWith('# Changelog')) {
+    existing = existing
+      ? '# Changelog\n\n' + existing
+      : '# Changelog\n\n';
+  }
   if (existing.includes(heading)) {
     console.log('Section already exists; skipping prepend');
   } else {
-    const withoutHeader = existing.replace(/^# Changelog\n?/,'').trimStart();
+    const withoutHeader = existing.replace(/^# Changelog\n?/, '').trimStart();
     const newContent = '# Changelog\n\n' + section + withoutHeader;
-    fs.writeFileSync(changelogPath, newContent.trimEnd() + '\n');
+    fs.writeFileSync(changelogPath, newContent.trimEnd() + '\n', 'utf8');
     console.log('Updated CHANGELOG.md');
   }
 }
