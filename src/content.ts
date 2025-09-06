@@ -1,6 +1,8 @@
-import { convertAllNewTextNodes, convertTitle, resetConversionCache } from './core/conversion.js';
+import { convertAllNewTextNodes, convertTitle } from './core/conversion.js';
 import type { OpenCCLocale } from './core/conversion.js';
 import { Converter } from 'opencc-js';
+import { matchesWhitelist } from './core/whitelist.js';
+import { setupAutoObserver } from './content/observer.js';
 
 interface Settings { origin: OpenCCLocale; target: OpenCCLocale; auto: boolean; whitelist: string[] }
 const defaultSettings: Settings = { origin: 'cn', target: 'hk', auto: false, whitelist: [] };
@@ -10,7 +12,7 @@ async function getSettings(): Promise<Settings> {
   return raw as Settings; // external API untyped; single cast centralized
 }
 
-const matchWhitelist = (whitelist: string[], url: string) => whitelist.map((p) => new RegExp(p)).some((re) => re.test(url));
+// legacy inline whitelist matcher replaced by cached utility
 
 function convertSelectedTextNodes(origin: OpenCCLocale, target: OpenCCLocale) {
   const selection = window.getSelection();
@@ -35,34 +37,11 @@ function convertSelectedTextNodes(origin: OpenCCLocale, target: OpenCCLocale) {
   range.insertNode(contents);
 }
 
-let currentURL = '';
-let pendingScan = false;
-const lang = document.documentElement.lang;
-if (!lang || lang.startsWith('zh')) {
-  const observer = new MutationObserver(async () => {
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  const settings = await getSettings();
-    if (!settings.auto || settings.origin === settings.target) return;
-    if (matchWhitelist(settings.whitelist, window.location.href)) return;
-    if (currentURL !== window.location.href) {
-      currentURL = window.location.href;
-      convertTitle(settings.origin, settings.target);
-      resetConversionCache();
-    }
-    if (!pendingScan) {
-      pendingScan = true;
-      setTimeout(() => {
-        pendingScan = false;
-        convertAllNewTextNodes(settings.origin, settings.target);
-      }, 120);
-    }
-  });
-  observer.observe(document.body, { childList: true, subtree: true });
-}
+setupAutoObserver(getSettings);
 
 getSettings().then((settings) => {
   if (!settings.auto) return;
-  if (matchWhitelist(settings.whitelist, window.location.href)) return;
+  if (matchesWhitelist(window.location.href, settings.whitelist)) return;
   convertTitle(settings.origin, settings.target);
   convertAllNewTextNodes(settings.origin, settings.target);
 });
