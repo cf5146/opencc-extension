@@ -34,3 +34,33 @@ chrome.action.setBadgeBackgroundColor({ color: 'white' });
 chrome.storage.local.get({ auto: false }).then(({ auto }) => {
   chrome.action.setBadgeText({ text: auto ? 'A' : '' });
 });
+
+// Dynamically register content script (Chromium MV3). Firefox still uses static manifest for now.
+async function ensureContentScriptRegistered() {
+  if (!chrome.scripting?.registerContentScripts) return;
+  try {
+    const existing = await chrome.scripting.getRegisteredContentScripts({ ids: ['opencc-content'] });
+  if (existing?.length) return;
+  } catch {
+    // proceed to register
+  }
+  try {
+    await chrome.scripting.registerContentScripts([
+      {
+        id: 'opencc-content',
+        js: ['content.js'],
+        matches: ['http://*/*', 'https://*/*'],
+        runAt: 'document_idle',
+        allFrames: false,
+        persistAcrossSessions: true,
+      },
+    ]);
+  } catch (e) {
+    console.warn('OpenCC: dynamic content script registration failed', e);
+  }
+}
+
+ensureContentScriptRegistered();
+
+// Re-register on extension update / service worker restart signals.
+chrome.runtime.onInstalled.addListener(() => ensureContentScriptRegistered());

@@ -7,6 +7,7 @@ Changes applied:
 3. Converted build to emit ES module scripts; `background.ts` used as service worker in Chromium browsers.
 4. All long-running logic avoided in background; content script performs DOM work. Background only handles context menu + badge state.
 5. Reduced permission scope: removed `tabs`, restricted content script matches to http/https, added explicit `host_permissions` for those schemes.
+6. Chromium: switched from static `content_scripts` to dynamic registration via `chrome.scripting.registerContentScripts` (manifest now has empty array for clarity). Firefox still loads statically.
 
 Potential follow-ups:
 
@@ -15,6 +16,7 @@ Potential follow-ups:
 	*Current state:* `tabs` removed; verify popup still functions for active page conversion (active tab query still allowed without full permission in MV3 when extension has action context, else consider adding `activeTab`).
 - Consider offscreen document if future heavy processing requires DOM APIs not available in service worker.
 - Implement messaging channel health checks (retry sendMessage on tab reload).
+- Unregister content script if feature disabled (e.g., auto mode off) to further reduce footprint.
 
 Testing checklist:
 
