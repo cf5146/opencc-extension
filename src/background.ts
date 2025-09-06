@@ -64,3 +64,27 @@ ensureContentScriptRegistered();
 
 // Re-register on extension update / service worker restart signals.
 chrome.runtime.onInstalled.addListener(() => ensureContentScriptRegistered());
+
+// React to auto mode toggles: register when enabling, unregister when disabling.
+chrome.storage.onChanged.addListener(async (changes, area) => {
+  if (area !== 'local' || !('auto' in changes)) return;
+  const newVal = changes.auto.newValue as boolean;
+  if (!chrome.scripting?.registerContentScripts) return;
+  try {
+    if (newVal) {
+      await ensureContentScriptRegistered();
+    } else {
+      // Unregister to reduce footprint when auto mode off; manual conversions via popup will trigger on-demand messaging when tab active.
+      await chrome.scripting.unregisterContentScripts({ ids: ['opencc-content'] });
+    }
+  } catch (e) {
+    console.warn('OpenCC: content script (un)registration on auto toggle failed', e);
+  }
+});
+
+// Lightweight message interface for popup to request script presence.
+chrome.runtime.onMessage.addListener((msg) => {
+  if (msg?.action === 'ensure-script') {
+    ensureContentScriptRegistered();
+  }
+});

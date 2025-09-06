@@ -93,4 +93,8 @@ $autoCheckbox.addEventListener('change', (event) => {
   const auto = (event.currentTarget as HTMLInputElement).checked;
   chrome.storage.local.set({ auto });
   chrome.action.setBadgeText({ text: auto ? 'A' : '' });
+  if (auto) {
+    // Ping background to ensure script registered (storage change listener should also handle this, but this is a wake-up nudge).
+    chrome.runtime.sendMessage({ action: 'ensure-script' }).catch(() => {});
+  }
 });
