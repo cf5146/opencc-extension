@@ -5,8 +5,10 @@
 import * as esbuild from "esbuild";
 
 const arg = process.argv[2];
-const mode = process.env.MODE;
-const browser = process.env.BROWSER;
+const mode = process.env.MODE || "development";
+// Default to chrome when BROWSER not provided (e.g. generic CI build)
+const browser = process.env.BROWSER || "chrome";
+const outdir = arg && arg !== "watch" ? arg : "./build";
 
 const options = {
   entryPoints: [
@@ -18,14 +20,8 @@ const options = {
     "./src/options/index.js",
     "./src/options/index.html",
     "./src/options/index.css",
-    {
-      in: `./src/manifest.${browser}.json`,
-      out: "manifest",
-    },
-    {
-      in: "./icon.png",
-      out: "icon",
-    },
+    { in: `./src/manifest.${browser}.json`, out: "manifest" },
+    { in: "./icon.png", out: "icon" },
   ],
   loader: {
     ".html": "copy",
@@ -34,7 +30,7 @@ const options = {
     ".png": "copy",
   },
   outbase: "src",
-  outdir: arg === "watch" ? "./build" : arg,
+  outdir,
   target: "es6",
   bundle: true,
   allowOverwrite: true,
@@ -45,4 +41,8 @@ const options = {
 if (arg === "watch") {
   const ctx = await esbuild.context(options);
   await ctx.watch();
-} else await esbuild.build(options);
+  console.log(`[watch] building to ${outdir} with browser=${browser} mode=${mode}`);
+} else {
+  await esbuild.build(options);
+  console.log(`Built to ${outdir} (browser=${browser}, mode=${mode})`);
+}
