@@ -32,7 +32,6 @@ const other = [];
 if (!commits.length) commits = ['(no changes)'];
 
 const typeMap = { feat: 'Features', fix: 'Fixes', perf: 'Performance', refactor: 'Refactoring', docs: 'Documentation', test: 'Tests', build: 'Build', ci: 'CI', chore: 'Chore', style: 'Style' };
-const buckets = {}; const other = [];
 const conventionalRe = /^(?<type>feat|fix|perf|refactor|docs|test|build|ci|chore|style)(!?)(\([^)]*\))?:\s*(?<msg>.+)$/i;
 
 for (const c of commits) {
@@ -46,7 +45,6 @@ for (const c of commits) {
 }
 if (other.length) buckets.Other = (buckets.Other || []).concat(other);
 const today = new Date().toISOString().slice(0, 10);
-const today = new Date().toISOString().slice(0,10);
 const heading = `## v${version} - ${today}`;
 let compare = '';
 if (prevTag) compare = `\n[Compare changes](https://github.com/cf5146/opencc-extension/compare/${prevTag}...v${version})\n`;
