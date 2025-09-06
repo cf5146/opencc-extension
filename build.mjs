@@ -12,16 +12,16 @@ const outdir = arg && arg !== "watch" ? arg : "./build";
 
 const options = {
   entryPoints: [
-    "./src/background.js",
-    "./src/content.js",
-    "./src/popup/index.js",
-    "./src/popup/index.html",
-    "./src/popup/index.css",
-    "./src/options/index.js",
-    "./src/options/index.html",
-    "./src/options/index.css",
-    { in: `./src/manifest.${browser}.json`, out: "manifest" },
-    { in: "./icon.png", out: "icon" },
+    './src/background.ts',
+    './src/content.ts',
+    './src/popup/index.ts',
+    './src/popup/index.html',
+    './src/popup/index.css',
+    './src/options/index.ts',
+    './src/options/index.html',
+    './src/options/index.css',
+    { in: `./src/manifest.${browser}.json`, out: 'manifest' },
+    { in: './icon.png', out: 'icon' },
   ],
   loader: {
     ".html": "copy",
