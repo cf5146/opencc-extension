@@ -7,7 +7,7 @@ Changes applied:
 3. Converted build to emit ES module scripts; `background.ts` used as service worker in Chromium browsers.
 4. All long-running logic avoided in background; content script performs DOM work. Background only handles context menu + badge state.
 5. Reduced permission scope: removed `tabs`, restricted content script matches to http/https, added explicit `host_permissions` for those schemes.
-6. Chromium: switched from static `content_scripts` to dynamic registration via `chrome.scripting.registerContentScripts` (manifest now has empty array for clarity). Firefox still loads statically.
+6. Chromium: switched from static `content_scripts` to dynamic registration via `chrome.scripting.registerContentScripts`. The `content_scripts` key was removed (previously left as an empty array) to silence store/validator warnings. Firefox still loads statically.
 7. Added explicit `scripting` permission (required for dynamic registration APIs). Missing this would prevent auto mode & manual page conversion from working because the content script is never injected.
 
 Potential follow-ups:
