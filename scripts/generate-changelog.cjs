@@ -15,7 +15,11 @@ const update = process.argv.includes('--update');
 const releaseBodyPath = 'CHANGELOG_RELEASE.md';
 
 function sh(cmd) {
-  try { return execSync(cmd, { encoding: 'utf8' }).trim(); } catch { return ''; }
+  try { return execSync(cmd, { encoding: 'utf8' }).trim(); }
+  catch (err) {
+    console.error(`Error executing command "${cmd}":`, err.message);
+    return '';
+  }
 }
 
 const prevTag = sh('git describe --tags --abbrev=0 --match "v*" 2>/dev/null');
@@ -23,7 +27,8 @@ const range = prevTag ? `${prevTag}..HEAD` : '';
 const logCmd = `git log --pretty=format:%s --no-merges ${range}`.trim();
 let commits = sh(logCmd).split(/\r?\n/).map(s => s.trim()).filter(Boolean)
   .filter(s => !/^chore:\s+release\s+v?\d+\.\d+\.\d+$/i.test(s));
-
+const buckets = {};
+const other = [];
 if (!commits.length) commits = ['(no changes)'];
 
 const typeMap = { feat: 'Features', fix: 'Fixes', perf: 'Performance', refactor: 'Refactoring', docs: 'Documentation', test: 'Tests', build: 'Build', ci: 'CI', chore: 'Chore', style: 'Style' };
@@ -40,7 +45,7 @@ for (const c of commits) {
   } else other.push(c);
 }
 if (other.length) buckets.Other = (buckets.Other || []).concat(other);
-
+const today = new Date().toISOString().slice(0, 10);
 const today = new Date().toISOString().slice(0,10);
 const heading = `## v${version} - ${today}`;
 let compare = '';
