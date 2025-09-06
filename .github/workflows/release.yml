@@ -1,17 +1,17 @@
 name: Release
 
 on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*.*.*' ]
   workflow_dispatch:
     inputs:
       version:
-        description: 'Semver version (e.g. 0.4.1)'
-        required: true
-      notes:
-        description: 'Release notes (short)'
+        description: 'Optional version override (semver)'
         required: false
-  push:
-    tags:
-      - 'v*.*.*'
+      notes:
+        description: 'Additional release notes'
+        required: false
 
 permissions:
   contents: write
@@ -20,44 +20,111 @@ jobs:
   build-and-release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Setup pnpm
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup PNPM
         uses: pnpm/action-setup@v4
         with:
           version: 9
-      - name: Use Node.js
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'pnpm'
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-      - name: Bump version (if manual dispatch)
-        if: ${{ github.event_name == 'workflow_dispatch' }}
+
+      - name: Determine version
+        id: version
+        shell: bash
         run: |
-          NEW_VERSION=${{ inputs.version }}
-          node -e "const fs=require('fs');const p=JSON.parse(fs.readFileSync('package.json'));p.version='"$NEW_VERSION"';fs.writeFileSync('package.json',JSON.stringify(p,null,2)+'\n')";
-          git config user.name 'github-actions'
-          git config user.email 'github-actions@github.com'
-          git commit -am "chore: release v$NEW_VERSION"
-          git tag v$NEW_VERSION
-      - name: Build
-        run: pnpm build
-      - name: Package
+          if [[ -n "${{ inputs.version }}" ]]; then
+            echo "Using manual override: ${{ inputs.version }}"
+            echo "version=${{ inputs.version }}" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            TAG_NAME="${GITHUB_REF##*/}"
+            VERSION="${TAG_NAME#v}"
+            echo "Using tag version: $VERSION"
+            echo "version=$VERSION" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          BASE=${LAST_TAG#v}
+          IFS=. read -r MAJOR MINOR PATCH <<< "$BASE"
+          PATCH=$((PATCH+1))
+          NEXT="$MAJOR.$MINOR.$PATCH"
+          echo "Auto increment patch: $LAST_TAG -> v$NEXT"
+          echo "version=$NEXT" >> $GITHUB_OUTPUT
+
+      - name: Show computed version
+        run: echo "Version => ${{ steps.version.outputs.version }}"
+
+      - name: Bump version in sources (main only, not for tag push)
+        if: github.ref == 'refs/heads/main'
+        run: node scripts/bump-version.cjs ${{ steps.version.outputs.version }}
+
+      - name: Generate changelog
+        run: node scripts/generate-changelog.cjs ${{ steps.version.outputs.version }} --update
+
+      - name: Commit & tag (main only if changes)
+        if: github.ref == 'refs/heads/main'
+        shell: bash
+        run: |
+          if git diff --quiet; then
+            echo "Nothing to commit"
+            exit 0
+          fi
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git commit -am "chore: release v${{ steps.version.outputs.version }}"
+          git tag -a "v${{ steps.version.outputs.version }}" -m "Release v${{ steps.version.outputs.version }}"
+          git push --follow-tags
+
+      - name: Build distributions
         run: pnpm dist
-      - name: Generate checksum
+
+      - name: Generate checksums
+        run: sha256sum opencc.chrome.zip opencc.firefox.zip opencc.edge.zip > SHA256SUMS
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts-${{ steps.version.outputs.version }}
+          path: |
+            opencc.chrome.zip
+            opencc.firefox.zip
+            opencc.edge.zip
+            SHA256SUMS
+          retention-days: 14
+
+      - name: Add checksum summary
+        shell: bash
         run: |
-          sha256sum opencc.chrome.zip > SHA256SUMS
-          sha256sum opencc.firefox.zip >> SHA256SUMS
+          echo "### Artifact Checksums" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| File | SHA256 |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|--------|" >> $GITHUB_STEP_SUMMARY
+          awk '{printf("| %s | `%s` |\n", $2, $1)}' SHA256SUMS >> $GITHUB_STEP_SUMMARY
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref_name }}
-          name: Release ${{ github.ref_name }}
-          body: ${{ inputs.notes || 'Automated release' }}
+          tag_name: v${{ steps.version.outputs.version }}
+          name: v${{ steps.version.outputs.version }}
+          body_path: CHANGELOG_RELEASE.md
+          draft: false
+          prerelease: false
           files: |
             opencc.chrome.zip
             opencc.firefox.zip
+            opencc.edge.zip
             SHA256SUMS
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
