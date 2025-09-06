@@ -1,0 +1,6 @@
+# Adjust owners as needed
+* @cf5146
+/.github @cf5146
+/*.json @cf5146
+/*.mjs @cf5146
+/.editorconfig @cf5146

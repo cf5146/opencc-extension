@@ -4,6 +4,15 @@
 
 <h1 align="center">opencc-extension</h1>
 
+<p align="center">
+  <a href="https://github.com/cf5146/opencc-extension/actions/workflows/ci.yml">
+    <img src="https://github.com/cf5146/opencc-extension/actions/workflows/ci.yml/badge.svg" alt="CI Status" />
+  </a>
+  <a href="https://github.com/cf5146/opencc-extension/blob/main/CONTRIBUTING.md">
+    <img src="https://img.shields.io/badge/contributions-welcome-brightgreen.svg" alt="Contributing" />
+  </a>
+</p>
+
 <p align="center"><img src="./demo.gif" width="50%" /></p>
 
 <p align="center">
@@ -95,6 +104,12 @@ All text in the webpage of the current active tab is converted whenever it loads
 
 - https://github.com/BYVoid/OpenCC
 - https://github.com/nk2028/opencc-js
+
+---
+
+## Contributing
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for GitHub Flow, development, and release process.
 
 ---
 
