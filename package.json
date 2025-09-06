@@ -18,7 +18,11 @@
     "start:chromium": "concurrently \"MODE='development' BROWSER='chrome' pnpm build:watch\" \"wait-on ./build/manifest.json && pnpm start -t chromium\"",
     "dist:chrome": "MODE='production' BROWSER='chrome' pnpm build ./dist/chrome && web-ext build -s ./dist/chrome -a . -n opencc.chrome.zip",
     "dist:firefox": "MODE='production' BROWSER='firefox' pnpm build ./dist/firefox && web-ext build -s ./dist/firefox -a . -n opencc.firefox.zip",
-    "dist": "concurrently \"pnpm dist:chrome\" \"pnpm dist:firefox\" && rm -rf ./dist"
+  "dist": "concurrently \"pnpm dist:chrome\" \"pnpm dist:firefox\" && rm -rf ./dist",
+  "lint": "eslint src build.mjs",
+  "format": "prettier . --write",
+  "format:check": "prettier . --check",
+  "ci": "pnpm lint && pnpm build"
   },
   "dependencies": {
     "opencc-js": "^1.0.5"
@@ -52,5 +56,8 @@
       "eslint:recommended",
       "prettier"
     ]
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

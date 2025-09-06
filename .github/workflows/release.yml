@@ -1,0 +1,63 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Semver version (e.g. 0.4.1)'
+        required: true
+      notes:
+        description: 'Release notes (short)'
+        required: false
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Bump version (if manual dispatch)
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        run: |
+          NEW_VERSION=${{ inputs.version }}
+          node -e "const fs=require('fs');const p=JSON.parse(fs.readFileSync('package.json'));p.version='"$NEW_VERSION"';fs.writeFileSync('package.json',JSON.stringify(p,null,2)+'\n')";
+          git config user.name 'github-actions'
+          git config user.email 'github-actions@github.com'
+          git commit -am "chore: release v$NEW_VERSION"
+          git tag v$NEW_VERSION
+      - name: Build
+        run: pnpm build
+      - name: Package
+        run: pnpm dist
+      - name: Generate checksum
+        run: |
+          sha256sum opencc.chrome.zip > SHA256SUMS
+          sha256sum opencc.firefox.zip >> SHA256SUMS
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
+          body: ${{ inputs.notes || 'Automated release' }}
+          files: |
+            opencc.chrome.zip
+            opencc.firefox.zip
+            SHA256SUMS
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
