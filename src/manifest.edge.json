@@ -11,7 +11,10 @@
   "content_scripts": [
     {
       "js": ["content.js"],
-      "matches": ["<all_urls>"],
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ],
       "run_at": "document_idle"
     }
   ],
@@ -28,6 +31,10 @@
     "service_worker": "background.js",
     "type": "module"
   },
-  "permissions": ["storage", "tabs", "contextMenus"],
+  "permissions": ["storage", "contextMenus"],
+  "host_permissions": [
+    "http://*/*",
+    "https://*/*"
+  ],
   "offline_enabled": true
 }
