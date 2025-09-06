@@ -76,7 +76,7 @@ jobs:
           fi
           # Try to get last tag, fallback to input, then package.json
           if LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null); then
-            true
+            # Last tag found, proceed
           elif [[ -n "${{ inputs.default_version }}" ]]; then
             LAST_TAG="v${{ inputs.default_version }}"
           else
@@ -97,7 +97,12 @@ jobs:
 
       - name: Update source versions (only when on main without tag)
         if: github.ref == 'refs/heads/main'
-        run: node scripts/bump-version.cjs ${{ steps.version.outputs.version }}
+        run: |
+          if [ -f scripts/bump-version.cjs ]; then
+            node scripts/bump-version.cjs ${{ steps.version.outputs.version }}
+          else
+            echo "Version bump script not found, skipping version update."
+          fi
 
       - name: Generate changelog
         shell: bash
@@ -120,7 +125,10 @@ jobs:
             git add .
             git commit -m "chore: bump version and update changelog [skip ci]"
             git tag "v${{ steps.version.outputs.version }}"
-            git push origin HEAD "v${{ steps.version.outputs.version }}"
+            if ! git push origin HEAD "v${{ steps.version.outputs.version }}"; then
+              echo "git push failed!" >&2
+              exit 1
+            fi
       - name: Set artifact name
         id: artifact_name
         shell: bash
@@ -152,7 +160,7 @@ jobs:
           awk '{printf("| %s | `%s` |\n", $2, $1)}' SHA256SUMS >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
-      - name: Create GitHub Release
+          body_path: CHANGELOG.md
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.version.outputs.version }}
