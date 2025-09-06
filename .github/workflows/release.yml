@@ -13,6 +13,9 @@ on:
       notes:
         description: 'Additional release notes'
         required: false
+      default_version:
+        description: 'Default version fallback (semver, e.g. 0.4.0)'
+        required: false
 
 permissions:
   contents: write
@@ -56,7 +59,15 @@ jobs:
             echo "version=$VERSION" >> $GITHUB_OUTPUT
             exit 0
           fi
-          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.4.0")
+          # Try to get last tag, fallback to input, then package.json
+          if LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null); then
+            :
+          elif [[ -n "${{ inputs.default_version }}" ]]; then
+            LAST_TAG="v${{ inputs.default_version }}"
+          else
+            PKG_VERSION=$(node -p "require('./package.json').version")
+            LAST_TAG="v${PKG_VERSION}"
+          fi
           BASE=${LAST_TAG#v}
           IFS=. read -r MAJOR MINOR PATCH <<< "$BASE"
           PATCH=$((PATCH+1))
@@ -74,7 +85,13 @@ jobs:
         run: node scripts/bump-version.cjs ${{ steps.version.outputs.version }}
 
       - name: Generate changelog
-        run: node scripts/generate-changelog.cjs ${{ steps.version.outputs.version }} --update
+        shell: bash
+        run: |
+          if [ -f scripts/generate-changelog.cjs ]; then
+            node scripts/generate-changelog.cjs ${{ steps.version.outputs.version }} --update
+          else
+            echo "Changelog script not found, skipping changelog generation."
+          fi
 
       - name: Commit & tag (only if main and not tag push and changes exist)
         if: github.ref == 'refs/heads/main'
@@ -85,21 +102,25 @@ jobs:
           else
             git config user.name "github-actions"
             git config user.email "github-actions@github.com"
-            git commit -am "chore: release v${{ steps.version.outputs.version }}"
-            git tag -a "v${{ steps.version.outputs.version }}" -m "Release v${{ steps.version.outputs.version }}"
-            git push --follow-tags
+            git add .
+            git commit -m "chore: bump version and update changelog [skip ci]"
+            git tag "v${{ steps.version.outputs.version }}"
+            git push origin HEAD
+            git push origin "v${{ steps.version.outputs.version }}"
+      - name: Set artifact name
+        id: artifact_name
+        shell: bash
+        run: |
+          if [[ -n "${{ steps.version.outputs.version }}" ]]; then
+            echo "name=build-artifacts-${{ steps.version.outputs.version }}" >> $GITHUB_OUTPUT
+          else
+            echo "name=build-artifacts-${{ github.ref_name }}" >> $GITHUB_OUTPUT
           fi
-
-      - name: Build distributions
-        run: pnpm dist
-
-      - name: Generate checksums
-        run: sha256sum opencc.chrome.zip opencc.firefox.zip opencc.edge.zip > SHA256SUMS
 
       - name: Upload workflow artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: build-artifacts-${{ steps.version.outputs.version != '' && steps.version.outputs.version || github.ref_name }}
+          name: ${{ steps.artifact_name.outputs.name }}
           path: |
             opencc.chrome.zip
             opencc.firefox.zip
