@@ -31,6 +31,35 @@ const buckets = {};
 const other = [];
 if (!commits.length) commits = ['(no changes)'];
 
+// Get repo URL from env or package.json
+let repoUrl = process.env.REPO_URL;
+if (!repoUrl) {
+  try {
+    const pkg = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../package.json'), 'utf8'));
+    if (pkg.repository) {
+      if (typeof pkg.repository === 'string') {
+        repoUrl = pkg.repository;
+      } else if (pkg.repository.url) {
+        repoUrl = pkg.repository.url;
+      }
+    }
+    // Remove .git suffix if present
+    if (repoUrl && repoUrl.endsWith('.git')) repoUrl = repoUrl.slice(0, -4);
+    // Convert git@github.com:owner/repo to https://github.com/owner/repo
+const repoUrl = 'https://github.com/cf5146/opencc-extension';
+let compare = '';
+if (prevTag) compare = `\n[Compare changes](${repoUrl}/compare/${prevTag}...v${version})\n`;
+
+const prLinkRe = /\(#(\d+)\)/g;
+let section = heading + compare + '\n';
+for (const name of Object.keys(buckets).sort()) {
+  section += `\n### ${name}\n`;
+  for (const item of buckets[name]) {
+    const transformed = item.replace(prLinkRe, (_, id) => `([#${id}](${repoUrl}/pull/${id}))`);
+    section += `- ${transformed}\n`;
+  }
+}
+section += '\n';
 const typeMap = { feat: 'Features', fix: 'Fixes', perf: 'Performance', refactor: 'Refactoring', docs: 'Documentation', test: 'Tests', build: 'Build', ci: 'CI', chore: 'Chore', style: 'Style' };
 const conventionalRe = /^(?<type>feat|fix|perf|refactor|docs|test|build|ci|chore|style)(!?)(\([^)]*\))?:\s*(?<msg>.+)$/i;
 
@@ -47,14 +76,14 @@ if (other.length) buckets.Other = (buckets.Other || []).concat(other);
 const today = new Date().toISOString().slice(0, 10);
 const heading = `## v${version} - ${today}`;
 let compare = '';
-if (prevTag) compare = `\n[Compare changes](https://github.com/cf5146/opencc-extension/compare/${prevTag}...v${version})\n`;
+if (prevTag) compare = `\n[Compare changes](${repoUrl}/compare/${prevTag}...v${version})\n`;
 
 const prLinkRe = /\(#(\d+)\)/g;
 let section = heading + compare + '\n';
 for (const name of Object.keys(buckets).sort()) {
   section += `\n### ${name}\n`;
   for (const item of buckets[name]) {
-    const transformed = item.replace(prLinkRe, (_, id) => `([#${id}](https://github.com/cf5146/opencc-extension/pull/${id}))`);
+    const transformed = item.replace(prLinkRe, (_, id) => `([#${id}](${repoUrl}/pull/${id}))`);
     section += `- ${transformed}\n`;
   }
 }
