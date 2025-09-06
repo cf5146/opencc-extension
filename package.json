@@ -36,7 +36,7 @@
     "eslint": "^8.57.1",
     "eslint-config-prettier": "^9.1.0",
     "prettier": "^3.4.1",
-    "wait-on": "^8.0.1",
+  "wait-on": "^8.0.1",
   "web-ext": "^8.3.0",
   "jsdom": "^24.0.0"
   },
