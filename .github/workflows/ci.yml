@@ -29,7 +29,7 @@ jobs:
         run: pnpm lint
       - name: Build
         run: pnpm build
-      - name: Package (Chrome & Firefox)
+      - name: Package (Chrome, Firefox, Edge)
         run: pnpm dist
       - name: Upload packaged artifacts
         uses: actions/upload-artifact@v4
@@ -38,4 +38,5 @@ jobs:
           path: |
             opencc.chrome.zip
             opencc.firefox.zip
+            opencc.edge.zip
           if-no-files-found: error
