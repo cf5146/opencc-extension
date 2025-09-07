@@ -1,6 +1,8 @@
 import { Converter } from 'opencc-js';
 import type { OpenCCLocale } from '../core/conversion.js';
 
+const RETRY_DELAY_MS = 120;
+
 const $originSelect = document.getElementById('origin') as HTMLSelectElement;
 const $targetSelect = document.getElementById('target') as HTMLSelectElement;
 const $swapButton = document.getElementById('swap') as HTMLButtonElement;
@@ -105,7 +107,7 @@ async function sendPageConvert(): Promise<PageConvertResponse | undefined> {
 
   // Type guard for error with message property
   function isErrorWithMessage(err: unknown): err is { message: string } {
-    return typeof err === 'object' && err !== null && 'message' in err && typeof (err as any).message === 'string';
+    return typeof err === 'object' && err !== null && 'message' in err && typeof (err as { message: unknown }).message === 'string';
   }
 
   try {
@@ -123,7 +125,7 @@ async function sendPageConvert(): Promise<PageConvertResponse | undefined> {
         await chrome.scripting.executeScript({ target: { tabId }, files: ['content.js'] });
       }
     } catch { /* ignore injection errors */ }
-    await new Promise(r => setTimeout(r, 120));
+    await new Promise(r => setTimeout(r, RETRY_DELAY_MS));
     try { return await attempt(); } catch { return undefined; }
   }
 }
