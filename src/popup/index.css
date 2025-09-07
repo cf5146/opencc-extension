@@ -84,8 +84,13 @@ textarea::-webkit-scrollbar-thumb:hover { background:#94a3b8; }
   #title { color:#f8fafc; }
   #title:hover { color:#93c5fd; }
   .version-badge { background:#334155; color:#cbd5e1; }
-  select { background:linear-gradient(#1e293b,#1f3047); color:#f8fafc; border-color:#475569; }
-  select:focus { border-color:#3b82f6; }
+  /* Dark mode select: improve contrast & distinguish options */
+  select { background:linear-gradient(#243247,#1b2532); color:#f1f5f9; border-color:#4b5563; }
+  select:focus { background:linear-gradient(#2b3b52,#223041); }
+  select option { background:#1f2937; color:#f1f5f9; }
+  select option:checked { background:#2563eb; color:#ffffff; }
+  select option:hover { background:#334155; }
+  /* merged focus styles already applied above */
   button { background:linear-gradient(#1f2937,#243349); color:#f1f5f9; border-color:#475569; }
   button:hover { background:linear-gradient(#243349,#2d425f); }
   button.primary { background:linear-gradient(#3b82f6,#2563eb); border-color:#2563eb; }
@@ -95,7 +100,4 @@ textarea::-webkit-scrollbar-thumb:hover { background:#94a3b8; }
   .app-footer { color:#94a3b8; }
   textarea::-webkit-scrollbar-thumb { background:#475569; border:2px solid #0f172a; }
   textarea::-webkit-scrollbar-thumb:hover { background:#64748b; }
-  /* Improved contrast for Direction row & labels */
-  .panel-title { color:#cbd5e1; }
-  .auto-toggle { color:#cbd5e1; }
 }
