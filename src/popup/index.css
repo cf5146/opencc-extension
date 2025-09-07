@@ -1,7 +1,13 @@
 /* Reset & base */
 * { box-sizing: border-box; }
 html, body { margin:0; width:100%; }
-body { font: 13px/1.4 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif; padding:0; background:linear-gradient(145deg,#ffffff,#f2f5f9); color:#1a1f29; min-width:320px; }
+body {
+  font: 13px/1.4 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+  padding: 0;
+  background: linear-gradient(145deg,#ffffff,#f2f5f9);
+  color: #1a1f29;
+  min-width: 320px;
+}
 
 /* Layout */
 .app-header { display:flex; justify-content:space-between; align-items:center; padding:8px 10px 4px; backdrop-filter:blur(6px); }
@@ -17,13 +23,25 @@ body { font: 13px/1.4 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sa
 .panel { background:#ffffffdd; border:1px solid #e5e7eb; border-radius:10px; padding:10px 10px 12px; box-shadow:0 2px 4px rgb(0 0 0 / 4%), 0 4px 10px rgb(0 0 0 / 3%); backdrop-filter:blur(8px); display:flex; flex-direction:column; gap:8px; }
 .panel-inline { gap:6px; }
 .panel-title { font-size:11px; text-transform:uppercase; letter-spacing:.8px; font-weight:600; color:#4b5563; }
-.panel-header { display:flex; justify-content:space-between; align-items:center; }
+select {
+  width: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+  padding: 6px 28px 6px 8px;
+  font-size: 12px;
+  line-height: 1.2;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: linear-gradient(#fff, #f9fafb);
+  color: #111827;
+  font-weight: 500;
+  position: relative;
+}
 .panel-tools { display:flex; gap:4px; }
 
 /* Direction row */
 .direction-row { display:flex; align-items:stretch; gap:6px; }
 .select-group { flex:1; }
-select { width:100%; appearance:none; -webkit-appearance:none; padding:6px 28px 6px 8px; font-size:12px; line-height:1.2; border:1px solid #d1d5db; border-radius:8px; background:linear-gradient(#fff,#f9fafb); color:#111827; position:relative; font-weight:500; }
 select:focus { outline:2px solid #2563eb55; border-color:#2563eb; }
 
 /* Buttons */
@@ -77,4 +95,5 @@ textarea::-webkit-scrollbar-thumb:hover { background:#94a3b8; }
   .app-footer { color:#94a3b8; }
   textarea::-webkit-scrollbar-thumb { background:#475569; border:2px solid #0f172a; }
   textarea::-webkit-scrollbar-thumb:hover { background:#64748b; }
+}
 }

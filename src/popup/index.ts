@@ -24,6 +24,8 @@ try {
 interface PopupSettings {
   origin: OpenCCLocale; target: OpenCCLocale; auto: boolean; textboxSize: { width: number | null; height: number | null }
 }
+// Added specific response type to avoid using any
+interface PageConvertResponse { count: number; time: number; }
 
 function textboxConvert() {
   const origin = $originSelect.value as OpenCCLocale;
@@ -91,14 +93,15 @@ new ResizeObserver(() => {
   });
 }).observe($textbox);
 
-async function sendPageConvert(): Promise<any | undefined> {
-  const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
-  const tabId = tabs[0]?.id;
+async function sendPageConvert(): Promise<PageConvertResponse | undefined> {
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  const tabId = tab?.id;
   if (tabId == null) return undefined;
+
   try {
     return await chrome.tabs.sendMessage(tabId, { action: 'click' });
-  } catch (e) {
-    // Possibly content script not yet registered (dynamic scripting permission) – request registration then retry once.
+  } catch {
+    // Possibly content script not yet registered – request registration then retry once.
     try { await chrome.runtime.sendMessage({ action: 'ensure-script' }); } catch {}
     await new Promise(r => setTimeout(r, 150));
     try {
