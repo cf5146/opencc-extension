@@ -97,22 +97,29 @@ async function sendPageConvert(): Promise<PageConvertResponse | undefined> {
   const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
   const tab = tabs[0];
   const tabId = tab?.id;
-  const url = (tab as any)?.url as string | undefined;
+  const url = tab?.url;
   if (tabId == null) return undefined;
   if (!url || !/^https?:/i.test(url)) return undefined;
 
   const attempt = async (): Promise<PageConvertResponse> => chrome.tabs.sendMessage(tabId, { action: 'click' });
 
+  // Type guard for error with message property
+  function isErrorWithMessage(err: unknown): err is { message: string } {
+    return typeof err === 'object' && err !== null && 'message' in err && typeof (err as any).message === 'string';
+  }
+
   try {
     return await attempt();
   } catch (e: unknown) {
-    if (e && typeof e === 'object' && (e as any).message && !/receiving end/i.test((e as any).message)) {
+    if (isErrorWithMessage(e) && !/receiving end/i.test(e.message)) {
       // eslint-disable-next-line no-console
-      console.debug('OpenCC popup: initial sendMessage failed, attempting recovery:', (e as any).message);
+      console.debug('OpenCC popup: initial sendMessage failed, attempting recovery:', e.message);
     }
+    // Ask background to ensure dynamic registration (no-op if already) before direct injection.
     try { await chrome.runtime.sendMessage({ action: 'ensure-script' }); } catch { /* ignore */ }
+    // Best-effort direct injection for current tab.
     try {
-      if ((chrome as any).scripting?.executeScript) {
+      if (typeof chrome.scripting !== 'undefined' && typeof chrome.scripting.executeScript === 'function') {
         await chrome.scripting.executeScript({ target: { tabId }, files: ['content.js'] });
       }
     } catch { /* ignore injection errors */ }
