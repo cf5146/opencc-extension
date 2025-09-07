@@ -18,6 +18,10 @@ function sh(cmd) {
   try {
     return execSync(cmd, { encoding: 'utf8' }).trim();
   } catch (err) {
+    console.warn(`[generate-changelog] Command failed: ${cmd}`);
+    if (process.env.DEBUG_CHANGELOG) {
+      console.warn(err && err.stack ? err.stack : String(err));
+    }
     return '';
   }
 }
