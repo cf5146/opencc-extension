@@ -94,21 +94,30 @@ new ResizeObserver(() => {
 }).observe($textbox);
 
 async function sendPageConvert(): Promise<PageConvertResponse | undefined> {
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+  const tab = tabs[0];
   const tabId = tab?.id;
+  const url = (tab as any)?.url as string | undefined;
   if (tabId == null) return undefined;
+  if (!url || !/^https?:/i.test(url)) return undefined;
+
+  const attempt = async (): Promise<PageConvertResponse> => chrome.tabs.sendMessage(tabId, { action: 'click' });
 
   try {
-    return await chrome.tabs.sendMessage(tabId, { action: 'click' });
-  } catch {
-    // Possibly content script not yet registered – request registration then retry once.
-    try { await chrome.runtime.sendMessage({ action: 'ensure-script' }); } catch {}
-    await new Promise(r => setTimeout(r, 150));
-    try {
-      return await chrome.tabs.sendMessage(tabId, { action: 'click' });
-    } catch {
-      return undefined;
+    return await attempt();
+  } catch (e: unknown) {
+    if (e && typeof e === 'object' && (e as any).message && !/receiving end/i.test((e as any).message)) {
+      // eslint-disable-next-line no-console
+      console.debug('OpenCC popup: initial sendMessage failed, attempting recovery:', (e as any).message);
     }
+    try { await chrome.runtime.sendMessage({ action: 'ensure-script' }); } catch { /* ignore */ }
+    try {
+      if ((chrome as any).scripting?.executeScript) {
+        await chrome.scripting.executeScript({ target: { tabId }, files: ['content.js'] });
+      }
+    } catch { /* ignore injection errors */ }
+    await new Promise(r => setTimeout(r, 120));
+    try { return await attempt(); } catch { return undefined; }
   }
 }
 
