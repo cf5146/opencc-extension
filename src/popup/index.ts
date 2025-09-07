@@ -9,6 +9,17 @@ const $textbox = document.getElementById('textbox') as HTMLTextAreaElement;
 const $convertButton = document.getElementById('convert') as HTMLButtonElement;
 const $autoCheckbox = document.getElementById('auto') as HTMLInputElement;
 const $footer = document.getElementsByTagName('footer')[0];
+const $subtitle = document.getElementById('subtitle');
+
+// Set UI version dynamically from extension manifest
+try {
+  const manifestVersion = chrome.runtime.getManifest().version;
+  if ($subtitle && manifestVersion) {
+    $subtitle.textContent = `v${manifestVersion}`;
+  }
+} catch {
+  // ignore if manifest not accessible
+}
 
 interface PopupSettings {
   origin: OpenCCLocale; target: OpenCCLocale; auto: boolean; textboxSize: { width: number | null; height: number | null }
