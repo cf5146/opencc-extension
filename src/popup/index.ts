@@ -77,11 +77,26 @@ $swapButton.addEventListener('click', () => {
   if ($textbox.value) textboxConvert();
 });
 
-let timeout: number | undefined;
-$textbox.addEventListener('input', () => {
-  if (timeout) window.clearTimeout(timeout);
-  timeout = window.setTimeout(textboxConvert, 750);
-});
+// Auto conversion helpers for textbox
+let inputDebounce: number | undefined;
+const INPUT_DEBOUNCE_MS = 250;
+
+function scheduleTextboxConvert() {
+  if (inputDebounce) window.clearTimeout(inputDebounce);
+  inputDebounce = window.setTimeout(() => {
+    // Guard: only attempt when variants differ
+    if ($originSelect.value !== $targetSelect.value && $textbox.value.trim()) {
+      try { textboxConvert(); } catch { /* ignore transient errors */ }
+    }
+  }, INPUT_DEBOUNCE_MS);
+}
+
+// Trigger on any input (typing, delete, undo, etc.)
+$textbox.addEventListener('input', scheduleTextboxConvert);
+// Explicit paste handler (paste fires before input text available so defer to next microtask)
+$textbox.addEventListener('paste', () => setTimeout(scheduleTextboxConvert, 0));
+// Fallback when textbox loses focus after edits without further input events
+$textbox.addEventListener('change', scheduleTextboxConvert);
 
 $resetButton.addEventListener('click', () => {
   $textbox.value = '';
