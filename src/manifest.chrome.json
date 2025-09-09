@@ -24,9 +24,9 @@
     "type": "module"
   },
   "permissions": [
-    "storage",
-    "contextMenus",
-    "scripting",
+  "storage",
+  "contextMenus",
+  "scripting",
   "tabs",
   "activeTab"
   ],
