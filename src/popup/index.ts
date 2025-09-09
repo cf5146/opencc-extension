@@ -1,6 +1,8 @@
 import { Converter } from 'opencc-js';
 import type { OpenCCLocale } from '../core/conversion.js';
 
+const RETRY_DELAY_MS = 120;
+
 const $originSelect = document.getElementById('origin') as HTMLSelectElement;
 const $targetSelect = document.getElementById('target') as HTMLSelectElement;
 const $swapButton = document.getElementById('swap') as HTMLButtonElement;
@@ -75,11 +77,26 @@ $swapButton.addEventListener('click', () => {
   if ($textbox.value) textboxConvert();
 });
 
-let timeout: number | undefined;
-$textbox.addEventListener('input', () => {
-  if (timeout) window.clearTimeout(timeout);
-  timeout = window.setTimeout(textboxConvert, 750);
-});
+// Auto conversion helpers for textbox
+let inputDebounce: number | undefined;
+const INPUT_DEBOUNCE_MS = 250;
+
+function scheduleTextboxConvert() {
+  if (inputDebounce) window.clearTimeout(inputDebounce);
+  inputDebounce = window.setTimeout(() => {
+    // Guard: only attempt when variants differ
+    if ($originSelect.value !== $targetSelect.value && $textbox.value.trim()) {
+      try { textboxConvert(); } catch { /* ignore transient errors */ }
+    }
+  }, INPUT_DEBOUNCE_MS);
+}
+
+// Trigger on any input (typing, delete, undo, etc.)
+$textbox.addEventListener('input', scheduleTextboxConvert);
+// Explicit paste handler (paste fires before input text available so defer to next microtask)
+$textbox.addEventListener('paste', () => setTimeout(scheduleTextboxConvert, 0));
+// Fallback when textbox loses focus after edits without further input events
+$textbox.addEventListener('change', scheduleTextboxConvert);
 
 $resetButton.addEventListener('click', () => {
   $textbox.value = '';
@@ -94,21 +111,37 @@ new ResizeObserver(() => {
 }).observe($textbox);
 
 async function sendPageConvert(): Promise<PageConvertResponse | undefined> {
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+  const tab = tabs[0];
   const tabId = tab?.id;
+  const url = tab?.url;
   if (tabId == null) return undefined;
+  if (!url || !/^https?:/i.test(url)) return undefined;
+
+  const attempt = async (): Promise<PageConvertResponse> => chrome.tabs.sendMessage(tabId, { action: 'click' });
+
+  // Type guard for error with message property
+  function isErrorWithMessage(err: unknown): err is { message: string } {
+    return typeof err === 'object' && err !== null && 'message' in err && typeof (err as { message: unknown }).message === 'string';
+  }
 
   try {
-    return await chrome.tabs.sendMessage(tabId, { action: 'click' });
-  } catch {
-    // Possibly content script not yet registered – request registration then retry once.
-    try { await chrome.runtime.sendMessage({ action: 'ensure-script' }); } catch {}
-    await new Promise(r => setTimeout(r, 150));
-    try {
-      return await chrome.tabs.sendMessage(tabId, { action: 'click' });
-    } catch {
-      return undefined;
+    return await attempt();
+  } catch (e: unknown) {
+    if (isErrorWithMessage(e) && !/receiving end/i.test(e.message)) {
+      // eslint-disable-next-line no-console
+      console.debug('OpenCC popup: initial sendMessage failed, attempting recovery:', e.message);
     }
+    // Ask background to ensure dynamic registration (no-op if already) before direct injection.
+    try { await chrome.runtime.sendMessage({ action: 'ensure-script' }); } catch { /* ignore */ }
+    // Best-effort direct injection for current tab.
+    try {
+      if (typeof chrome.scripting !== 'undefined' && typeof chrome.scripting.executeScript === 'function') {
+        await chrome.scripting.executeScript({ target: { tabId }, files: ['content.js'] });
+      }
+    } catch { /* ignore injection errors */ }
+    await new Promise(r => setTimeout(r, RETRY_DELAY_MS));
+    try { return await attempt(); } catch { return undefined; }
   }
 }
 

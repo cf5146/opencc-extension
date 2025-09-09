@@ -16,6 +16,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build-and-release:
     runs-on: ubuntu-latest
@@ -88,6 +92,15 @@ jobs:
         run: |
           if [[ -z "${{ steps.version.outputs.version }}" ]]; then echo "No version; abort" >&2; exit 1; fi
           node scripts/generate-changelog.cjs ${{ steps.version.outputs.version }} --update
+
+      - name: Append manual notes
+        if: inputs.notes != ''
+        shell: bash
+        run: |
+          echo "" >> CHANGELOG_RELEASE.md
+          echo "### Additional Notes" >> CHANGELOG_RELEASE.md
+          # Preserve line breaks from workflow_dispatch input
+          printf '%s\n' "${{ inputs.notes }}" >> CHANGELOG_RELEASE.md
 
       - name: Commit & tag (main only if changes)
         if: github.ref == 'refs/heads/main'

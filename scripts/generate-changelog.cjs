@@ -14,13 +14,17 @@ if (!version) {
 const update = process.argv.includes('--update');
 const releaseBodyPath = 'CHANGELOG_RELEASE.md';
 
-function sh(cmd) {
+function sh(cmd, { ignoreError = false } = {}) {
   try {
     return execSync(cmd, { encoding: 'utf8' }).trim();
   } catch (err) {
-    console.warn(`[generate-changelog] Command failed: ${cmd}`);
-    if (process.env.DEBUG_CHANGELOG) {
-      console.warn(err && err.stack ? err.stack : String(err));
+    if (!ignoreError) {
+      console.warn(`[generate-changelog] Command failed: ${cmd}`);
+      if (process.env.DEBUG_CHANGELOG) {
+        console.warn(err && err.stack ? err.stack : String(err));
+      }
+    } else {
+      console.warn(`[generate-changelog] Non-critical command failed: ${cmd}`);
     }
     return '';
   }
@@ -63,15 +67,15 @@ if (!repoUrl) {
   }
 }
 if (!repoUrl) {
-  repoUrl = sh('git config --get remote.origin.url');
+  repoUrl = sh('git config --get remote.origin.url', { ignoreError: true });
 }
 repoUrl = normalizeRepoUrl(repoUrl);
 
 // Previous tag (expects v* tags)
-const prevTag = sh('git describe --tags --abbrev=0 --match "v*" 2>/dev/null');
+const prevTag = sh('git describe --tags --abbrev=0 --match "v*" 2>/dev/null', { ignoreError: true });
 const range = prevTag ? `${prevTag}..HEAD` : '';
 const logCmd = `git log --pretty=format:%s --no-merges ${range}`.trim();
-let commits = sh(logCmd)
+let commits = sh(logCmd, { ignoreError: true })
   .split(/\r?\n/)
   .map(s => s.trim())
   .filter(Boolean)
