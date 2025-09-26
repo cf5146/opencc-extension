@@ -83,7 +83,6 @@ class Trie {
 
     return bestValue === undefined ? null : { value: bestValue, length: bestLength };
   }
-  }
 }
 
 function iterateCodePoints(text: string): Iterable<number> {
@@ -91,7 +90,12 @@ function iterateCodePoints(text: string): Iterable<number> {
     *[Symbol.iterator]() {
       let index = 0;
       while (index < text.length) {
-        const codePoint = text.codePointAt(index)!;
+        const codePoint = text.codePointAt(index);
+        if (codePoint === undefined) {
+          // Skip invalid index
+          index += 1;
+          continue;
+        }
         yield codePoint;
         index += codePoint > 0xffff ? 2 : 1;
       }

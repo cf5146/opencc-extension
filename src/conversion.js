@@ -39,13 +39,10 @@ export function convertAllNewTextNodes(from, to, root = document.body) {
   const convert = getConverter(from, to);
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null, false);
   let count = 0;
-  let node = walker.nextNode();
-
-  while (node) {
+  for (let node; (node = walker.nextNode()); ) {
     if (processTextNode(node, from, to, convert)) {
       count++;
     }
-    node = walker.nextNode();
   }
   return count;
 }
