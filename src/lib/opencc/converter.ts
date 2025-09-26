@@ -47,9 +47,15 @@ class Trie {
         continue;
       }
 
-      const codePoint = input.codePointAt(index)!;
-      output.push(String.fromCodePoint(codePoint));
-      index += codePoint > 0xffff ? 2 : 1;
+      const codePoint = input.codePointAt(index);
+      if (codePoint === undefined) {
+        // Handle invalid code point, skip one character
+        output.push(input.charAt(index));
+        index += 1;
+      } else {
+        output.push(String.fromCodePoint(codePoint));
+        index += codePoint > 0xffff ? 2 : 1;
+      }
     }
 
     return output.join('');
@@ -62,7 +68,10 @@ class Trie {
     let bestLength = 0;
 
     while (cursor < input.length && node) {
-      const codePoint = input.codePointAt(cursor)!;
+      const codePoint = input.codePointAt(cursor);
+      if (codePoint === undefined) {
+        break;
+      }
       node = node.children.get(codePoint);
       if (!node) break;
       cursor += codePoint > 0xffff ? 2 : 1;
@@ -73,6 +82,7 @@ class Trie {
     }
 
     return bestValue === undefined ? null : { value: bestValue, length: bestLength };
+  }
   }
 }
 

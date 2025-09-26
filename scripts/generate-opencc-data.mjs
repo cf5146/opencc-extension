@@ -21,9 +21,10 @@ const parseDictString = (dictString) => {
     const [left, ...rest] = sanitized.split(' ');
     if (!left) return [];
     const right = rest.join(' ');
+    const CHARACTER_DELETION = '';
     if (rest.length === 0) {
-      // No explicit mapping target provided -> map to empty string (character deletion)
-      return [[left, '']];
+      // No explicit mapping target provided -> map to CHARACTER_DELETION (empty string), indicating character deletion.
+      return [[left, CHARACTER_DELETION]];
     }
     return [[left, right]];
   });

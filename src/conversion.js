@@ -15,31 +15,31 @@ export function resetConversionCache() {
   nodeMeta = new WeakMap();
 }
 
+function processTextNode(node, from, to, convert) {
+  const meta = nodeMeta.get(node);
+  if (!meta || meta.from !== from || meta.to !== to) {
+    const original = node.nodeValue;
+    if (original && /[\u4e00-\u9fff]/.test(original)) {
+      const converted = convert(original);
+      if (converted !== original) {
+        node.nodeValue = converted;
+        nodeMeta.set(node, { from, to });
+        return true;
+      }
+      nodeMeta.set(node, { from, to });
+    } else {
+      nodeMeta.set(node, { from, to });
+    }
+  }
+  return false;
+}
+
 export function convertAllNewTextNodes(from, to, root = document.body) {
   if (!root) return 0;
   const convert = getConverter(from, to);
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null, false);
   let count = 0;
   let node = walker.nextNode();
-
-  function processTextNode(node, from, to, convert) {
-    const meta = nodeMeta.get(node);
-    if (!meta || meta.from !== from || meta.to !== to) {
-      const original = node.nodeValue;
-      if (original && /[\u4e00-\u9fff]/.test(original)) {
-        const converted = convert(original);
-        if (converted !== original) {
-          node.nodeValue = converted;
-          nodeMeta.set(node, { from, to });
-          return true;
-        }
-        nodeMeta.set(node, { from, to });
-      } else {
-        nodeMeta.set(node, { from, to });
-      }
-    }
-    return false;
-  }
 
   while (node) {
     if (processTextNode(node, from, to, convert)) {
