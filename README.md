@@ -26,8 +26,10 @@
 
 A browser extension that converts text in the current active tab between different Chinese variants.
 
-This extension is powered by [opencc-js](https://github.com/nk2028/opencc-js),
-which is a JavaScript API wrapper around the great [OpenCC](https://github.com/BYVoid/OpenCC) project.
+This extension now ships with a self-hosted OpenCC converter (see `src/lib/opencc`),
+built directly from the official [OpenCC](https://github.com/BYVoid/OpenCC) dictionaries.
+The bundled data originates from the MIT-licensed [opencc-js](https://github.com/nk2028/opencc-js) project,
+but the runtime implementation is maintained within this repository.
 
 Most of the variants supported by OpenCC are supported:
 
@@ -103,7 +105,7 @@ All text in the webpage of the current active tab is converted whenever it loads
 ## Credits
 
 - https://github.com/BYVoid/OpenCC
-- https://github.com/nk2028/opencc-js
+- https://github.com/nk2028/opencc-js (dictionaries)
 
 ---
 

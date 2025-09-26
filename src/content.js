@@ -1,5 +1,5 @@
 import { convertAllNewTextNodes, convertTitle, resetConversionCache } from "./conversion.js";
-import { Converter } from "opencc-js";
+import { Converter } from "./lib/opencc/index.js";
 
 const defaultSettings = { origin: "cn", target: "hk", auto: false, whitelist: [] };
 

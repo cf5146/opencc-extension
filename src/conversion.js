@@ -1,4 +1,4 @@
-import { Converter } from "opencc-js";
+import { Converter } from "./lib/opencc/index.js";
 
 // Cache converters by from->to key to avoid recreating
 const converterCache = new Map();
@@ -15,25 +15,36 @@ export function resetConversionCache() {
   nodeMeta = new WeakMap();
 }
 
+function isConversionNeeded(node, from, to) {
+  const meta = nodeMeta.get(node);
+  return !meta || meta.from !== from || meta.to !== to;
+}
+
+function shouldConvertText(text) {
+  return text && /[\u4e00-\u9fff]/.test(text);
+}
+
+function updateNodeMeta(node, from, to) {
+  nodeMeta.set(node, { from, to });
+}
+
 export function convertAllNewTextNodes(from, to, root = document.body) {
   if (!root) return 0;
   const convert = getConverter(from, to);
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null, false);
   let count = 0;
   for (let node; (node = walker.nextNode()); ) {
-    const meta = nodeMeta.get(node);
-    if (meta && meta.from === from && meta.to === to) continue; // already converted for this mapping
-    const original = node.nodeValue;
-    if (!original || !/[\u4e00-\u9fff]/.test(original)) { // skip if no CJK
-      nodeMeta.set(node, { from, to });
-      continue;
+    if (isConversionNeeded(node, from, to)) {
+      const original = node.nodeValue;
+      if (shouldConvertText(original)) {
+        const converted = convert(original);
+        if (converted !== original) {
+          node.nodeValue = converted;
+          count++;
+        }
+      }
+      updateNodeMeta(node, from, to);
     }
-    const converted = convert(original);
-    if (converted !== original) {
-      node.nodeValue = converted;
-      count++;
-    }
-    nodeMeta.set(node, { from, to });
   }
   return count;
 }

@@ -1,14 +1,13 @@
-import { Converter } from 'opencc-js';
+import { Converter } from '../lib/opencc/index.js';
+import type { ConverterFunction, OpenCCLocale } from '../lib/opencc/index.js';
 
-// Supported locale codes for opencc-js in this extension
-// Keep only locales actually supported by opencc-js (exclude unsupported like 'sg' if not present)
-export type OpenCCLocale = 'cn' | 'hk' | 'twp' | 'tw' | 'jp';
+export type { OpenCCLocale } from '../lib/opencc/index.js';
 
 // Cache converters by from->to key to avoid recreating
-const converterCache = new Map<string, ReturnType<typeof Converter>>();
+const converterCache = new Map<string, ConverterFunction>();
 const getConverter = (from: OpenCCLocale, to: OpenCCLocale) => {
   const key = `${from}->${to}`;
-  if (!converterCache.has(key)) converterCache.set(key, Converter({ from: from as any, to: to as any }));
+  if (!converterCache.has(key)) converterCache.set(key, Converter({ from, to }));
   return converterCache.get(key)!;
 };
 
