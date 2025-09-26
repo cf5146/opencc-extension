@@ -79,11 +79,11 @@ class Trie {
 function iterateCodePoints(text: string): Iterable<number> {
   return {
     *[Symbol.iterator]() {
-      let i = 0;
-      while (i < text.length) {
-        const codePoint = text.codePointAt(i)!;
+      let index = 0;
+      while (index < text.length) {
+        const codePoint = text.codePointAt(index)!;
         yield codePoint;
-        i += codePoint > 0xffff ? 2 : 1;
+        index += codePoint > 0xffff ? 2 : 1;
       }
     },
   };
@@ -111,6 +111,8 @@ function assertValidLocale(preset: LocalePreset, type: keyof LocalePreset, local
   }
 }
 
+const IDENTITY_CONVERTER: ConverterFunction = (text: string) => text;
+
 export function createConverterBuilder(preset: LocalePreset) {
   return function Converter(options: ConverterOptions) {
     if (!options) {
@@ -132,7 +134,7 @@ export function createConverterBuilder(preset: LocalePreset) {
     }
 
     if (groups.length === 0) {
-      return (text: string) => text;
+      return IDENTITY_CONVERTER;
     }
 
     return createConverterFactory(groups);

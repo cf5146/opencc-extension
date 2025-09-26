@@ -21,7 +21,8 @@ export function convertAllNewTextNodes(from, to, root = document.body) {
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null, false);
   let count = 0;
   let node = walker.nextNode();
-  while (node) {
+
+  function processTextNode(node, from, to, convert) {
     const meta = nodeMeta.get(node);
     if (!meta || meta.from !== from || meta.to !== to) {
       const original = node.nodeValue;
@@ -29,12 +30,20 @@ export function convertAllNewTextNodes(from, to, root = document.body) {
         const converted = convert(original);
         if (converted !== original) {
           node.nodeValue = converted;
-          count++;
+          nodeMeta.set(node, { from, to });
+          return true;
         }
         nodeMeta.set(node, { from, to });
       } else {
         nodeMeta.set(node, { from, to });
       }
+    }
+    return false;
+  }
+
+  while (node) {
+    if (processTextNode(node, from, to, convert)) {
+      count++;
     }
     node = walker.nextNode();
   }

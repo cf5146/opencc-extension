@@ -22,7 +22,7 @@ const parseDictString = (dictString) => {
     if (!left) return [];
     const right = rest.join(' ');
     if (rest.length === 0) {
-      // No explicit mapping target provided -> treat as empty string replacement
+      // No explicit mapping target provided -> map to empty string (character deletion)
       return [[left, '']];
     }
     return [[left, right]];
