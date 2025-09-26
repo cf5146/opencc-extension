@@ -49,7 +49,7 @@ class Trie {
 
       const codePoint = input.codePointAt(index);
       if (codePoint === undefined) {
-        // Handle invalid code point or surrogate pair, skip one character
+        // Handle end of string or malformed surrogate pair, skip one character
         output.push(input.charAt(index));
         index += 1;
       } else {
@@ -92,7 +92,7 @@ function iterateCodePoints(text: string): Iterable<number> {
       for (let index = 0; index < text.length; ) {
         const codePoint = text.codePointAt(index);
         if (codePoint === undefined) {
-          // Fallback: yield single 16-bit code unit
+          // Fallback for end of string or malformed surrogate pair: yield single 16-bit code unit
           yield text.charCodeAt(index);
           index += 1;
           continue;

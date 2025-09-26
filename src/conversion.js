@@ -28,32 +28,26 @@ function updateNodeMeta(node, from, to) {
   nodeMeta.set(node, { from, to });
 }
 
-function processTextNode(node, from, to, convert) {
-  if (isConversionNeeded(node, from, to)) {
-    const original = node.nodeValue;
-    if (shouldConvertText(original)) {
-      const converted = convert(original);
-      if (converted !== original) {
-        node.nodeValue = converted;
-        updateNodeMeta(node, from, to);
-        return true;
-      }
-      updateNodeMeta(node, from, to);
-    } else {
-      updateNodeMeta(node, from, to);
-    }
-  }
-  return false;
-}
-
 export function convertAllNewTextNodes(from, to, root = document.body) {
   if (!root) return 0;
   const convert = getConverter(from, to);
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null, false);
   let count = 0;
   for (let node; (node = walker.nextNode()); ) {
-    if (processTextNode(node, from, to, convert)) {
-      count++;
+    if (isConversionNeeded(node, from, to)) {
+      const original = node.nodeValue;
+      if (shouldConvertText(original)) {
+        const converted = convert(original);
+        if (converted !== original) {
+          node.nodeValue = converted;
+          updateNodeMeta(node, from, to);
+          count++;
+        } else {
+          updateNodeMeta(node, from, to);
+        }
+      } else {
+        updateNodeMeta(node, from, to);
+      }
     }
   }
   return count;
