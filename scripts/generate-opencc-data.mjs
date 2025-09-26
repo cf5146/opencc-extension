@@ -14,7 +14,7 @@ const presetModule = await import(presetUrl);
 const { from: fromPresets, to: toPresets } = presetModule;
 
 // DELETION_MARKER: An empty string indicates character deletion in OpenCC dictionary mappings.
-const DELETION_MARKER = '';
+const CHARACTER_DELETION_MARKER = '';
 
 const parseDictString = (dictString) => {
   if (!dictString) return [];
@@ -25,8 +25,8 @@ const parseDictString = (dictString) => {
     if (!left) return [];
     const right = rest.join(' ');
     if (rest.length === 0) {
-      // No explicit mapping target provided -> map to DELETION_MARKER (empty string), indicating character deletion.
-      return [[left, DELETION_MARKER]];
+      // No explicit mapping target provided -> map to CHARACTER_DELETION_MARKER (empty string), indicating character deletion.
+      return [[left, CHARACTER_DELETION_MARKER]];
     }
     return [[left, right]];
   });

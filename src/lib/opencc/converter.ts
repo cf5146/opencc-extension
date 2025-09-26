@@ -49,7 +49,7 @@ class Trie {
 
       const codePoint = input.codePointAt(index);
       if (codePoint === undefined) {
-        // Handle end of string or malformed surrogate pair, yield single 16-bit code unit
+        // Handle end of string (index out of bounds), yield single 16-bit code unit
         output.push(String.fromCharCode(input.charCodeAt(index)));
         index += 1;
       } else {
@@ -92,7 +92,7 @@ function iterateCodePoints(text: string): Iterable<number> {
       for (let index = 0; index < text.length; ) {
         const codePoint = text.codePointAt(index);
         if (codePoint === undefined) {
-          // Fallback for end of string or malformed surrogate pair: yield single 16-bit code unit
+          // Fallback for end of string or when a malformed surrogate pair is encountered: yield single 16-bit code unit
           yield text.charCodeAt(index);
           index += 1;
           continue;
@@ -138,12 +138,18 @@ export function createConverterBuilder(preset: LocalePreset) {
     const groups: DictionaryGroup[] = [];
 
     const from = options.from;
+    if (from === null || from === undefined) {
+      throw new Error('Converter options.from is required');
+    }
     if (from && isConcreteLocale(from)) {
       assertValidLocale(preset, 'from', from);
       groups.push(...preset.from[from]);
     }
 
     const to = options.to;
+    if (to === null || to === undefined) {
+      throw new Error('Converter options.to is required');
+    }
     if (to && isConcreteLocale(to)) {
       assertValidLocale(preset, 'to', to);
       groups.push(...preset.to[to]);
