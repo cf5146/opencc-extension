@@ -13,6 +13,9 @@ const presetUrl = new URL('../node_modules/opencc-js/dist/esm-lib/preset/full.js
 const presetModule = await import(presetUrl);
 const { from: fromPresets, to: toPresets } = presetModule;
 
+// DELETION_MARKER: An empty string indicates character deletion in OpenCC dictionary mappings.
+const DELETION_MARKER = '';
+
 const parseDictString = (dictString) => {
   if (!dictString) return [];
   return dictString.split('|').flatMap((line) => {
@@ -21,7 +24,6 @@ const parseDictString = (dictString) => {
     const [left, ...rest] = sanitized.split(' ');
     if (!left) return [];
     const right = rest.join(' ');
-    const DELETION_MARKER = '';
     if (rest.length === 0) {
       // No explicit mapping target provided -> map to DELETION_MARKER (empty string), indicating character deletion.
       return [[left, DELETION_MARKER]];

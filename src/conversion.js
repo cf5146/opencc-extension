@@ -40,14 +40,10 @@ export function convertAllNewTextNodes(from, to, root = document.body) {
         const converted = convert(original);
         if (converted !== original) {
           node.nodeValue = converted;
-          updateNodeMeta(node, from, to);
           count++;
-        } else {
-          updateNodeMeta(node, from, to);
         }
-      } else {
-        updateNodeMeta(node, from, to);
       }
+      updateNodeMeta(node, from, to);
     }
   }
   return count;

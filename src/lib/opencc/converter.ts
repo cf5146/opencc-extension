@@ -49,8 +49,8 @@ class Trie {
 
       const codePoint = input.codePointAt(index);
       if (codePoint === undefined) {
-        // Handle end of string or malformed surrogate pair, skip one character
-        output.push(input.charAt(index));
+        // Handle end of string or malformed surrogate pair, yield single 16-bit code unit
+        output.push(String.fromCharCode(input.charCodeAt(index)));
         index += 1;
       } else {
         output.push(String.fromCodePoint(codePoint));
