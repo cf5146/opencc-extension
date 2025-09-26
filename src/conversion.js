@@ -15,20 +15,32 @@ export function resetConversionCache() {
   nodeMeta = new WeakMap();
 }
 
-function processTextNode(node, from, to, convert) {
+function isConversionNeeded(node, from, to) {
   const meta = nodeMeta.get(node);
-  if (!meta || meta.from !== from || meta.to !== to) {
+  return !meta || meta.from !== from || meta.to !== to;
+}
+
+function shouldConvertText(text) {
+  return text && /[\u4e00-\u9fff]/.test(text);
+}
+
+function updateNodeMeta(node, from, to) {
+  nodeMeta.set(node, { from, to });
+}
+
+function processTextNode(node, from, to, convert) {
+  if (isConversionNeeded(node, from, to)) {
     const original = node.nodeValue;
-    if (original && /[\u4e00-\u9fff]/.test(original)) {
+    if (shouldConvertText(original)) {
       const converted = convert(original);
       if (converted !== original) {
         node.nodeValue = converted;
-        nodeMeta.set(node, { from, to });
+        updateNodeMeta(node, from, to);
         return true;
       }
-      nodeMeta.set(node, { from, to });
+      updateNodeMeta(node, from, to);
     } else {
-      nodeMeta.set(node, { from, to });
+      updateNodeMeta(node, from, to);
     }
   }
   return false;

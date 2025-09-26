@@ -30,6 +30,10 @@ const parseDictString = (dictString) => {
   });
 };
 
+/**
+ * @param {(string | [string, string][])[]} group
+ * @returns {[string, string][]}
+ */
 const normalizeGroup = (group) => {
   /** @type {[string, string][]} */
   const entries = [];

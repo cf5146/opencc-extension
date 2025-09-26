@@ -49,11 +49,12 @@ class Trie {
 
       const codePoint = input.codePointAt(index);
       if (codePoint === undefined) {
-        // Handle invalid code point, skip one character
+        // Handle invalid code point or surrogate pair, skip one character
         output.push(input.charAt(index));
         index += 1;
       } else {
         output.push(String.fromCodePoint(codePoint));
+        // Advance index by 2 for surrogate pairs, 1 otherwise
         index += codePoint > 0xffff ? 2 : 1;
       }
     }
@@ -88,15 +89,16 @@ class Trie {
 function iterateCodePoints(text: string): Iterable<number> {
   return {
     *[Symbol.iterator]() {
-      let index = 0;
-      while (index < text.length) {
+      for (let index = 0; index < text.length; ) {
         const codePoint = text.codePointAt(index);
         if (codePoint === undefined) {
-          // Skip invalid index
+          // Fallback: yield single 16-bit code unit
+          yield text.charCodeAt(index);
           index += 1;
           continue;
         }
         yield codePoint;
+        // Advance by 2 for surrogate pair, else 1
         index += codePoint > 0xffff ? 2 : 1;
       }
     },
