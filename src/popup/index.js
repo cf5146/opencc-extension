@@ -1,4 +1,4 @@
-import { Converter } from "opencc-js";
+import { Converter } from "../lib/opencc/index.js";
 
 const $originSelect = document.getElementById("origin");
 const $targetSelect = document.getElementById("target");

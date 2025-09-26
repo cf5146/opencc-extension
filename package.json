@@ -28,13 +28,10 @@
     "test:ui": "vitest --ui",
     "ci": "pnpm lint && pnpm typecheck && pnpm build && pnpm test"
   },
-  "dependencies": {
-    "opencc-js": "^1.0.5"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@types/chrome": "^0.0.287",
     "@types/node": "^22.5.0",
-    "@types/opencc-js": "^1.0.3",
     "concurrently": "^9.1.0",
     "esbuild": "^0.24.0",
     "eslint": "^8.57.1",

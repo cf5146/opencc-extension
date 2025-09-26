@@ -1,6 +1,6 @@
 import { convertAllNewTextNodes, convertTitle } from './core/conversion.js';
 import type { OpenCCLocale } from './core/conversion.js';
-import { Converter } from 'opencc-js';
+import { Converter } from './lib/opencc/index.js';
 import { matchesWhitelist } from './core/whitelist.js';
 import { setupAutoObserver } from './content/observer.js';
 
@@ -17,7 +17,7 @@ async function getSettings(): Promise<Settings> {
 function convertSelectedTextNodes(origin: OpenCCLocale, target: OpenCCLocale) {
   const selection = window.getSelection();
   if (!selection || selection.rangeCount === 0) return;
-  const convert = Converter({ from: origin as any, to: target as any });
+  const convert = Converter({ from: origin, to: target });
   const iterateTextNodes = (nodes: Iterable<Node>, callback: (n: Text) => void) => {
     for (const node of nodes) {
       if (node.nodeType === Node.TEXT_NODE) callback(node as Text);

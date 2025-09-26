@@ -1,4 +1,4 @@
-import { Converter } from "opencc-js";
+import { Converter } from "./lib/opencc/index.js";
 
 // Cache converters by from->to key to avoid recreating
 const converterCache = new Map();
@@ -20,20 +20,23 @@ export function convertAllNewTextNodes(from, to, root = document.body) {
   const convert = getConverter(from, to);
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null, false);
   let count = 0;
-  for (let node; (node = walker.nextNode()); ) {
+  let node = walker.nextNode();
+  while (node) {
     const meta = nodeMeta.get(node);
-    if (meta && meta.from === from && meta.to === to) continue; // already converted for this mapping
-    const original = node.nodeValue;
-    if (!original || !/[\u4e00-\u9fff]/.test(original)) { // skip if no CJK
-      nodeMeta.set(node, { from, to });
-      continue;
+    if (!meta || meta.from !== from || meta.to !== to) {
+      const original = node.nodeValue;
+      if (original && /[\u4e00-\u9fff]/.test(original)) {
+        const converted = convert(original);
+        if (converted !== original) {
+          node.nodeValue = converted;
+          count++;
+        }
+        nodeMeta.set(node, { from, to });
+      } else {
+        nodeMeta.set(node, { from, to });
+      }
     }
-    const converted = convert(original);
-    if (converted !== original) {
-      node.nodeValue = converted;
-      count++;
-    }
-    nodeMeta.set(node, { from, to });
+    node = walker.nextNode();
   }
   return count;
 }
