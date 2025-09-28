@@ -1,28 +1,14 @@
-<p align="center">
-  <img src="./icon.png" width="64px" />
-</p>
+# opencc-extension
 
-<h1 align="center">opencc-extension</h1>
+![OpenCC browser extension icon](./icon.png)
 
-<p align="center">
-  <a href="https://github.com/cf5146/opencc-extension/actions/workflows/ci.yml">
-    <img src="https://github.com/cf5146/opencc-extension/actions/workflows/ci.yml/badge.svg" alt="CI Status" />
-  </a>
-  <a href="https://github.com/cf5146/opencc-extension/blob/main/CONTRIBUTING.md">
-    <img src="https://img.shields.io/badge/contributions-welcome-brightgreen.svg" alt="Contributing" />
-  </a>
-</p>
+[![CI Status](https://github.com/cf5146/opencc-extension/actions/workflows/ci.yml/badge.svg)](https://github.com/cf5146/opencc-extension/actions/workflows/ci.yml)
+[![Contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg)](https://github.com/cf5146/opencc-extension/blob/main/CONTRIBUTING.md)
 
-<p align="center"><img src="./demo.gif" width="50%" /></p>
+![Popup converting a webpage using opencc-extension](./demo.gif)
 
-<p align="center">
-  <a href="https://chromewebstore.google.com/detail/opencc/jmlbcbhpnfpffhniogblmmiklgbopoif">
-    <img src="https://user-images.githubusercontent.com/585534/107280622-91a8ea80-6a26-11eb-8d07-77c548b28665.png">
-  </a>
-  <a href="https://addons.mozilla.org/firefox/addon/opencc">
-    <img src="https://user-images.githubusercontent.com/585534/107280546-7b9b2a00-6a26-11eb-8f9f-f95932f4bfec.png" />
-  </a>
-</p>
+[![Install from the Chrome Web Store](https://user-images.githubusercontent.com/585534/107280622-91a8ea80-6a26-11eb-8d07-77c548b28665.png)](https://chromewebstore.google.com/detail/opencc/jmlbcbhpnfpffhniogblmmiklgbopoif)
+[![Install from Firefox Add-ons](https://user-images.githubusercontent.com/585534/107280546-7b9b2a00-6a26-11eb-8f9f-f95932f4bfec.png)](https://addons.mozilla.org/firefox/addon/opencc)
 
 A browser extension that converts text in the current active tab between different Chinese variants.
 
@@ -59,40 +45,33 @@ Most of the variants supported by OpenCC are supported:
   - 嚴格審校一簡對多繁詞條，原則爲「能分則不合」。
   - 支持中國大陸、臺灣、香港異體字和地區習慣用詞轉換，如「裏」「裡」、「鼠標」「滑鼠」。
 
+## Architecture
+
+- **Domain (`src/domain`)** – locale rules, validation helpers, and other pure data definitions.
+- **Infrastructure (`src/infrastructure`)** – adapters that wire the bundled OpenCC converter into the app.
+- **Application (`src/application`)** – stateful services that handle caching, DOM traversal, and selection updates.
+- **Core (`src/core`)** – small façade exporting stable helpers (`convertAllNewTextNodes`, `convertPlainText`, etc.) to the rest of the extension.
+- **Presentation (`src/content`, `src/popup`, `src/background`)** – browser-facing scripts that consume the core façade and Chrome APIs.
+
 See [usage](#usage) for more ways to convert text.
 
 ## Usage
 
 Specify the language settings in the extension popup.
 
-<table><tr><td>
-  <strong>Origin</strong> → <strong>Target</strong>
-</td></tr></table>
+| Setting | Description |
+| --- | --- |
+| **Origin** | The original Chinese variant on the current page |
+| **Target** | The desired Chinese variant to convert into |
 
 - **Origin**: the original Chinese text variant in the webpage
 - **Target**: the desired Chinese text variant to be converted into
 
-<p align="center">
-  <img src="./select.gif" width="40%" />
-  <img src="./textbox.gif" width="30%" />
-</p>
+![Converting a highlighted text selection](./select.gif)
+![Real-time textbox conversion](./textbox.gif)
 
-<p align="center">
-  <sub><strong>Left:</strong> Convert Text Selection on Webpage</sub>
-  <br>
-  <sub><strong>Right:</strong> Convert Any Text in Text Box</sub>
-</p>
-
-<p align="center">
-  <img src="./demo.gif" width="40%" />
-  <img src="./auto.gif" width="40%" />
-</p>
-
-<p align="center">
-  <sub><strong>Left:</strong> One Click</sub>
-  <br>
-  <sub><strong>Right:</strong> Auto Mode</sub>
-</p>
+![One-click full page conversion](./demo.gif)
+![Automatic conversion mode badge](./auto.gif)
 
 > [!NOTE]
 > For performance reason, auto mode will not convert text on webpages which
@@ -104,8 +83,8 @@ All text in the webpage of the current active tab is converted whenever it loads
 
 ## Credits
 
-- https://github.com/BYVoid/OpenCC
-- https://github.com/nk2028/opencc-js (dictionaries)
+- <https://github.com/BYVoid/OpenCC>
+- <https://github.com/nk2028/opencc-js> (dictionaries)
 
 ---
 
@@ -115,8 +94,6 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for GitHub Flow, development, and relea
 
 ---
 
-<p align="center">
-  <sub><strong>~ crafted with ♥︎ by tnychn ~</strong></sub>
-  <br>
-  <sub><strong>MIT © 2024 Tony Chan</strong></sub>
-</p>
+> ~ crafted with ♥︎ by tnychn ~
+>
+> MIT © 2024 Tony Chan

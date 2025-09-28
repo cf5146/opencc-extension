@@ -1,4 +1,4 @@
-import { Converter } from '../lib/opencc/index.js';
+import { convertPlainText } from '../core/conversion.js';
 import type { OpenCCLocale } from '../core/conversion.js';
 
 const RETRY_DELAY_MS = 120;
@@ -33,9 +33,8 @@ function textboxConvert() {
   const origin = $originSelect.value as OpenCCLocale;
   const target = $targetSelect.value as OpenCCLocale;
   if (origin === target) return;
-  const convert = Converter({ from: origin, to: target });
   const originalText = $textbox.value;
-  const convertedText = convert(originalText);
+  const convertedText = convertPlainText(originalText, origin, target);
   if (convertedText !== originalText) $textbox.value = convertedText;
 }
 
