@@ -1,4 +1,4 @@
-import { Converter } from "../lib/opencc/index.js";
+import { convertPlainText } from "../core/conversion.js";
 
 const $originSelect = document.getElementById("origin");
 const $targetSelect = document.getElementById("target");
@@ -12,9 +12,8 @@ const $footer = document.getElementsByTagName("footer")[0];
 function textboxConvert() {
   const [origin, target] = [$originSelect.value, $targetSelect.value];
   if (origin === target) return;
-  const convert = Converter({ from: origin, to: target });
   const originalText = $textbox.value;
-  const convertedText = convert(originalText);
+  const convertedText = convertPlainText(originalText, origin, target);
   if (convertedText !== originalText) $textbox.value = convertedText;
 }
 

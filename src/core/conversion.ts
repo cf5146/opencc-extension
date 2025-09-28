@@ -1,71 +1,45 @@
-import { Converter } from '../lib/opencc/index.js';
-import type { ConverterFunction, OpenCCLocale } from '../lib/opencc/index.js';
+import { createConversionService } from '../application/conversion/index.js';
+import type { ConversionService } from '../application/conversion/index.js';
+import { SUPPORTED_LOCALES } from '../domain/conversion/locales.js';
+import type { LocaleCode } from '../domain/conversion/locales.js';
 
-export type { OpenCCLocale } from '../lib/opencc/index.js';
+export type OpenCCLocale = LocaleCode;
 
-// Cache converters by from->to key to avoid recreating
-const converterCache = new Map<string, ConverterFunction>();
-const getConverter = (from: OpenCCLocale, to: OpenCCLocale) => {
-  const key = `${from}->${to}`;
-  if (!converterCache.has(key)) converterCache.set(key, Converter({ from, to }));
-  return converterCache.get(key)!;
-};
+export { SUPPORTED_LOCALES };
 
-// Track which nodes have already been converted for a specific from->to pair
-interface NodeMeta { from: OpenCCLocale; to: OpenCCLocale }
-let nodeMeta: WeakMap<Node, NodeMeta> = new WeakMap(); // node -> { from, to }
-
-// Track strings that are already in target form (outputs we produced) per mapping.
-const convertedOutputs = new Map<string, Set<string>>(); // key: from->to
-function getConvertedOutputsSet(key: string) {
-  let set = convertedOutputs.get(key);
-  if (!set) { set = new Set(); convertedOutputs.set(key, set); }
-  return set;
-}
+const service: ConversionService = createConversionService();
 
 export function resetConversionCache() {
-  nodeMeta = new WeakMap();
+  service.resetCaches();
 }
 
 export function convertTextNode(from: OpenCCLocale, to: OpenCCLocale, textNode: Text): boolean {
-  const meta = nodeMeta.get(textNode);
-  if (meta && meta.from === from && meta.to === to) return false; // already converted
-  const original = textNode.nodeValue;
-  if (!original || !/[\u4e00-\u9fff]/.test(original)) { nodeMeta.set(textNode, { from, to }); return false; }
-  const key = `${from}->${to}`;
-  const outputs = getConvertedOutputsSet(key);
-  // If we've previously produced this exact string as an output for this mapping, treat as already-converted.
-  if (outputs.has(original)) { nodeMeta.set(textNode, { from, to }); return false; }
-  const convert = getConverter(from, to);
-  const converted = convert(original);
-  if (converted !== original) {
-    textNode.nodeValue = converted;
-    outputs.add(converted);
-    nodeMeta.set(textNode, { from, to });
-    return true;
-  }
-  // original unchanged: could still be target form; mark output cache so future identical nodes skip quickly.
-  outputs.add(original);
-  nodeMeta.set(textNode, { from, to });
-  return false;
+  return service.convertTextNode(textNode, from, to);
 }
 
-export function convertAllNewTextNodes(from: OpenCCLocale, to: OpenCCLocale, root: HTMLElement | DocumentFragment | null = document.body) {
+export function convertAllNewTextNodes(
+  from: OpenCCLocale,
+  to: OpenCCLocale,
+  root: HTMLElement | DocumentFragment | null = document.body,
+) {
   if (!root) return 0;
-  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null);
-  let count = 0; let node: Node | null;
-  while ((node = walker.nextNode())) {
-    if (convertTextNode(from, to, node as Text)) count++;
-  }
-  return count;
+  return service.convertDocument(from, to, root);
 }
 
 export function convertTitle(from: OpenCCLocale, to: OpenCCLocale) {
-  const convert = getConverter(from, to);
-  document.title = convert(document.title);
+  service.convertTitle(from, to);
+}
+
+export function convertSelection(from: OpenCCLocale, to: OpenCCLocale, selection: Selection | null) {
+  return service.convertSelection(selection, from, to);
+}
+
+export function convertPlainText(text: string, from: OpenCCLocale, to: OpenCCLocale) {
+  return service.convertText(text, from, to);
 }
 
 export function hasConverted(node: Node, from: OpenCCLocale, to: OpenCCLocale) {
-  const meta = nodeMeta.get(node);
-  return !!meta && meta.from === from && meta.to === to;
+  return service.hasConverted(node, from, to);
 }
+
+export const conversionService = service;
