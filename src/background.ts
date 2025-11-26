@@ -104,7 +104,7 @@ chrome.runtime.onMessage.addListener((msg) => {
 
 // Test hook (only attached during Vitest / test environment)
 try {
-  // @ts-ignore
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (globalThis as any).__opencc_test__ = { ensureContentScriptRegistered };
 } catch {
   // ignore

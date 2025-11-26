@@ -20,7 +20,7 @@
     "dist:firefox": "MODE=production BROWSER=firefox npm run build -- ./dist/firefox && web-ext build -s ./dist/firefox -a . -n opencc.firefox.zip",
     "dist:edge": "MODE=production BROWSER=edge npm run build -- ./dist/edge && web-ext build -s ./dist/edge -a . -n opencc.edge.zip",
     "dist": "concurrently \"npm run dist:chrome\" \"npm run dist:firefox\" \"npm run dist:edge\" && rm -rf ./dist",
-    "lint": "eslint src build.mjs",
+    "lint": "eslint src build.mjs --ext .ts,.js,.mjs",
     "typecheck": "tsc --noEmit",
     "format": "prettier . --write",
     "format:check": "prettier . --check",
@@ -31,6 +31,8 @@
   "devDependencies": {
     "@types/chrome": "^0.0.287",
     "@types/node": "^22.5.0",
+    "@typescript-eslint/eslint-plugin": "^8.48.0",
+    "@typescript-eslint/parser": "^8.48.0",
     "concurrently": "^9.1.0",
     "esbuild": "^0.27.0",
     "eslint": "^8.57.1",
@@ -52,12 +54,17 @@
       "browser": true,
       "webextensions": true
     },
+    "parser": "@typescript-eslint/parser",
+    "plugins": [
+      "@typescript-eslint"
+    ],
     "parserOptions": {
       "ecmaVersion": "latest",
       "sourceType": "module"
     },
     "extends": [
       "eslint:recommended",
+      "plugin:@typescript-eslint/recommended",
       "prettier"
     ]
   },
