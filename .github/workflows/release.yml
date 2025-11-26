@@ -29,19 +29,14 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup PNPM
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'pnpm'
+          cache: 'npm'
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm ci
 
       - name: Determine version
         id: version
@@ -119,7 +114,7 @@ jobs:
           git push --follow-tags
 
       - name: Build distributions
-        run: pnpm dist
+        run: npm run dist
 
       - name: Generate checksums
         run: sha256sum opencc.chrome.zip opencc.firefox.zip opencc.edge.zip > SHA256SUMS

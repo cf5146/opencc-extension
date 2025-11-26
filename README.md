@@ -81,11 +81,11 @@ Install from the listings above—updates are handled automatically by each stor
 3. Load the generated `build/` directory as an unpacked extension.
 
 ```powershell
-pnpm install
-pnpm build
+npm install
+npm run build
 ```
 
-For Firefox, use `pnpm build:firefox` and load the produced artifacts from `build/` via `about:debugging`.
+For Firefox, use `npm run build:firefox` and load the produced artifacts from `build/` via `about:debugging`.
 
 ## Usage
 
@@ -111,12 +111,12 @@ When auto mode is active, a grey badge with the letter “A” appears on the to
 
 ## Development
 
-The project uses Node.js ≥ 18, [pnpm](https://pnpm.io/) ≥ 8, and TypeScript.
+The project uses Node.js ≥ 18, [npm](https://www.npmjs.com/) ≥ 9, and TypeScript.
 
 ```powershell
-pnpm install      # install dependencies
-pnpm dev          # start a watch build (outputs to build/)
-pnpm build        # generate production bundles
+npm install       # install dependencies
+npm run dev       # start a watch build (outputs to build/)
+npm run build     # generate production bundles
 ```
 
 While developing, load the `build/` directory as an unpacked extension (Chromium) or temporary add-on (Firefox) and keep the watch build running.
@@ -126,9 +126,9 @@ While developing, load the `build/` directory as an unpacked extension (Chromium
 Unit and integration tests use [Vitest](https://vitest.dev/).
 
 ```powershell
-pnpm typecheck
-pnpm test
-pnpm vitest run tests/conversion-service.test.ts
+npm run typecheck
+npm test
+npm run vitest run tests/conversion-service.test.ts
 ```
 
 CI runs linting, type checking, and tests on every pull request through GitHub Actions.

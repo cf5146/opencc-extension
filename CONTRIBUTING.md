@@ -12,41 +12,41 @@ Thanks for your interest in contributing!
 
 ## Development
 
-Requirements: Node >= 18, pnpm.
+Requirements: Node >= 18, npm.
 
 Install deps:
 
 ```bash
-pnpm install
+npm install
 ```
 
 Start dev for Firefox:
 
 ```bash
-pnpm start:firefox
+npm run start:firefox
 ```
 
 For Chromium:
 
 ```bash
-pnpm start:chromium
+npm run start:chromium
 ```
 
 Build production artifacts (zips generated in repo root):
 
 ```bash
-pnpm dist
+npm run dist
 ```
 
 ## Lint & Format
 
 ```bash
-pnpm lint
-pnpm format:check
+npm run lint
+npm run format:check
 ```
 
 ## Commit Messages
- 
+
 Use present tense, imperative mood. Example:
 
 ```text
@@ -54,17 +54,21 @@ feat: add auto mode badge hover tooltip
 ```
 
 ## Release Process
+
 Maintainers:
- 
+
 1. Update version in `package.json` (or use the Release workflow dispatch).
 2. Tag: `git tag vX.Y.Z && git push --tags`.
 3. GitHub Action builds & attaches artifacts.
 
 ## Issue Reporting
+
 Provide reproduction steps & environment details. Screens/GIFs help.
 
 ## Security
+
 Do not open public issues for sensitive vulnerabilities. Email the author (see `package.json`).
 
 ## License
+
 By contributing you agree your work is MIT licensed.
