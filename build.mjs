@@ -35,7 +35,7 @@ const options = {
   },
   outbase: "src",
   outdir,
-  target: "es6",
+  target: "es2022",
   bundle: true,
   allowOverwrite: true,
   minify: mode === "production",
