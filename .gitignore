@@ -62,10 +62,10 @@ Thumbs.db
 # TypeScript incremental build (if introduced later)
 *.tsbuildinfo
 
-# Lockfiles (pnpm is used; keep pnpm-lock.yaml tracked)
-package-lock.json
+# Lockfiles (npm is used; keep package-lock.json tracked)
+# package-lock.json
 yarn.lock
-# DO NOT ignore pnpm-lock.yaml
+pnpm-lock.yaml
 
 # Misc
 *.bak
