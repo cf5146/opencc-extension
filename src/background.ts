@@ -41,9 +41,10 @@ chrome.contextMenus.onClicked.addListener(async (info) => {
 
 chrome.action.setBadgeBackgroundColor({ color: 'white' });
 
-chrome.storage.local.get({ auto: false }).then(({ auto }) => {
+(async () => { // NOSONAR
+  const { auto } = await chrome.storage.local.get({ auto: false });
   chrome.action.setBadgeText({ text: auto ? 'A' : '' });
-});
+})();
 
 // Dynamically register content script (Chromium MV3). Firefox still uses static manifest for now.
 async function ensureContentScriptRegistered() {
@@ -70,7 +71,9 @@ async function ensureContentScriptRegistered() {
   }
 }
 
-ensureContentScriptRegistered();
+(async () => { // NOSONAR
+  await ensureContentScriptRegistered();
+})();
 
 // Re-register on extension update / service worker restart signals.
 chrome.runtime.onInstalled.addListener(() => ensureContentScriptRegistered());

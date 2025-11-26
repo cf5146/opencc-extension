@@ -13,12 +13,15 @@ async function getSettings(): Promise<Settings> {
 
 setupAutoObserver(getSettings);
 
-getSettings().then((settings) => {
-  if (!settings.auto) return;
-  if (matchesWhitelist(window.location.href, settings.whitelist)) return;
-  convertTitle(settings.origin, settings.target);
-  convertAllNewTextNodes(settings.origin, settings.target);
-});
+(async () => { // NOSONAR
+  const settings = await getSettings();
+  if (settings.auto) {
+    if (!matchesWhitelist(globalThis.location.href, settings.whitelist)) {
+      convertTitle(settings.origin, settings.target);
+      convertAllNewTextNodes(settings.origin, settings.target);
+    }
+  }
+})();
 
 chrome.runtime.onMessage.addListener(({ action }: { action: 'click' | 'select' }, _sender, sendResponse) => {
   (async () => {
@@ -29,7 +32,7 @@ chrome.runtime.onMessage.addListener(({ action }: { action: 'click' | 'select' }
         convertTitle(settings.origin, settings.target);
         const count = convertAllNewTextNodes(settings.origin, settings.target);
         sendResponse({ count, time: Date.now() - start });
-      } else if (action === 'select') convertSelection(settings.origin, settings.target, window.getSelection());
+      } else if (action === 'select') convertSelection(settings.origin, settings.target, globalThis.getSelection());
     }
   })();
   return true; // keep message channel alive

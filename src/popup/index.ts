@@ -38,12 +38,13 @@ function textboxConvert() {
   if (convertedText !== originalText) $textbox.value = convertedText;
 }
 
-chrome.storage.local.get({
-  origin: 'cn',
-  target: 'hk',
-  auto: false,
-  textboxSize: { width: null, height: null },
-}).then((settings: any) => {
+(async () => { // NOSONAR
+  const settings = await chrome.storage.local.get({
+    origin: 'cn',
+    target: 'hk',
+    auto: false,
+    textboxSize: { width: null, height: null },
+  });
   const s = settings as PopupSettings;
   $originSelect.value = s.origin;
   $targetSelect.value = s.target;
@@ -52,7 +53,7 @@ chrome.storage.local.get({
   const { width, height } = s.textboxSize;
   $textbox.style.width = width ? `${width}px` : '';
   $textbox.style.height = height ? `${height}px` : '';
-});
+})();
 
 $originSelect.addEventListener('change', (event) => {
   const value = (event.currentTarget as HTMLSelectElement).value as OpenCCLocale;
@@ -81,13 +82,13 @@ let inputDebounce: number | undefined;
 const INPUT_DEBOUNCE_MS = 250;
 
 function scheduleTextboxConvert() {
-  if (inputDebounce) window.clearTimeout(inputDebounce);
-  inputDebounce = window.setTimeout(() => {
+  if (inputDebounce) globalThis.clearTimeout(inputDebounce);
+  inputDebounce = globalThis.setTimeout(() => {
     // Guard: only attempt when variants differ
     if ($originSelect.value !== $targetSelect.value && $textbox.value.trim()) {
       try { textboxConvert(); } catch { /* ignore transient errors */ }
     }
-  }, INPUT_DEBOUNCE_MS);
+  }, INPUT_DEBOUNCE_MS) as unknown as number;
 }
 
 // Trigger on any input (typing, delete, undo, etc.)
@@ -109,6 +110,10 @@ new ResizeObserver(() => {
   });
 }).observe($textbox);
 
+function isErrorWithMessage(err: unknown): err is { message: string } {
+  return typeof err === 'object' && err !== null && 'message' in err && typeof (err as { message: unknown }).message === 'string';
+}
+
 async function sendPageConvert(): Promise<PageConvertResponse | undefined> {
   const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
   const tab = tabs[0];
@@ -118,11 +123,6 @@ async function sendPageConvert(): Promise<PageConvertResponse | undefined> {
   if (!url || !/^https?:/i.test(url)) return undefined;
 
   const attempt = async (): Promise<PageConvertResponse> => chrome.tabs.sendMessage(tabId, { action: 'click' });
-
-  // Type guard for error with message property
-  function isErrorWithMessage(err: unknown): err is { message: string } {
-    return typeof err === 'object' && err !== null && 'message' in err && typeof (err as { message: unknown }).message === 'string';
-  }
 
   try {
     return await attempt();
@@ -135,7 +135,7 @@ async function sendPageConvert(): Promise<PageConvertResponse | undefined> {
     try { await chrome.runtime.sendMessage({ action: 'ensure-script' }); } catch { /* ignore */ }
     // Best-effort direct injection for current tab.
     try {
-      if (typeof chrome.scripting !== 'undefined' && typeof chrome.scripting.executeScript === 'function') {
+      if (chrome.scripting !== undefined && typeof chrome.scripting.executeScript === 'function') {
         await chrome.scripting.executeScript({ target: { tabId }, files: ['content.js'] });
       }
     } catch { /* ignore injection errors */ }

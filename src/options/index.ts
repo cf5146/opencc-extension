@@ -7,16 +7,17 @@ $whitelist.addEventListener('input', () => {
     .map((line) => line.trim())
     .join('\n');
   if (timeout) clearTimeout(timeout);
-  timeout = window.setTimeout(() => {
+  timeout = globalThis.setTimeout(() => {
     $whitelist.value = $whitelist.value.trim();
     const whitelist = $whitelist.value
       .split('\n')
       .filter(Boolean)
       .map((pattern) => pattern.replaceAll('*', '[^ ]*'));
     chrome.storage.local.set({ whitelist });
-  }, 500);
+  }, 500) as unknown as number;
 });
 
-chrome.storage.local.get({ whitelist: [] }).then(({ whitelist }) => {
+(async () => { // NOSONAR
+  const { whitelist } = await chrome.storage.local.get({ whitelist: [] });
   $whitelist.value = (whitelist as string[]).map((p) => p.replaceAll('[^ ]*', '*')).join('\n');
-});
+})();
