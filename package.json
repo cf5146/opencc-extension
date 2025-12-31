@@ -29,44 +29,26 @@
     "ci": "npm run lint && npm run typecheck && npm run build && npm test"
   },
   "devDependencies": {
-    "@types/chrome": "^0.0.287",
-    "@types/node": "^22.5.0",
-    "@typescript-eslint/eslint-plugin": "^8.48.0",
-    "@typescript-eslint/parser": "^8.48.0",
-    "esbuild": "^0.27.0",
-    "eslint": "^8.57.1",
-    "eslint-config-prettier": "^9.1.0",
+    "@eslint/js": "^9.39.2",
+    "@types/chrome": "^0.1.32",
+    "@types/node": "^22.19.3",
+    "@typescript-eslint/eslint-plugin": "^8.51.0",
+    "@typescript-eslint/parser": "^8.51.0",
+    "esbuild": "^0.27.2",
+    "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
+    "globals": "^16.4.0",
     "jsdom": "^24.0.0",
-    "prettier": "^3.4.1",
-    "typescript": "^5.5.4",
-    "vitest": "^4.0.14",
-    "web-ext": "^8.3.0"
+    "prettier": "^3.7.4",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.16",
+    "web-ext": "^9.2.0"
   },
   "prettier": {
     "tabWidth": 2,
     "printWidth": 120
   },
-  "eslintConfig": {
-    "env": {
-      "es6": true,
-      "browser": true,
-      "webextensions": true
-    },
-    "parser": "@typescript-eslint/parser",
-    "plugins": [
-      "@typescript-eslint"
-    ],
-    "parserOptions": {
-      "ecmaVersion": "latest",
-      "sourceType": "module"
-    },
-    "extends": [
-      "eslint:recommended",
-      "plugin:@typescript-eslint/recommended",
-      "prettier"
-    ]
-  },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=18.18.0"
   }
 }

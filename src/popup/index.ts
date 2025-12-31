@@ -23,8 +23,11 @@ try {
   // ignore if manifest not accessible
 }
 
-interface PopupSettings {
-  origin: OpenCCLocale; target: OpenCCLocale; auto: boolean; textboxSize: { width: number | null; height: number | null }
+interface PopupSettings extends Record<string, unknown> {
+  origin: OpenCCLocale;
+  target: OpenCCLocale;
+  auto: boolean;
+  textboxSize: { width: number | null; height: number | null };
 }
 // Added specific response type to avoid using any
 interface PageConvertResponse { count: number; time: number; }
@@ -45,7 +48,7 @@ function textboxConvert() {
     auto: false,
     textboxSize: { width: null, height: null },
   });
-  const s = settings as PopupSettings;
+  const s = settings as unknown as PopupSettings;
   $originSelect.value = s.origin;
   $targetSelect.value = s.target;
   $autoCheckbox.checked = s.auto;
@@ -128,7 +131,6 @@ async function sendPageConvert(): Promise<PageConvertResponse | undefined> {
     return await attempt();
   } catch (e: unknown) {
     if (isErrorWithMessage(e) && !/receiving end/i.test(e.message)) {
-      // eslint-disable-next-line no-console
       console.debug('OpenCC popup: initial sendMessage failed, attempting recovery:', e.message);
     }
     // Ask background to ensure dynamic registration (no-op if already) before direct injection.
