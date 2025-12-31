@@ -6,31 +6,52 @@ on:
   pull_request:
     branches: [ main ]
 
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
 jobs:
-  build:
+  verify:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Use Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
+          cache: npm
       - name: Install dependencies
         run: npm ci
       - name: Lint
         run: npm run lint
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Test
+        run: npm test
       - name: Build
         run: npm run build
+
+  package:
+    # Packaging is valuable but slower; run it on pushes (main/dev) so PR checks stay quick.
+    if: github.event_name == 'push'
+    needs: verify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
       - name: Package (Chrome, Firefox, Edge)
         run: npm run dist
       - name: Upload packaged artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: webext-zips
+          name: webext-zips-${{ github.sha }}
           path: |
             opencc.chrome.zip
             opencc.firefox.zip
