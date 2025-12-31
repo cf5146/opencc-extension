@@ -38,7 +38,7 @@
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
     "globals": "^16.4.0",
-    "jsdom": "^24.0.0",
+    "jsdom": "^27.4.0",
     "prettier": "^3.7.4",
     "typescript": "^5.9.3",
     "vitest": "^4.0.16",
@@ -49,6 +49,6 @@
     "printWidth": 120
   },
   "engines": {
-    "node": ">=18.18.0"
+    "node": ">=20.19.0"
   }
 }
