@@ -1,7 +1,5 @@
 #!/usr/bin/env node
 
-/* eslint-env node */
-
 import * as esbuild from "esbuild";
 import fs from "node:fs/promises";
 import path from "node:path";
