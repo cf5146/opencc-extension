@@ -123,6 +123,12 @@ jobs:
       - name: Build distributions
         run: npm run dist
 
+      - name: Collect distributions
+        run: |
+          cp .output/*-chrome.zip opencc.chrome.zip
+          cp .output/*-firefox.zip opencc.firefox.zip
+          cp .output/*-edge.zip opencc.edge.zip
+
       - name: Generate checksums
         run: sha256sum opencc.chrome.zip opencc.firefox.zip opencc.edge.zip > SHA256SUMS
 

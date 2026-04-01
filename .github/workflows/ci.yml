@@ -53,7 +53,7 @@ jobs:
         with:
           name: webext-zips-${{ github.sha }}
           path: |
-            opencc.chrome.zip
-            opencc.firefox.zip
-            opencc.edge.zip
+            .output/*chrome.zip
+            .output/*firefox.zip
+            .output/*edge.zip
           if-no-files-found: error
