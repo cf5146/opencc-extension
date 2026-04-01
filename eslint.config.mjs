@@ -6,7 +6,7 @@ import prettier from 'eslint-config-prettier';
 
 export default [
   {
-    ignores: ['build/**', 'node_modules/**', '*.zip'],
+    ignores: ['build/**', '.output/**', '.wxt/**', 'node_modules/**', '*.zip'],
   },
 
   // Base recommended rules for JavaScript.
@@ -26,7 +26,7 @@ export default [
 
   // Extension runtime code (browser + webextension globals).
   {
-    files: ['src/**/*.ts'],
+    files: ['src/**/*.{ts,tsx}'],
     languageOptions: {
       parser: tsParser,
       ecmaVersion: 'latest',
@@ -34,6 +34,12 @@ export default [
       globals: {
         ...globals.browser,
         ...globals.webextensions,
+        // WXT auto-imports
+        defineBackground: 'readonly',
+        defineContentScript: 'readonly',
+        defineUnlistedScript: 'readonly',
+        browser: 'readonly',
+        storage: 'readonly',
       },
     },
     plugins: {

@@ -60,13 +60,12 @@ The legacy OpenCC presets `t` and `jp` are intentionally excluded to keep the UI
 
 ## Architecture
 
-The codebase follows a layered structure to keep concerns clean and testable:
+The codebase is built on [WXT](https://wxt.dev/) (Vite-based browser extension framework) with [Preact](https://preactjs.com/) for the UI:
 
-- **Domain (`src/domain`)** – Locale definitions and validation helpers.
-- **Infrastructure (`src/infrastructure`)** – The OpenCC factory that wires dictionary data to runtime converters.
-- **Application (`src/application`)** – Stateful services that orchestrate conversion, caching, and DOM traversal.
-- **Core (`src/core`)** – A small façade exposing stable helpers (`convertPlainText`, `convertAllNewTextNodes`, `convertSelection`, etc.).
-- **Presentation (`src/content`, `src/popup`, `src/background`)** – Browser-facing scripts that interact with Chrome/Firefox APIs.
+- **Entrypoints (`src/entrypoints/`)** – Background service worker, content script, popup, and options page.
+- **Utilities (`src/utils/`)** – Conversion facade (converter + DOM traversal + caching), whitelist matching, MutationObserver for auto mode, WXT typed storage items.
+- **Hooks (`src/hooks/`)** – Preact hooks for reactive settings across popup/options.
+- **OpenCC engine (`src/lib/opencc/`)** – Trie-based converter with embedded dictionary data (auto-generated, do not edit).
 
 ## Installation
 
@@ -78,14 +77,14 @@ Install from the listings above—updates are handled automatically by each stor
 
 1. Clone the repository and install dependencies.
 2. Build the extension bundle.
-3. Load the generated `build/` directory as an unpacked extension.
+3. Load the generated `.output/chrome-mv3/` directory as an unpacked extension.
 
 ```powershell
 npm install
 npm run build
 ```
 
-For Firefox, use `npm run build:firefox` and load the produced artifacts from `build/` via `about:debugging`.
+For Firefox, use `npm run build:firefox` and load `.output/firefox-mv3/` via `about:debugging`.
 
 ## Usage
 
@@ -111,15 +110,16 @@ When auto mode is active, a grey badge with the letter “A” appears on the to
 
 ## Development
 
-The project uses Node.js ≥ 18, [npm](https://www.npmjs.com/) ≥ 9, and TypeScript.
+The project uses Node.js ≥ 18, [npm](https://www.npmjs.com/) ≥ 9, and TypeScript. Built with [WXT](https://wxt.dev/).
 
 ```powershell
-npm install       # install dependencies
-npm run dev       # start a watch build (outputs to build/)
-npm run build     # generate production bundles
+npm install           # install dependencies
+npm run dev           # start dev mode with HMR (Chromium)
+npm run dev:firefox   # start dev mode (Firefox)
+npm run build         # production build → .output/chrome-mv3/
 ```
 
-While developing, load the `build/` directory as an unpacked extension (Chromium) or temporary add-on (Firefox) and keep the watch build running.
+WXT handles manifest generation, content script registration, and hot module reloading during development.
 
 ## Testing
 

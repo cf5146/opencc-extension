@@ -1,22 +1,7 @@
 {
+  "extends": "./.wxt/tsconfig.json",
   "compilerOptions": {
-    "target": "ES2021",
-  "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "allowJs": true,
-    "checkJs": false,
-    "strict": true,
-    "skipLibCheck": true,
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "isolatedModules": true,
-    "noEmit": true,
-    "types": ["chrome", "node"],
-    "baseUrl": ".",
-    "paths": {
-      "@core/*": ["src/core/*"]
-    }
-  },
-  "include": ["src", "tests", "build.mjs"],
-  "exclude": ["dist", "build", "node_modules"]
+    "jsx": "react-jsx",
+    "jsxImportSource": "preact"
+  }
 }

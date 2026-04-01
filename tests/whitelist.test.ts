@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { matchesWhitelist, compileWhitelist } from '../src/core/whitelist.js';
+import { matchesWhitelist, compileWhitelist } from '../src/utils/whitelist';
 
 describe('whitelist utilities', () => {
   it('compiles patterns once and caches', () => {

@@ -20,22 +20,31 @@ Install deps:
 npm install
 ```
 
-Start dev for Firefox:
+Start dev mode (Chromium, with HMR):
 
 ```bash
-npm run start:firefox
+npm run dev
 ```
 
-For Chromium:
+For Firefox:
 
 ```bash
-npm run start:chromium
+npm run dev:firefox
 ```
 
-Build production artifacts (zips generated in repo root):
+Build production artifacts:
 
 ```bash
-npm run dist
+npm run build          # Chrome → .output/chrome-mv3/
+npm run build:firefox  # Firefox → .output/firefox-mv3/
+```
+
+Package as zip for store upload:
+
+```bash
+npm run zip
+npm run zip:firefox
+npm run zip:edge
 ```
 
 ## Lint & Format
