@@ -18,7 +18,7 @@
     "zip": "wxt zip",
     "zip:firefox": "wxt zip -b firefox",
     "zip:edge": "wxt zip -b edge",
-    "dist": "npm run zip && npm run zip:firefox && npm run zip:edge && node scripts/copy-icons.cjs",
+    "dist": "wxt build && node ./scripts/copy-icons.cjs && wxt zip && wxt build -b firefox && node ./scripts/copy-icons.cjs && wxt zip -b firefox && wxt build -b edge && node ./scripts/copy-icons.cjs && wxt zip -b edge",
     "lint": "eslint src --ext .ts,.tsx,.js,.mjs",
     "typecheck": "tsc --noEmit",
     "format": "prettier . --write",
