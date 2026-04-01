@@ -48,12 +48,17 @@ jobs:
         run: npm ci
       - name: Package (Chrome, Firefox, Edge)
         run: npm run dist
+      - name: Collect distributions
+        run: |
+          cp .output/*-chrome.zip opencc.chrome.zip
+          cp .output/*-firefox.zip opencc.firefox.zip
+          cp .output/*-edge.zip opencc.edge.zip
       - name: Upload packaged artifacts
         uses: actions/upload-artifact@v4
         with:
           name: webext-zips-${{ github.sha }}
           path: |
-            .output/*chrome.zip
-            .output/*firefox.zip
-            .output/*edge.zip
+            opencc.chrome.zip
+            opencc.firefox.zip
+            opencc.edge.zip
           if-no-files-found: error
