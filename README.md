@@ -5,7 +5,7 @@
 [![CI Status](https://github.com/cf5146/opencc-extension/actions/workflows/ci.yml/badge.svg)](https://github.com/cf5146/opencc-extension/actions/workflows/ci.yml)
 [![Contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg)](https://github.com/cf5146/opencc-extension/blob/main/CONTRIBUTING.md)
 
-Convert Chinese text between Simplified, Traditional (TW/HK), and other OpenCC variants directly inside your browser. The extension ships with an embedded OpenCC engine so every conversion happens locally—no network calls required.
+Convert Chinese text between Simplified, Traditional (TW/HK), Japanese Shinjitai, and other OpenCC variants directly inside your browser. The extension is now built with WXT and Svelte, and every conversion happens locally—no network calls required.
 
 ![Popup converting a webpage using opencc-extension](./demo.gif)
 
@@ -33,26 +33,26 @@ Convert Chinese text between Simplified, Traditional (TW/HK), and other OpenCC v
 [![Get it from Microsoft Edge](https://learn.microsoft.com/en-us/microsoft-edge/extensions/publish/add-ons-badge-images/microsoft-edge-add-ons-badge.png)](https://microsoftedge.microsoft.com/addons/detail/opencc/mdbpbkojhmbbeepkhehdllcjdefbahnh)
 
 > [!NOTE]
-> The extension is actively tested on Chrome and Firefox. Other Chromium-based browsers may work, but compatibility is not guaranteed.
+> The extension is built for Chrome, Firefox, and Edge from the same WXT codebase.
 
 ## Overview
 
 The project bundles the official [OpenCC](https://github.com/BYVoid/OpenCC) dictionaries (via [opencc-js](https://github.com/nk2028/opencc-js)) and runs them inside the browser. Supported variants include:
 
 - `cn`: Simplified Chinese (Mainland China)
-- `hk`: Traditional Chinese (Hong Kong)
 - `tw`: Traditional Chinese (Taiwan)
-  - `twp`: Traditional Chinese (Taiwan) with native phrases
-
-The legacy OpenCC presets `t` and `jp` are intentionally excluded to keep the UI focused and the bundles smaller.
+- `twp`: Traditional Chinese (Taiwan) with native phrases
+- `hk`: Traditional Chinese (Hong Kong)
+- `jp`: Japanese Shinjitai
+- `t`: Generic Traditional Chinese
 
 ## Feature snapshot
 
-- One-click page-wide conversion using a fast [`TreeWalker`](https://developer.mozilla.org/docs/Web/API/TreeWalker).
+- One-click page-wide conversion using OpenCC's `HTMLConverter`.
 - Auto mode that watches for new DOM nodes via [`MutationObserver`](https://developer.mozilla.org/docs/Web/API/MutationObserver).
 - Context-menu action to convert highlighted selections in place.
 - Popup textbox for quick phrase-by-phrase conversion.
-- Locale whitelist to avoid converting unsuitable sections such as code blocks.
+- Dark mode, keyboard shortcut support, synced settings, per-site preferences, and blocklist/allowlist rules.
 - All work happens offline—no tracking, no telemetry.
 
 ![Converting a highlighted text selection](./select.gif)
@@ -60,13 +60,13 @@ The legacy OpenCC presets `t` and `jp` are intentionally excluded to keep the UI
 
 ## Architecture
 
-The codebase follows a layered structure to keep concerns clean and testable:
+The codebase follows WXT's file-based extension structure:
 
-- **Domain (`src/domain`)** – Locale definitions and validation helpers.
-- **Infrastructure (`src/infrastructure`)** – The OpenCC factory that wires dictionary data to runtime converters.
-- **Application (`src/application`)** – Stateful services that orchestrate conversion, caching, and DOM traversal.
-- **Core (`src/core`)** – A small façade exposing stable helpers (`convertPlainText`, `convertAllNewTextNodes`, `convertSelection`, etc.).
-- **Presentation (`src/content`, `src/popup`, `src/background`)** – Browser-facing scripts that interact with Chrome/Firefox APIs.
+- **`entrypoints/`** – Background worker, content script, popup, and options pages.
+- **`lib/`** – Typed conversion, storage, messaging, constants, and domain matching helpers.
+- **`assets/styles/`** – Shared popup/options theme styles with light, dark, and system modes.
+- **`public/_locales/`** – Chrome-compatible i18n messages for English, Traditional Chinese, and Simplified Chinese.
+- **`test/`** – Vitest unit tests and Playwright extension E2E tests.
 
 ## Installation
 
@@ -78,14 +78,14 @@ Install from the listings above—updates are handled automatically by each stor
 
 1. Clone the repository and install dependencies.
 2. Build the extension bundle.
-3. Load the generated `build/` directory as an unpacked extension.
+3. Load the generated `.output/chrome-mv3/` directory as an unpacked extension.
 
 ```powershell
 npm install
 npm run build
 ```
 
-For Firefox, use `npm run build:firefox` and load the produced artifacts from `build/` via `about:debugging`.
+For Firefox, use `npm run build:firefox` and load the produced artifacts from `.output/` via `about:debugging`.
 
 ## Usage
 
@@ -93,55 +93,55 @@ For Firefox, use `npm run build:firefox` and load the produced artifacts from `b
 2. Choose the **Origin** (current text variant) and **Target** (desired variant).
 3. Use one of the entry points:
    - **Convert page**: Transforms visible text in the active tab.
-   - **Convert selection**: Right-click any highlighted text and choose “Convert with OpenCC”.
+   - **Convert selection**: Right-click any highlighted text and choose “Convert selected text”.
    - **Textbox conversion**: Type or paste phrases in the popup to convert as you go.
 
-The extension remembers your last origin/target pair for future sessions.
+The extension remembers your last origin/target pair and per-site conversion choices for future sessions.
 
 ## Auto mode
 
 Enable auto mode from the popup to continually convert new content—perfect for sites that stream or dynamically load text.
 
-> [!NOTE]
-> To avoid unwanted conversions, auto mode skips pages whose `<html>` tag sets a non-Chinese `lang` attribute (for example, `lang="en"`).
-
-When auto mode is active, a grey badge with the letter “A” appears on the toolbar icon. Toggle it off from the popup at any time.
+Use the options page to block or allow specific domain patterns such as `*.example.com`. When a page is converted, the toolbar badge shows the conversion direction.
 
 ![Automatic conversion mode badge](./auto.gif)
 
 ## Development
 
-The project uses Node.js ≥ 18, [npm](https://www.npmjs.com/) ≥ 9, and TypeScript.
+The project uses Node.js ≥ 20.19, [npm](https://www.npmjs.com/), WXT, Svelte 5, and TypeScript.
 
 ```powershell
-npm install       # install dependencies
-npm run dev       # start a watch build (outputs to build/)
-npm run build     # generate production bundles
+npm install            # install dependencies
+npm run dev            # start WXT dev mode for Chrome
+npm run dev:firefox    # start WXT dev mode for Firefox
+npm run build          # build Chrome MV3 output
+npm run build:firefox  # build Firefox output
 ```
 
-While developing, load the `build/` directory as an unpacked extension (Chromium) or temporary add-on (Firefox) and keep the watch build running.
+WXT writes builds to `.output/` and handles manifest generation for Chrome, Firefox, and Edge.
 
 ## Testing
 
-Unit and integration tests use [Vitest](https://vitest.dev/).
+Unit tests use [Vitest](https://vitest.dev/), and extension E2E tests use [Playwright](https://playwright.dev/).
 
 ```powershell
+npm run lint
 npm run typecheck
-npm test
-npm run vitest run tests/conversion-service.test.ts
+npm run test:unit
+npm run test:e2e
 ```
 
-CI runs linting, type checking, and tests on every pull request through GitHub Actions.
+CI runs formatting, linting, type checking, unit tests, browser builds, and Playwright E2E checks on every pull request.
 
 ## Data and privacy
 
 - Conversions execute entirely in the browser; no text ever leaves your machine.
-- The extension stores only minimal preferences (origin/target locales and auto-mode flag) using browser storage APIs.
+- The extension stores only preferences such as origin/target locales, theme, auto-mode flag, per-site preferences, and domain rules using browser storage APIs.
 - No analytics, telemetry, or advertising trackers are included.
 
 ## Troubleshooting
 
-- **Nothing changes after clicking convert** – Ensure the page is not excluded by the locale whitelist and that Origin/Target differ.
+- **Nothing changes after clicking convert** – Ensure the page is not excluded by the domain blocklist and that Origin/Target differ.
 - **Auto mode feels slow** – Heavy pages with frequent DOM mutations may benefit from disabling auto mode or narrowing the scope using the whitelist.
 - **Firefox-specific quirks** – Firefox requires the extension to be reloaded after every build from source.
 

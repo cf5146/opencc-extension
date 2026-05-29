@@ -20,6 +20,8 @@ yarn-error.log*
 # Build outputs (ephemeral)
 build/
 dist/
+.output/
+.wxt/
 
 # Distribution artifacts produced by release workflow
 opencc.*.zip
@@ -29,6 +31,8 @@ SHA256SUMS
 coverage/
 .vitest/
 *.lcov
+playwright-report/
+test-results/
 
 # Web-ext artifacts/cache
 web-ext-artifacts/

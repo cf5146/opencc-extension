@@ -1,0 +1,29 @@
+{
+  "extName": {
+    "message": "OpenCC — 中文转换"
+  },
+  "extDescription": {
+    "message": "一键转换网页简体与繁体中文。"
+  },
+  "popupConvert": {
+    "message": "转换页面"
+  },
+  "popupRestore": {
+    "message": "还原"
+  },
+  "popupTextBox": {
+    "message": "文本框"
+  },
+  "popupAutoMode": {
+    "message": "自动模式"
+  },
+  "optionsBlocklist": {
+    "message": "屏蔽列表"
+  },
+  "optionsAllowlist": {
+    "message": "允许列表"
+  },
+  "shortcutHint": {
+    "message": "快捷键：Alt+Shift+C"
+  }
+}

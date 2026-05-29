@@ -1,0 +1,170 @@
+.popup-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 100vh;
+  padding: 16px;
+}
+
+.popup-header,
+.popup-footer,
+.site-indicator,
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.popup-header h1 {
+  margin: 0;
+  font-size: 22px;
+  line-height: 1.1;
+}
+
+.popup-header p,
+.popup-footer,
+.toggle-row small,
+.site-indicator span,
+.textbox-label span {
+  margin: 4px 0 0;
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.icon-button,
+.swap-button,
+.popup-footer button {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-secondary);
+  cursor: pointer;
+}
+
+.icon-button {
+  width: 36px;
+  height: 36px;
+}
+
+.tab-bar {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-secondary);
+}
+
+.tab-bar button {
+  border: 0;
+  border-radius: 8px;
+  padding: 8px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.tab-bar button.active {
+  color: #ffffff;
+  background: var(--accent);
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.site-indicator {
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-secondary);
+}
+
+.variant-grid {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 8px;
+  align-items: end;
+}
+
+.variant-grid label,
+.textbox-label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.variant-grid select,
+.textbox-label textarea {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-primary);
+  background: var(--bg-secondary);
+}
+
+.variant-grid select {
+  min-height: 38px;
+  padding: 0 8px;
+}
+
+.swap-button {
+  width: 36px;
+  height: 38px;
+}
+
+.primary-action {
+  min-height: 42px;
+  border: 0;
+  border-radius: var(--radius);
+  color: #ffffff;
+  background: var(--accent);
+  box-shadow: var(--shadow);
+  cursor: pointer;
+}
+
+.primary-action:disabled {
+  cursor: progress;
+  opacity: 0.72;
+}
+
+.primary-action:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.toggle-row {
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-secondary);
+}
+
+.toggle-row input {
+  width: 18px;
+  height: 18px;
+}
+
+.textbox-label textarea {
+  min-height: 86px;
+  resize: vertical;
+  padding: 10px;
+}
+
+.status {
+  margin: 0;
+  color: var(--success);
+  font-size: 12px;
+}
+
+.status.error {
+  color: var(--danger);
+}
+
+.popup-footer {
+  margin-top: auto;
+}
+
+.popup-footer button {
+  padding: 6px 10px;
+}

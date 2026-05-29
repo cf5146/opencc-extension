@@ -1,49 +1,61 @@
 import js from '@eslint/js';
-import globals from 'globals';
-import tsParser from '@typescript-eslint/parser';
-import tsPlugin from '@typescript-eslint/eslint-plugin';
 import prettier from 'eslint-config-prettier';
+import svelte from 'eslint-plugin-svelte';
+import svelteParser from 'svelte-eslint-parser';
+import tseslint from 'typescript-eslint';
 
-export default [
+export default tseslint.config(
   {
-    ignores: ['build/**', 'node_modules/**', '*.zip'],
+    ignores: [
+      '.output/**',
+      '.wxt/**',
+      'build/**',
+      'coverage/**',
+      'dist/**',
+      'node_modules/**',
+      'playwright-report/**',
+      'scripts/**',
+      'src/**',
+      'tests/**',
+      '*.zip',
+      'build.mjs',
+    ],
   },
-
-  // Base recommended rules for JavaScript.
   js.configs.recommended,
-
-  // Node-oriented files (build and scripts).
+  ...tseslint.configs.strictTypeChecked,
+  ...svelte.configs['flat/recommended'],
+  prettier,
+  {
+    languageOptions: {
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
+  },
+  {
+    files: ['**/*.svelte'],
+    languageOptions: {
+      globals: {
+        document: 'readonly',
+      },
+      parser: svelteParser,
+      parserOptions: {
+        parser: tseslint.parser,
+        projectService: true,
+        extraFileExtensions: ['.svelte'],
+      },
+    },
+  },
   {
     files: ['**/*.{js,mjs,cjs}'],
-    languageOptions: {
-      ecmaVersion: 'latest',
-      sourceType: 'module',
-      globals: {
-        ...globals.node,
-      },
-    },
+    extends: [tseslint.configs.disableTypeChecked],
   },
-
-  // Extension runtime code (browser + webextension globals).
   {
-    files: ['src/**/*.ts'],
-    languageOptions: {
-      parser: tsParser,
-      ecmaVersion: 'latest',
-      sourceType: 'module',
-      globals: {
-        ...globals.browser,
-        ...globals.webextensions,
-      },
-    },
-    plugins: {
-      '@typescript-eslint': tsPlugin,
-    },
     rules: {
-      ...tsPlugin.configs.recommended.rules,
+      '@typescript-eslint/consistent-type-imports': 'error',
+      '@typescript-eslint/no-import-type-side-effects': 'error',
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
     },
   },
-
-  // Disable formatting-related rules that conflict with Prettier.
-  prettier,
-];
+);

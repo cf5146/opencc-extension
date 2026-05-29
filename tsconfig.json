@@ -1,22 +1,35 @@
 {
+  "extends": "./.wxt/tsconfig.json",
   "compilerOptions": {
-    "target": "ES2021",
-  "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "allowJs": true,
-    "checkJs": false,
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
     "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": false,
+    "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
     "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+    "jsx": "preserve",
     "noEmit": true,
-    "types": ["chrome", "node"],
+    "types": ["vite/client", "node"],
     "baseUrl": ".",
     "paths": {
-      "@core/*": ["src/core/*"]
+      "@/*": ["./*"]
     }
   },
-  "include": ["src", "tests", "build.mjs"],
-  "exclude": ["dist", "build", "node_modules"]
+  "include": [
+    "entrypoints/**/*.ts",
+    "entrypoints/**/*.svelte",
+    "lib/**/*.ts",
+    "test/**/*.ts",
+    "wxt.config.ts",
+    "playwright.config.ts",
+    "vitest.config.mjs",
+    ".wxt/**/*.ts"
+  ],
+  "exclude": ["node_modules", ".output", "coverage", "playwright-report"]
 }

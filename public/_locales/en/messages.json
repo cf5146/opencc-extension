@@ -1,0 +1,29 @@
+{
+  "extName": {
+    "message": "OpenCC — Chinese Converter"
+  },
+  "extDescription": {
+    "message": "Convert webpages between Simplified and Traditional Chinese with one click."
+  },
+  "popupConvert": {
+    "message": "Convert Page"
+  },
+  "popupRestore": {
+    "message": "Restore"
+  },
+  "popupTextBox": {
+    "message": "Text Box"
+  },
+  "popupAutoMode": {
+    "message": "Auto Mode"
+  },
+  "optionsBlocklist": {
+    "message": "Blocklist"
+  },
+  "optionsAllowlist": {
+    "message": "Allowlist"
+  },
+  "shortcutHint": {
+    "message": "Keyboard shortcut: Alt+Shift+C"
+  }
+}

@@ -1,0 +1,22 @@
+.output/
+.wxt/
+build/
+coverage/
+dist/
+node_modules/
+playwright-report/
+*.zip
+
+# Legacy MV2/MV3 implementation kept outside the WXT build.
+src/
+tests/
+scripts/
+build.mjs
+
+# User-authored prompt and repository metadata not owned by the rewrite.
+.github/copilot-instructions.md
+.github/dependabot.yml
+.github/prompt/
+CONTRIBUTING.md
+MV3_NOTES.md
+PRIVACY.md

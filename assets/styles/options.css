@@ -1,0 +1,143 @@
+body {
+  width: auto;
+  min-height: 100vh;
+}
+
+.options-shell {
+  width: min(980px, calc(100vw - 32px));
+  margin: 0 auto;
+  padding: 32px 0;
+}
+
+.options-header,
+.card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-primary);
+  box-shadow: var(--shadow);
+}
+
+.options-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 24px;
+}
+
+.options-header h1,
+.card h2,
+.rule-editor h3 {
+  margin: 0;
+}
+
+.options-header p,
+.rule-editor p,
+.empty,
+.notice {
+  color: var(--text-secondary);
+}
+
+.options-header label,
+.rule-editor,
+.inline-form,
+.import-export {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.options-header select,
+.inline-form input,
+.import-export textarea {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-primary);
+  background: var(--bg-secondary);
+}
+
+.options-header select,
+.inline-form input {
+  min-height: 38px;
+  padding: 0 10px;
+}
+
+.card {
+  margin-top: 18px;
+  padding: 24px;
+}
+
+.rule-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 18px;
+}
+
+.inline-form {
+  flex-direction: row;
+}
+
+.inline-form input {
+  flex: 1;
+}
+
+button {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px 12px;
+  color: var(--text-primary);
+  background: var(--bg-secondary);
+  cursor: pointer;
+}
+
+button:hover {
+  border-color: var(--accent);
+}
+
+ul {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+li,
+.shortcut-card {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+li {
+  justify-content: space-between;
+}
+
+code,
+kbd {
+  border-radius: 6px;
+  padding: 4px 6px;
+  background: var(--bg-tertiary);
+}
+
+.import-export textarea {
+  min-height: 100px;
+  padding: 10px;
+  resize: vertical;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  border-bottom: 1px solid var(--border);
+  padding: 10px;
+  text-align: left;
+}
+
+.notice {
+  margin: 14px 0 0;
+}

@@ -2,58 +2,66 @@ name: CI
 
 on:
   push:
-    branches: [ main, dev ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
-
-concurrency:
-  group: ci-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+    branches: [main]
 
 permissions:
   contents: read
 
 jobs:
-  verify:
+  quality:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
-      - name: Install dependencies
-        run: npm ci
-      - name: Lint
-        run: npm run lint
-      - name: Typecheck
-        run: npm run typecheck
-      - name: Test
-        run: npm test
-      - name: Build
-        run: npm run build
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run format:check
+      - run: npm run typecheck
+      - run: npm run test:unit -- --coverage
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
 
-  package:
-    # Packaging is valuable but slower; run it on pushes (main/dev) so PR checks stay quick.
-    if: github.event_name == 'push'
-    needs: verify
+  build:
     runs-on: ubuntu-latest
+    needs: quality
+    strategy:
+      matrix:
+        browser: [chrome, firefox, edge]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
-      - name: Install dependencies
-        run: npm ci
-      - name: Package (Chrome, Firefox, Edge)
-        run: npm run dist
-      - name: Upload packaged artifacts
-        uses: actions/upload-artifact@v4
+      - run: npm ci
+      - run: npm run build:${{ matrix.browser }}
+      - uses: actions/upload-artifact@v4
         with:
-          name: webext-zips-${{ github.sha }}
-          path: |
-            opencc.chrome.zip
-            opencc.firefox.zip
-            opencc.edge.zip
-          if-no-files-found: error
+          name: extension-${{ matrix.browser }}
+          path: .output/
+
+  test-e2e:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run build
+      - run: xvfb-run -a npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report/
