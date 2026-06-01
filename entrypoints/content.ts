@@ -60,7 +60,7 @@ function restorePage(): PageStatusResponse {
   }
 
   activeConversion.observer?.disconnect();
-  for (const handler of activeConversion.dynamicHandlers.reverse()) {
+  for (const handler of activeConversion.dynamicHandlers.toReversed()) {
     handler.restore();
   }
   activeConversion.mainHandler.restore();

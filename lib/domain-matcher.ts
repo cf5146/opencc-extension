@@ -8,7 +8,7 @@ export function normalizeDomainPattern(pattern: string): string {
 
 export function domainPatternToRegExp(pattern: string): RegExp {
   const normalized = normalizeDomainPattern(pattern);
-  const escaped = normalized.replace(REGEX_META_PATTERN, '\\$&').replace(/\*/g, '.*');
+  const escaped = normalized.replace(REGEX_META_PATTERN, String.raw`\$&`).replaceAll('*', '.*');
   return new RegExp(`^${escaped}$`, 'i');
 }
 
