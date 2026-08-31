@@ -55,6 +55,7 @@ Create these files:
 - `src/application/runtime/background-runtime.ts`: Background orchestration against platform ports.
 - `src/application/runtime/content-runtime.ts`: Content message handling and auto-controller orchestration.
 - `src/application/runtime/index.ts`: Runtime orchestration exports.
+- `src/application/conversion/conversion-service.ts`: Shared selection/document node-cache integration so inserted selection output is not rescanned.
 - `src/application/ui/popup-controller.ts`: Injectable popup DOM and platform behavior.
 - `src/application/ui/options-controller.ts`: Injectable options DOM and platform behavior.
 - `src/application/ui/index.ts`: UI controller exports.
@@ -1337,13 +1338,17 @@ rtk git commit -m "refactor: route tab operations through background runtime"
 - Modify: `src/application/runtime/index.ts`
 - Modify: `entrypoints/content.ts`
 - Create: `tests/content-runtime.test.ts`
+- Modify: `src/application/conversion/conversion-service.ts`
+- Modify: `tests/conversion-service.test.ts`
 
 **Interfaces:**
 
 - Consumes `ExtensionPlatform`, `SettingsStore`, `AutoConversionOperations`, and injected time/document dependencies.
 - Produces `createContentRuntime(options): ContentRuntime`.
-- `ContentRuntime` exposes `start(): Promise<() => void>`; the returned function disposes runtime listeners and the auto controller.
-- Uses the existing core conversion facade through an `AutoConversionOperations` adapter.
+- `ContentRuntime` exposes `start(): Promise<() => void>` and synchronous `dispose()`; the returned cleanup function disposes runtime listeners and the auto controller.
+- Uses the existing core conversion facade through an `AutoConversionOperations` adapter; selection conversion uses the service's tracked node path so inserted output is not rescanned.
+- The auto controller also exposes `getDocumentState(settings)`, `markDocumentProcessed(settings)`, `markSelectionProcessed(settings)`, and `markConversionFailed()` so manual conversions share retained locale-pair safety with auto mode, self-generated mutation records can be recognized through `hasConverted`, and partial failures cannot be retried in place.
+- Failed full scans, fallback scans, incremental observer conversions, and manual page/selection conversions leave a sticky `reload-required` state for the current URL; a fresh URL is required before another full scan can run.
 
 - [ ] **Step 1: Write failing content runtime tests**
 

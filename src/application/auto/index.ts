@@ -4,6 +4,7 @@ export type {
   AutoConversionControllerOptions,
   AutoConversionOperations,
   AutoStatus,
+  DocumentConversionState,
   ObserverPort,
   TimerPort,
 } from './auto-conversion-controller.js';

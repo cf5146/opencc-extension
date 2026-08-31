@@ -63,6 +63,24 @@ describe('conversion service', () => {
     expect(paragraph.textContent).toBe('cn->hk:選取文字');
   });
 
+  it('does not reconvert text inserted by selection conversion', () => {
+    const service = createService();
+    const paragraph = document.createElement('p');
+    paragraph.textContent = '選取文字';
+    document.body.appendChild(paragraph);
+
+    const selection = window.getSelection();
+    const range = document.createRange();
+    range.selectNodeContents(paragraph);
+    selection?.removeAllRanges();
+    selection?.addRange(range);
+
+    expect(service.convertSelection(selection, 'cn', 'hk')).toBe(true);
+    expect(service.convertDocument('cn', 'hk')).toBe(0);
+    expect(service.convertSelection(selection, 'cn', 'hk')).toBe(false);
+    expect(paragraph.textContent).toBe('cn->hk:選取文字');
+  });
+
   it('updates titles and exposes conversion metadata', () => {
     const service = createService();
     const node = document.createTextNode('標題文字');
