@@ -1,12 +1,12 @@
-import js from '@eslint/js';
-import globals from 'globals';
-import tsParser from '@typescript-eslint/parser';
-import tsPlugin from '@typescript-eslint/eslint-plugin';
-import prettier from 'eslint-config-prettier';
+import js from "@eslint/js";
+import globals from "globals";
+import tsParser from "@typescript-eslint/parser";
+import tsPlugin from "@typescript-eslint/eslint-plugin";
+import prettier from "eslint-config-prettier";
 
 export default [
   {
-    ignores: ['build/**', 'node_modules/**', '*.zip'],
+    ignores: ["build/**", "node_modules/**", "*.zip"],
   },
 
   // Base recommended rules for JavaScript.
@@ -14,30 +14,49 @@ export default [
 
   // Node-oriented files (build and scripts).
   {
-    files: ['**/*.{js,mjs,cjs}'],
+    files: ["**/*.{js,mjs,cjs}"],
     languageOptions: {
-      ecmaVersion: 'latest',
-      sourceType: 'module',
+      ecmaVersion: "latest",
+      sourceType: "module",
       globals: {
         ...globals.node,
       },
     },
   },
 
-  // Extension runtime code (browser + webextension globals).
+  // Extension source and WXT entrypoints (browser + webextension globals).
   {
-    files: ['src/**/*.ts'],
+    files: ["src/**/*.ts", "entrypoints/**/*.ts"],
     languageOptions: {
       parser: tsParser,
-      ecmaVersion: 'latest',
-      sourceType: 'module',
+      ecmaVersion: "latest",
+      sourceType: "module",
       globals: {
         ...globals.browser,
         ...globals.webextensions,
       },
     },
     plugins: {
-      '@typescript-eslint': tsPlugin,
+      "@typescript-eslint": tsPlugin,
+    },
+    rules: {
+      ...tsPlugin.configs.recommended.rules,
+    },
+  },
+
+  // WXT configuration runs in the Node-based build process.
+  {
+    files: ["wxt.config.ts"],
+    languageOptions: {
+      parser: tsParser,
+      ecmaVersion: "latest",
+      sourceType: "module",
+      globals: {
+        ...globals.node,
+      },
+    },
+    plugins: {
+      "@typescript-eslint": tsPlugin,
     },
     rules: {
       ...tsPlugin.configs.recommended.rules,
