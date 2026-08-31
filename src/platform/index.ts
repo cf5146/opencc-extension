@@ -1,3 +1,4 @@
+export { createBrowserPlatform } from './browser-platform.js';
 export { PlatformError } from './types.js';
 export type {
   ActionPort,
