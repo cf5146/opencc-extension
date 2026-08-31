@@ -96,11 +96,8 @@ export function createConversionService(factory: ConverterFactory = createOpenCC
 
     for (let node = walker.nextNode(); node; node = walker.nextNode()) {
       const textNode = node as Text;
-  const original = textNode.nodeValue ?? '';
-      if (!original) continue;
-      const converted = convertText(original, from, to);
-      if (converted !== original) {
-        textNode.nodeValue = converted;
+      if (!textNode.nodeValue) continue;
+      if (convertNode(textNode, from, to)) {
         changed = true;
       }
     }

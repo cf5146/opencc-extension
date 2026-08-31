@@ -121,6 +121,7 @@ export function createRecordingConversionOperations() {
     convertDocument: vi.fn().mockReturnValue(1),
     convertTitle: vi.fn(),
     convertSelection: vi.fn().mockReturnValue(false),
+    hasConverted: vi.fn().mockReturnValue(false),
     resetCaches: vi.fn(),
   };
 }

@@ -107,6 +107,7 @@ describe('auto conversion controller', () => {
         convertedTitles += 1;
       },
       convertSelection: () => false,
+      hasConverted: () => false,
       resetCaches: () => {
         resetCount += 1;
       },
@@ -157,6 +158,37 @@ describe('auto conversion controller', () => {
     expect(documentRoots).toEqual([dom.window.document.body]);
   });
 
+  it('marks a failed activation reload-required until the URL changes', async () => {
+    let attempts = 0;
+    const operations = createOperations({
+      convertDocument: (_from, _to, root) => {
+        attempts += 1;
+        if (attempts === 1) throw new Error('initial scan failed');
+        convertedDocuments += 1;
+        documentRoots.push(root);
+        return 1;
+      },
+    });
+    const controller = createController(operations);
+    const settings = makeSettings({ auto: true });
+
+    await expect(controller.reconcile(settings)).rejects.toThrow('initial scan failed');
+    expect(controller.getStatus()).toBe('inactive');
+    expect(observed).toBe(false);
+
+    await controller.reconcile(settings);
+    expect(controller.getStatus()).toBe('reload-required');
+    expect(attempts).toBe(1);
+
+    currentUrl = 'https://example.com/next';
+    await controller.reconcile(settings);
+
+    expect(controller.getStatus()).toBe('active');
+    expect(attempts).toBe(2);
+    expect(convertedDocuments).toBe(1);
+    expect(observed).toBe(true);
+  });
+
   it.each([
     { name: 'auto mode disabled', settings: makeSettings({ auto: false }), prepare: () => {} },
     { name: 'same locale pair', settings: makeSettings({ auto: true, origin: 'cn', target: 'cn' }), prepare: () => {} },
@@ -187,6 +219,19 @@ describe('auto conversion controller', () => {
 
     expect(controller.getStatus()).toBe('inactive');
     expect(disconnected).toBe(true);
+  });
+
+  it('retains document state after auto mode stops', async () => {
+    const controller = createController();
+    const settings = makeSettings({ auto: true, origin: 'cn', target: 'hk' });
+
+    await controller.reconcile(settings);
+    await controller.reconcile(makeSettings({ ...settings, auto: false }));
+
+    expect(controller.getDocumentState(settings)).toBe('processed');
+    expect(controller.getDocumentState(makeSettings({ ...settings, origin: 'tw', target: 'cn' }))).toBe(
+      'reload-required',
+    );
   });
 
   it('converts added text nodes incrementally', async () => {
@@ -236,6 +281,50 @@ describe('auto conversion controller', () => {
     expect(nodePairs).toEqual([['cn', 'hk']]);
   });
 
+  it('does not schedule fallback for already-tracked conversion mutations', async () => {
+    const operations = createOperations({
+      convertTextNode: () => false,
+      hasConverted: () => true,
+    });
+    const controller = createController(operations);
+    await controller.reconcile(makeSettings({ auto: true }));
+
+    const changed = dom.window.document.createTextNode('already converted');
+    await emit([
+      makeMutation(dom.window.document, {
+        type: 'characterData',
+        target: changed,
+      }),
+    ]);
+
+    expect(timer.schedule).not.toHaveBeenCalled();
+    expect(controller.getStatus()).toBe('active');
+  });
+
+  it('does not schedule fallback for tracked selection replacement records', async () => {
+    const operations = createOperations({
+      convertTextNode: () => false,
+      hasConverted: () => true,
+    });
+    const controller = createController(operations);
+    await controller.reconcile(makeSettings({ auto: true }));
+
+    const inserted = dom.window.document.createTextNode('tracked selection output');
+    const removed = dom.window.document.createTextNode('original selection output');
+    await emit([
+      makeMutation(dom.window.document, {
+        addedNodes: [inserted] as unknown as NodeList,
+      }),
+      makeMutation(dom.window.document, {
+        addedNodes: [] as unknown as NodeList,
+        removedNodes: [removed] as unknown as NodeList,
+      }),
+    ]);
+
+    expect(timer.schedule).not.toHaveBeenCalled();
+    expect(controller.getStatus()).toBe('active');
+  });
+
   it('coalesces zero-change batches into one 250ms fallback scan', async () => {
     const controller = createController();
     await controller.reconcile(makeSettings({ auto: true }));
@@ -251,6 +340,22 @@ describe('auto conversion controller', () => {
     runTimer(handle);
     await Promise.resolve();
 
+    expect(convertedDocuments).toBe(2);
+  });
+
+  it('reconciles the current URL before a pending fallback scan', async () => {
+    const controller = createController();
+    await controller.reconcile(makeSettings({ auto: true }));
+    await emit([]);
+    const handle = [...scheduledTimers.keys()][0];
+    if (handle === undefined) throw new Error('fallback timer was not scheduled');
+
+    currentUrl = 'https://example.com/next';
+    runTimer(handle);
+    await Promise.resolve();
+
+    expect(resetCount).toBe(1);
+    expect(convertedTitles).toBe(2);
     expect(convertedDocuments).toBe(2);
   });
 
@@ -278,6 +383,24 @@ describe('auto conversion controller', () => {
     expect(convertedTitles).toBe(2);
     expect(convertedDocuments).toBe(2);
     expect(controller.getStatus()).toBe('active');
+  });
+
+  it('reconciles a SPA URL change before processing its mutation batch', async () => {
+    const controller = createController();
+    await controller.reconcile(makeSettings({ auto: true }));
+
+    currentUrl = 'https://example.com/next';
+    const added = dom.window.document.createTextNode('added on next route');
+    await emit([
+      makeMutation(dom.window.document, {
+        addedNodes: [added] as unknown as NodeList,
+      }),
+    ]);
+
+    expect(resetCount).toBe(1);
+    expect(convertedTitles).toBe(2);
+    expect(convertedDocuments).toBe(2);
+    expect(nodePairs).toEqual([['cn', 'hk']]);
   });
 
   it('marks a processed document reload-required when the locale pair changes', async () => {
@@ -309,6 +432,44 @@ describe('auto conversion controller', () => {
     expect(nodePairs).toEqual([['tw', 'cn']]);
   });
 
+  it('keeps reload-required sticky after alternate-pair mutations and reactivation', async () => {
+    const controller = createController();
+    const original = makeSettings({ auto: true, origin: 'cn', target: 'hk' });
+    const alternate = makeSettings({ auto: true, origin: 'tw', target: 'cn' });
+
+    await controller.reconcile(original);
+    await controller.reconcile(alternate);
+    const added = dom.window.document.createTextNode('alternate output');
+    await emit([makeMutation(dom.window.document, { addedNodes: [added] as unknown as NodeList })]);
+    await controller.reconcile(makeSettings({ ...alternate, auto: false }));
+    await controller.reconcile(original);
+
+    expect(controller.getStatus()).toBe('reload-required');
+    expect(convertedDocuments).toBe(1);
+  });
+
+  it('resets caches when a URL transition fails after partial conversion', async () => {
+    let attempts = 0;
+    const operations = createOperations({
+      convertDocument: (_from, _to, root) => {
+        attempts += 1;
+        if (attempts === 2) throw new Error('route scan failed');
+        convertedDocuments += 1;
+        documentRoots.push(root);
+        return 1;
+      },
+    });
+    const controller = createController(operations);
+    const settings = makeSettings({ auto: true });
+    await controller.reconcile(settings);
+    currentUrl = 'https://example.com/next';
+
+    await expect(controller.reconcile(settings)).rejects.toThrow('route scan failed');
+
+    expect(resetCount).toBe(2);
+    expect(controller.getStatus()).toBe('inactive');
+  });
+
   it('does not fallback-scan existing content while reload is required', async () => {
     const controller = createController();
     await controller.reconcile(makeSettings({ auto: true, origin: 'cn', target: 'hk' }));
@@ -332,6 +493,18 @@ describe('auto conversion controller', () => {
     expect(resetCount).toBe(2);
     expect(convertedTitles).toBe(2);
     expect(convertedDocuments).toBe(2);
+  });
+
+  it('reactivates without rescanning the same processed document', async () => {
+    const controller = createController();
+    const settings = makeSettings({ auto: true });
+
+    await controller.reconcile(settings);
+    await controller.reconcile(makeSettings({ ...settings, auto: false }));
+    await controller.reconcile(settings);
+
+    expect(convertedDocuments).toBe(1);
+    expect(controller.getStatus()).toBe('active');
   });
 
   it('contains asynchronous observer operation failures', async () => {
@@ -361,6 +534,26 @@ describe('auto conversion controller', () => {
     }
 
     expect(unhandledRejection).not.toHaveBeenCalled();
-    expect(controller.getStatus()).toBe('active');
+    expect(controller.getStatus()).toBe('reload-required');
+  });
+
+  it('marks fallback scan failures reload-required', async () => {
+    const operations = createOperations({
+      convertDocument: vi.fn()
+        .mockReturnValueOnce(1)
+        .mockImplementation(() => {
+          throw new Error('fallback failed');
+        }),
+    });
+    const controller = createController(operations);
+
+    await controller.reconcile(makeSettings({ auto: true }));
+    await emit([]);
+    const handle = [...scheduledTimers.keys()][0];
+    if (handle === undefined) throw new Error('fallback timer was not scheduled');
+    runTimer(handle);
+
+    expect(controller.getStatus()).toBe('reload-required');
+    expect(resetCount).toBe(1);
   });
 });
