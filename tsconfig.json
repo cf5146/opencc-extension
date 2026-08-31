@@ -1,7 +1,8 @@
 {
+  "extends": "./.wxt/tsconfig.json",
   "compilerOptions": {
     "target": "ES2021",
-  "module": "NodeNext",
+    "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "allowJs": true,
     "checkJs": false,
@@ -11,12 +12,23 @@
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
     "noEmit": true,
-    "types": ["chrome", "node"],
+    "types": ["node", "vitest/globals"],
     "baseUrl": ".",
     "paths": {
       "@core/*": ["src/core/*"]
     }
   },
-  "include": ["src", "tests", "build.mjs"],
-  "exclude": ["dist", "build", "node_modules"]
+  "include": ["src", "entrypoints", "tests", "wxt.config.ts", "scripts"],
+  "exclude": [
+    "dist",
+    "build",
+    "node_modules",
+    ".output",
+    ".wxt",
+    "src/background.ts",
+    "src/content.ts",
+    "src/content/observer.ts",
+    "src/popup",
+    "src/options"
+  ]
 }

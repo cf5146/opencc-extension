@@ -19,7 +19,11 @@ yarn-error.log*
 
 # Build outputs (ephemeral)
 build/
+!src/build/
+!src/build/**
 dist/
+.output/
+.wxt/
 
 # Distribution artifacts produced by release workflow
 opencc.*.zip

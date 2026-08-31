@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="zh" xml:lang="zh">
+  <head>
+    <meta charset="utf-8" />
+    <title>OpenCC Extension</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <div class="brand">
+        <a id="title" target="_blank" href="https://github.com/tnychn/opencc-extension">OpenCC</a>
+        <span id="subtitle" class="version-badge" title="Extension version"></span>
+      </div>
+      <nav class="header-actions">
+        <button id="convert" class="primary" title="Convert current page">Convert Page</button>
+      </nav>
+    </header>
+    <main class="app-main">
+      <section class="panel panel-inline" aria-labelledby="direction-title">
+        <span id="direction-title" class="panel-title">Direction</span>
+        <div class="direction-row">
+          <div class="select-group">
+            <label for="origin" class="sr-only">Source</label>
+            <select id="origin" aria-label="Source variant">
+              <option value="cn" selected>cn (简)</option>
+              <option value="hk">hk (港)</option>
+              <option value="tw">tw (臺)</option>
+              <option value="twp">twp (臺灣常用詞彙)</option>
+            </select>
+          </div>
+          <button id="swap" class="icon" title="Swap">⇄</button>
+          <div class="select-group">
+            <label for="target" class="sr-only">Target</label>
+            <select id="target" aria-label="Target variant">
+              <option value="hk" selected>hk (港)</option>
+              <option value="cn">cn (简)</option>
+              <option value="tw">tw (臺)</option>
+              <option value="twp">twp (臺灣常用詞彙)</option>
+            </select>
+          </div>
+        </div>
+        <div class="auto-toggle">
+          <input id="auto" type="checkbox" />
+          <label for="auto">Auto convert on load</label>
+        </div>
+      </section>
+      <section class="panel" aria-labelledby="textbox-title">
+        <div class="panel-header">
+          <span id="textbox-title" class="panel-title">Text Sandbox</span>
+          <div class="panel-tools">
+            <button id="reset" class="icon" title="Reset textbox">⟳</button>
+          </div>
+        </div>
+        <textarea
+          id="textbox"
+          placeholder="Paste or type text here to convert…"
+          aria-label="Conversion textbox"
+        ></textarea>
+      </section>
+    </main>
+    <footer class="app-footer">
+      <span class="footnote">Powered by <a target="_blank" href="https://github.com/BYVoid/OpenCC">OpenCC</a></span>
+      <a class="repo-link" target="_blank" href="https://github.com/tnychn/opencc-extension">Repository</a>
+    </footer>
+
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>
