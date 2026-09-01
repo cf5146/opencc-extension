@@ -11,14 +11,27 @@ import {
 
 const selectionMenuId = 'convert-selection';
 
-function errorMessage(error: unknown): string {
-  if (error instanceof Error && error.message) return error.message;
-  if (typeof error === 'string') return error;
-  if (typeof error === 'object' && error !== null && 'message' in error) {
+function objectErrorMessage(error: object): string {
+  if ('message' in error) {
     const message = (error as { message?: unknown }).message;
     if (typeof message === 'string' && message) return message;
   }
-  return String(error);
+  try {
+    const serialized = JSON.stringify(error);
+    return typeof serialized === 'string' ? serialized : 'Unknown error object';
+  } catch {
+    return 'Unserializable error object';
+  }
+}
+
+function errorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message || error.name;
+  if (typeof error === 'string') return error;
+  if (typeof error === 'object' && error !== null) return objectErrorMessage(error);
+  if (error === null) return 'null';
+  if (error === undefined) return 'undefined';
+  if (typeof error === 'function') return error.name || 'Unknown function';
+  return error.toString();
 }
 
 function isNoReceiverError(error: unknown): boolean {
