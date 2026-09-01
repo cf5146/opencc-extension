@@ -41,7 +41,7 @@
     "jsdom": "^27.4.0",
     "prettier": "^3.7.4",
     "typescript": "^5.9.3",
-    "vitest": "^4.0.16",
+    "vitest": "^4.1.11",
     "web-ext": "^9.2.0"
   },
   "prettier": {
