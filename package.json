@@ -35,7 +35,7 @@
     "@typescript-eslint/eslint-plugin": "^8.68.0",
     "@typescript-eslint/parser": "^8.51.0",
     "esbuild": "^0.28.2",
-    "eslint": "^9.39.2",
+    "eslint": "^10.9.1",
     "eslint-config-prettier": "^10.1.8",
     "globals": "^16.4.0",
     "jsdom": "^27.4.0",
