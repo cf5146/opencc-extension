@@ -22,13 +22,14 @@
     "zip:firefox": "wxt zip -b firefox --mv3",
     "zip:edge": "wxt zip -b edge --mv3",
     "dist": "npm run zip:chrome && npm run zip:firefox && npm run zip:edge",
+    "postinstall": "wxt prepare",
     "lint": "eslint src entrypoints wxt.config.ts --ext .ts,.js,.mjs",
     "typecheck": "tsc --noEmit",
     "format": "prettier . --write",
     "format:check": "prettier . --check",
     "test": "vitest run",
     "test:ui": "vitest --ui",
-    "ci": "npm run lint && npm run typecheck && npm run build && npm test"
+    "ci": "npm run lint && npm run typecheck && npm test && npm run build:chrome && node scripts/verify-build-output.mjs chrome && npm run build:firefox && node scripts/verify-build-output.mjs firefox && npm run build:edge && node scripts/verify-build-output.mjs edge"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",

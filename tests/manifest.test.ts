@@ -27,7 +27,7 @@ describe("target manifest factory", () => {
   });
 
   it("uses the Firefox MV3 background shape and preserves the Gecko ID", () => {
-    expect(createManifest("firefox").background).toEqual({ scripts: ["background.js"] });
+    expect(createManifest("firefox").background).toEqual({ scripts: ["background.js"], type: "module" });
     expect(createManifest("firefox").browser_specific_settings).toEqual({
       gecko: { id: "opencc.extension@tnychn" },
     });

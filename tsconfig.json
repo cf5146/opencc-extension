@@ -19,16 +19,5 @@
     }
   },
   "include": ["src", "entrypoints", "tests", "wxt.config.ts", "scripts"],
-  "exclude": [
-    "dist",
-    "build",
-    "node_modules",
-    ".output",
-    ".wxt",
-    "src/background.ts",
-    "src/content.ts",
-    "src/content/observer.ts",
-    "src/popup",
-    "src/options"
-  ]
+  "exclude": ["dist", "build", "node_modules", ".output", ".wxt"]
 }

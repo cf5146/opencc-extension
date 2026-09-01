@@ -22,6 +22,7 @@
 - "Existing `src/domain`, `src/core`, `src/application/conversion`, and `src/infrastructure/conversion` modules remain shared and browser-neutral."
 - "No generated build output or browser-specific source duplication is required to maintain the extension."
 - "Browser globals are confined to the platform adapter; entrypoints use platform interfaces."
+- "WXT preparation runs from the local dependency on install and explicitly after script-disabled CI installs."
 - Use `rtk` before every shell command in this repository.
 - Do not commit generated `.output/`, `dist/`, `build/`, coverage, or zip artifacts.
 
@@ -69,14 +70,18 @@ Create these files:
 - `tests/popup-controller.test.ts`: Popup behavior tests using JSDOM and a fake platform.
 - `tests/options-controller.test.ts`: Options persistence tests using JSDOM and a fake platform.
 - `scripts/verify-build-output.mjs`: Generated manifest and entrypoint verification.
+- `scripts/resolve-release-version.mjs`: Shell-safe monotonic release-version resolution for the release workflow.
+- `tests/release-scripts.test.mjs`: Fixture coverage for generated-artifact validation and release-version resolution.
 
 Modify these files:
 
-- `package.json` and `package-lock.json`: Add WXT dependencies and target scripts; remove direct esbuild, web-ext, and Chrome type dependencies after migration.
+- `package.json` and `package-lock.json`: Add WXT dependencies and target scripts, run `wxt prepare` after install, and remove direct esbuild, web-ext, and Chrome type dependencies after migration.
+- `.github/workflows/release.yml`: Run the complete target build/verifier gate and upload WXT output paths.
+- `.github/copilot-instructions.md`: Keep repository architecture and runtime guidance aligned with the WXT layout.
 - `tsconfig.json`: Extend WXT's generated config and include entrypoints, shared source, tests, and WXT config.
 - `eslint.config.mjs`: Lint WXT config and entrypoints with the correct module environments.
 - `.gitignore`: Ignore `.output/` and `.wxt/`.
-- `scripts/bump-version.cjs`: Update only `package.json`; WXT supplies manifest versioning.
+- `scripts/bump-version.cjs`: Update `package.json` and the root package metadata in `package-lock.json`; WXT supplies manifest versioning.
 - `.github/workflows/ci.yml`: Build and verify all three WXT targets and package all three zips on pushes.
 - `README.md`, `CONTRIBUTING.md`, `PRIVACY.md`, `MV3_NOTES.md`: Document WXT commands, static registration, target policy, and the reduced permission set.
 
@@ -93,6 +98,10 @@ Delete these files only after the new runtime and builds pass:
 - `src/content.ts`
 - `src/content/observer.ts`
 - `src/popup/index.ts`
+- `src/options/index.html`
+- `src/options/index.css`
+- `src/popup/index.html`
+- `src/popup/index.css`
 - `src/options/index.ts`
 
 Move `icon.png` to `public/icon.png` without changing its bytes. Leave existing conversion and OpenCC data files untouched unless import paths require an extension-only adjustment.
@@ -159,7 +168,7 @@ describe('target manifest factory', () => {
   });
 
   it('uses the Firefox MV3 background shape and preserves the Gecko ID', () => {
-    expect(createManifest('firefox').background).toEqual({ scripts: ['background.js'] });
+    expect(createManifest('firefox').background).toEqual({ scripts: ['background.js'], type: 'module' });
     expect(createManifest('firefox').browser_specific_settings).toEqual({
       gecko: { id: 'opencc.extension@tnychn' },
     });
@@ -181,7 +190,7 @@ Create `src/build/manifest.ts` with a typed common manifest and only the intenti
 export type TargetBrowser = 'chrome' | 'edge' | 'firefox';
 
 type ChromiumBackground = { service_worker: string; type: 'module' };
-type FirefoxBackground = { scripts: string[] };
+type FirefoxBackground = { scripts: string[]; type: 'module' };
 
 export interface ExtensionManifest {
   manifest_version: 3;
@@ -224,7 +233,7 @@ export function createManifest(browser: TargetBrowser): ExtensionManifest {
   if (browser === 'firefox') {
     return {
       ...commonManifest,
-      background: { scripts: ['background.js'] },
+      background: { scripts: ['background.js'], type: 'module' },
       browser_specific_settings: { gecko: { id: 'opencc.extension@tnychn' } },
     };
   }
@@ -249,7 +258,7 @@ export default defineConfig({
   manifest: ({ browser }) => createManifest(browser as TargetBrowser),
   zip: {
     artifactTemplate: 'opencc.{{browser}}.zip',
-    excludeSources: [],
+    excludeSources: ['build/**', 'dist/**', 'opencc.*.zip', 'SHA256SUMS'],
   },
 });
 ```
@@ -344,10 +353,13 @@ Add these package scripts while keeping `test`, `lint`, `typecheck`, and `ci` na
     "zip:chrome": "wxt zip -b chrome --mv3",
     "zip:firefox": "wxt zip -b firefox --mv3",
     "zip:edge": "wxt zip -b edge --mv3",
-    "dist": "npm run zip:chrome && npm run zip:firefox && npm run zip:edge"
+    "dist": "npm run zip:chrome && npm run zip:firefox && npm run zip:edge",
+    "postinstall": "wxt prepare"
   }
 }
 ```
+
+Set `wxt.config.ts` zip options to exclude `build/**`, `dist/**`, `opencc.*.zip`, and `SHA256SUMS` from Firefox source archives so stale generated outputs cannot be redistributed.
 
 - [ ] **Step 6: Build all targets and verify the baseline**
 
@@ -1771,12 +1783,14 @@ rtk git commit -m "refactor: move extension UI behind platform ports"
 **Files:**
 
 - Create: `scripts/verify-build-output.mjs`
+- Create: `scripts/resolve-release-version.mjs`
 - Modify: `package.json`, `package-lock.json`, `scripts/bump-version.cjs`, `.github/workflows/ci.yml`, `.gitignore`
 - Modify: `README.md`, `CONTRIBUTING.md`, `PRIVACY.md`, `MV3_NOTES.md`
 - Delete: `build.mjs`, `scripts/dev.mjs`, `scripts/dist.mjs`, `scripts/dist-all.mjs`
 - Delete: `src/manifest.chrome.json`, `src/manifest.edge.json`, `src/manifest.firefox.json`
 - Delete: `src/background.ts`, `src/content.ts`, `src/content/observer.ts`, `src/popup/index.ts`, `src/options/index.ts`
 - Delete: `tests/background.integration.test.ts`
+- Move: `src/types.d.ts` declaration to `tests/types.d.ts` for test-only JSDOM typing.
 
 **Interfaces:**
 
@@ -1857,10 +1871,11 @@ Expected: all three verifier runs pass. If a manifest shape or referenced file f
 
 - [ ] **Step 3: Remove obsolete build and runtime files**
 
-Delete the custom build scripts, duplicated manifests, old browser entry modules, old observer, and old loose background integration test listed above. Update `scripts/bump-version.cjs` so it updates only `package.json`:
+Delete the custom build scripts, duplicated manifests, old browser entry modules, old observer, and old loose background integration test listed above. Update `scripts/bump-version.cjs` so it updates `package.json` and the root package metadata in `package-lock.json`:
 
 ```js
 updateJSON('package.json');
+// Also synchronize package-lock.json version metadata.
 ```
 
 Remove the code that scans and rewrites `src/manifest.*.json`. Remove package scripts that invoke `build.mjs`, `scripts/dev.mjs`, `scripts/dist.mjs`, or `scripts/dist-all.mjs`. Keep `scripts/generate-opencc-data.mjs`, `scripts/bump-version.cjs`, and `scripts/generate-changelog.cjs` because they are unrelated to the runtime rewrite.
