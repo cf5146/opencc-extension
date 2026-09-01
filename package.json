@@ -42,7 +42,7 @@
     "eslint-config-prettier": "^10.1.8",
     "globals": "^17.11.0",
     "jsdom": "^27.4.0",
-    "prettier": "^3.7.4",
+    "prettier": "^3.9.6",
     "typescript": "^5.9.3",
     "vitest": "^4.1.11",
     "web-ext": "^10.6.0",
