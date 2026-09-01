@@ -66,6 +66,21 @@ describe('browser platform', () => {
     });
   });
 
+  it('serializes object-shaped failures without default object stringification', async () => {
+    const platform = createBrowserPlatform({
+      storage: {
+        local: {
+          get: vi.fn().mockRejectedValue({ reason: 'storage unavailable' }),
+        },
+      },
+    } as never);
+
+    await expect(platform.storage.get({})).rejects.toMatchObject({
+      code: 'request-failed',
+      message: 'storage.get: {"reason":"storage unavailable"}',
+    });
+  });
+
   it('bridges runtime callbacks, maps sender tabs, and cleans up the listener', async () => {
     const onMessage = createEvent<
       (message: RuntimeMessage, sender: { tab?: { id?: number } }, sendResponse: (response?: unknown) => void) => void
