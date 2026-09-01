@@ -2,7 +2,7 @@
 // Bump the package and lockfile versions.
 // Usage: node scripts/bump-version.cjs <version>
 
-const fs = require("fs");
+const fs = require("node:fs");
 
 const newVersion = process.argv[2];
 if (!newVersion) {

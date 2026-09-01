@@ -38,7 +38,7 @@ export function createConversionService(factory: ConverterFactory = createOpenCC
 
   const convertNode = (node: Text, from: LocaleCode, to: LocaleCode) => {
     const meta = nodeMeta.get(node);
-    if (meta && meta.from === from && meta.to === to) {
+    if (meta?.from === from && meta.to === to) {
       return false;
     }
 
