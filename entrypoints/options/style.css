@@ -1,5 +1,4 @@
 * {
-  user-select: none;
   box-sizing: border-box;
 }
 
@@ -34,4 +33,10 @@ textarea {
   min-height: 10em;
   min-width: 100%;
   max-width: 100%;
+  user-select: text;
+}
+
+textarea:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
 }
