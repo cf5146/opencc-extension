@@ -3,9 +3,12 @@ import { createBackgroundRuntime } from '../src/application/runtime/background-r
 import { createSettingsStore } from '../src/application/settings/settings-store.js';
 import { createBrowserPlatform } from '../src/platform/browser-platform.js';
 
-export default defineBackground(() => {
-	const platform = createBrowserPlatform();
-	const settingsStore = createSettingsStore(platform.storage);
-	const runtime = createBackgroundRuntime(platform, settingsStore);
-	runtime.start();
+export default defineBackground({
+	type: 'module',
+	main() {
+		const platform = createBrowserPlatform();
+		const settingsStore = createSettingsStore(platform.storage);
+		const runtime = createBackgroundRuntime(platform, settingsStore);
+		runtime.start();
+	},
 });

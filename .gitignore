@@ -17,7 +17,7 @@ pnpm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Build outputs (ephemeral)
+# WXT and legacy build outputs (ephemeral)
 build/
 !src/build/
 !src/build/**

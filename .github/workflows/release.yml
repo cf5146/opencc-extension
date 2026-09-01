@@ -4,144 +4,188 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Optional version override (semver, without leading v)'
+        description: "Optional version override (semver, without leading v)"
         required: false
       notes:
-        description: 'Additional release notes (markdown)'
+        description: "Additional release notes (markdown)"
         required: false
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: release-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
-  build-and-release:
+  verify:
     runs-on: ubuntu-latest
-    # This workflow bumps versions + tags the repo; keep it on main to avoid surprises.
     if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
         with:
-          fetch-depth: 0
+          persist-credentials: false
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 20
-          cache: 'npm'
+          cache: "npm"
 
       - name: Install dependencies
-        run: npm ci
-
-      - name: Verify (lint, typecheck, test)
         run: |
-          npm run lint
-          npm run typecheck
-          npm test
+          npm ci --ignore-scripts
+          node_modules/.bin/wxt prepare
+
+      - name: Verify (lint, typecheck, test, builds)
+        run: npm --ignore-scripts run ci
+
+  build-and-release:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    needs: verify
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 20
+          cache: "npm"
+
+      - name: Install dependencies
+        run: |
+          npm ci --ignore-scripts
+          node_modules/.bin/wxt prepare
 
       - name: Determine version
         id: version
         shell: bash
-        run: |
-          if [[ -n "${{ inputs.version }}" ]]; then
-            VERSION="${{ inputs.version }}"
-            echo "Using manual override: $VERSION"
-            echo "version=$VERSION" >> $GITHUB_OUTPUT
-            exit 0
-          fi
-          PKG_VERSION=$(node -p "require('./package.json').version" 2>/dev/null || echo "0.0.0")
-          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v$PKG_VERSION")
-          BASE=${LAST_TAG#v}
-          if [[ ! $BASE =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "Warning: last tag '$LAST_TAG' not valid semver; falling back to package.json version $PKG_VERSION" >&2
-            BASE=$PKG_VERSION
-          fi
-          IFS=. read -r MAJOR MINOR PATCH <<< "$BASE"
-          PATCH=$((PATCH+1))
-          NEXT="$MAJOR.$MINOR.$PATCH"
-          if [[ ! $NEXT =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "Error: computed version '$NEXT' invalid" >&2
-            exit 1
-          fi
-          echo "Auto increment patch: $LAST_TAG -> v$NEXT"
-          echo "version=$NEXT" >> $GITHUB_OUTPUT
+        run: node scripts/resolve-release-version.mjs
+        env:
+          RELEASE_VERSION: ${{ inputs.version }}
 
       - name: Show computed version
+        env:
+          RELEASE_VERSION: ${{ steps.version.outputs.version }}
         run: |
-          if [[ -z "${{ steps.version.outputs.version }}" ]]; then
+          if [[ -z "$RELEASE_VERSION" ]]; then
             echo "Version missing" >&2; exit 1; fi
-          if [[ ! "${{ steps.version.outputs.version }}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "Invalid semver: '${{ steps.version.outputs.version }}'" >&2; exit 1; fi
-          echo "Version => ${{ steps.version.outputs.version }}"
+          if [[ ! "$RELEASE_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Invalid semver" >&2; exit 1; fi
+          echo "Version => $RELEASE_VERSION"
 
-      - name: Bump version in sources (main only, not for tag push)
+      - name: Bump version in sources
+        env:
+          RELEASE_VERSION: ${{ steps.version.outputs.version }}
         run: |
-          if [[ -z "${{ steps.version.outputs.version }}" ]]; then echo "No version; abort" >&2; exit 1; fi
-          node scripts/bump-version.cjs ${{ steps.version.outputs.version }}
+          if [[ -z "$RELEASE_VERSION" ]]; then echo "No version; abort" >&2; exit 1; fi
+          node scripts/bump-version.cjs "$RELEASE_VERSION"
 
       - name: Generate changelog
+        if: steps.version.outputs.resumed != 'true'
+        env:
+          RELEASE_VERSION: ${{ steps.version.outputs.version }}
         run: |
-          if [[ -z "${{ steps.version.outputs.version }}" ]]; then echo "No version; abort" >&2; exit 1; fi
-          node scripts/generate-changelog.cjs ${{ steps.version.outputs.version }} --update
+          if [[ -z "$RELEASE_VERSION" ]]; then echo "No version; abort" >&2; exit 1; fi
+          node scripts/generate-changelog.cjs "$RELEASE_VERSION" --update
 
       - name: Append manual notes
-        if: inputs.notes != ''
+        if: inputs.notes != '' && steps.version.outputs.resumed != 'true'
         shell: bash
         run: |
           echo "" >> CHANGELOG_RELEASE.md
           echo "### Additional Notes" >> CHANGELOG_RELEASE.md
           # Preserve line breaks from workflow_dispatch input
-          printf '%s\n' "${{ inputs.notes }}" >> CHANGELOG_RELEASE.md
+          printf '%s\n' "$RELEASE_NOTES" >> CHANGELOG_RELEASE.md
+        env:
+          RELEASE_NOTES: ${{ inputs.notes }}
+
+      - name: Verify final versioned artifacts
+        run: npm --ignore-scripts run ci
 
       - name: Commit changes
         shell: bash
+        env:
+          RELEASE_VERSION: ${{ steps.version.outputs.version }}
         run: |
-          if [[ ! "${{ steps.version.outputs.version }}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "Refusing to tag invalid version '${{ steps.version.outputs.version }}'" >&2; exit 1; fi
+          if [[ ! "$RELEASE_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Refusing to tag invalid version" >&2; exit 1; fi
           git config user.name github-actions
           git config user.email github-actions@github.com
-          if git diff --quiet; then
+          git add package.json package-lock.json CHANGELOG.md CHANGELOG_RELEASE.md
+          if git diff --cached --quiet; then
             echo "Nothing to commit (working tree clean)"
           else
-            git commit -am "chore: release v${{ steps.version.outputs.version }}"
+            git commit -m "chore: release v$RELEASE_VERSION"
           fi
 
       - name: Create local tag
         shell: bash
+        env:
+          RELEASE_VERSION: ${{ steps.version.outputs.version }}
         run: |
-          TAG="v${{ steps.version.outputs.version }}"
+          TAG="v$RELEASE_VERSION"
+          HEAD_COMMIT="$(git rev-parse HEAD)"
           if git show-ref --tags --verify --quiet "refs/tags/$TAG"; then
-            echo "Tag $TAG already exists; refusing to overwrite" >&2
-            exit 1
+            TAG_COMMIT="$(git rev-list -n 1 "$TAG")"
+            if [[ "$TAG_COMMIT" != "$HEAD_COMMIT" ]]; then
+              echo "Tag $TAG already exists at $TAG_COMMIT, expected $HEAD_COMMIT. Refusing to overwrite it." >&2
+              echo "Recovery: restore main and the tag to the same commit, then rerun with version $RELEASE_VERSION." >&2
+              exit 1
+            fi
+            echo "Tag $TAG already points to HEAD; resuming publication"
+          else
+            git tag -a "$TAG" -m "Release $TAG"
           fi
-          git tag -a "$TAG" -m "Release $TAG"
 
       - name: Build distributions
         run: npm run dist
 
       - name: Generate checksums
-        run: sha256sum opencc.chrome.zip opencc.firefox.zip opencc.edge.zip > SHA256SUMS
+        run: (cd .output && sha256sum opencc.chrome.zip opencc.firefox.zip opencc.edge.zip) > SHA256SUMS
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: build-artifacts-${{ steps.version.outputs.version }}
           path: |
-            opencc.chrome.zip
-            opencc.firefox.zip
-            opencc.edge.zip
+            .output/opencc.chrome.zip
+            .output/opencc.firefox.zip
+            .output/opencc.edge.zip
             SHA256SUMS
           retention-days: 14
 
       - name: Push commit + tag
         shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_VERSION: ${{ steps.version.outputs.version }}
         run: |
-          git push
-          git push --tags
+          TAG="v$RELEASE_VERSION"
+          AUTH_HEADER="http.https://github.com/.extraheader=AUTHORIZATION: bearer $GITHUB_TOKEN"
+          REMOTE_TAG_COMMIT="$(git -c "$AUTH_HEADER" ls-remote origin "refs/tags/$TAG^{}" | awk 'NR == 1 { print $1 }')"
+          LOCAL_TAG_COMMIT="$(git rev-list -n 1 "$TAG")"
+          if [[ -n "$REMOTE_TAG_COMMIT" && "$REMOTE_TAG_COMMIT" != "$LOCAL_TAG_COMMIT" ]]; then
+            echo "Remote tag $TAG already points to $REMOTE_TAG_COMMIT, expected $LOCAL_TAG_COMMIT. Refusing to overwrite it." >&2
+            echo "Recovery: restore the remote tag and main branch to the same release commit, then rerun." >&2
+            exit 1
+          fi
+          if [[ -n "$REMOTE_TAG_COMMIT" ]]; then
+            echo "Remote tag $TAG already exists at the expected commit; updating main only"
+            git -c "$AUTH_HEADER" push origin HEAD:main
+          else
+            git -c "$AUTH_HEADER" push --atomic origin HEAD:main "refs/tags/$TAG"
+          fi
 
       - name: Add checksum summary
         shell: bash
@@ -153,17 +197,18 @@ jobs:
           awk '{printf("| %s | `%s` |\n", $2, $1)}' SHA256SUMS >> $GITHUB_STEP_SUMMARY
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
         with:
           tag_name: v${{ steps.version.outputs.version }}
           name: v${{ steps.version.outputs.version }}
           body_path: CHANGELOG_RELEASE.md
           draft: false
           prerelease: false
+          overwrite_files: true
           files: |
-            opencc.chrome.zip
-            opencc.firefox.zip
-            opencc.edge.zip
+            .output/opencc.chrome.zip
+            .output/opencc.firefox.zip
+            .output/opencc.edge.zip
             SHA256SUMS
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,6 +1,6 @@
 # opencc-extension
 
-![OpenCC browser extension icon](./icon.png)
+![OpenCC browser extension icon](./public/icon.png)
 
 [![CI Status](https://github.com/cf5146/opencc-extension/actions/workflows/ci.yml/badge.svg)](https://github.com/cf5146/opencc-extension/actions/workflows/ci.yml)
 [![Contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg)](https://github.com/cf5146/opencc-extension/blob/main/CONTRIBUTING.md)
@@ -66,7 +66,8 @@ The codebase follows a layered structure to keep concerns clean and testable:
 - **Infrastructure (`src/infrastructure`)** – The OpenCC factory that wires dictionary data to runtime converters.
 - **Application (`src/application`)** – Stateful services that orchestrate conversion, caching, and DOM traversal.
 - **Core (`src/core`)** – A small façade exposing stable helpers (`convertPlainText`, `convertAllNewTextNodes`, `convertSelection`, etc.).
-- **Presentation (`src/content`, `src/popup`, `src/background`)** – Browser-facing scripts that interact with Chrome/Firefox APIs.
+- **Presentation (`entrypoints`)** – WXT background, content-script, popup, and options entrypoints.
+- **Platform (`src/platform`)** – The only browser API boundary; application code uses platform ports.
 
 ## Installation
 
@@ -74,18 +75,20 @@ The codebase follows a layered structure to keep concerns clean and testable:
 
 Install from the listings above—updates are handled automatically by each store.
 
-### Manual build (Chromium-based browsers)
+### Manual build
 
 1. Clone the repository and install dependencies.
-2. Build the extension bundle.
-3. Load the generated `build/` directory as an unpacked extension.
+2. Build the target you want to load.
+3. Load the matching `.output/<browser>-mv3/` directory as an unpacked extension.
 
 ```powershell
-npm install
-npm run build
+npm ci
+npm run build:chrome
 ```
 
-For Firefox, use `npm run build:firefox` and load the produced artifacts from `build/` via `about:debugging`.
+Chrome and Edge use Chromium MV3 service workers. Firefox uses its MV3 background `scripts` declaration and can be loaded from `.output/firefox-mv3/` through `about:debugging`.
+
+The `npm run dist` command writes all three target packages to `.output/` as `opencc.chrome.zip`, `opencc.firefox.zip`, and `opencc.edge.zip`.
 
 ## Usage
 
@@ -96,6 +99,8 @@ For Firefox, use `npm run build:firefox` and load the produced artifacts from `b
    - **Convert selection**: Right-click any highlighted text and choose “Convert with OpenCC”.
    - **Textbox conversion**: Type or paste phrases in the popup to convert as you go.
 
+If a tab was opened before the static content script was ready, page conversion performs one active-tab injection fallback and one retry.
+
 The extension remembers your last origin/target pair for future sessions.
 
 ## Auto mode
@@ -105,21 +110,25 @@ Enable auto mode from the popup to continually convert new content—perfect for
 > [!NOTE]
 > To avoid unwanted conversions, auto mode skips pages whose `<html>` tag sets a non-Chinese `lang` attribute (for example, `lang="en"`).
 
-When auto mode is active, a grey badge with the letter “A” appears on the toolbar icon. Toggle it off from the popup at any time.
+Content scripts are declared statically for HTTP and HTTPS pages. Auto mode enables or disables the observer inside that already-declared content script; it never registers or unregisters scripts at runtime. When auto mode is active, a grey badge with the letter “A” appears on the toolbar icon. Toggle it off from the popup at any time.
 
 ![Automatic conversion mode badge](./auto.gif)
 
 ## Development
 
-The project uses Node.js ≥ 18, [npm](https://www.npmjs.com/) ≥ 9, and TypeScript.
+The project uses Node.js ≥ 20.19, [npm](https://www.npmjs.com/) ≥ 9, [WXT](https://wxt.dev/), and TypeScript. Chrome, Edge, and Firefox are built from one shared source tree with explicit Manifest V3 targets.
 
 ```powershell
-npm install       # install dependencies
-npm run dev       # start a watch build (outputs to build/)
-npm run build     # generate production bundles
+npm ci
+npm run dev             # Chrome watch build in .output/chrome-mv3/
+npm run dev:firefox     # Firefox watch build in .output/firefox-mv3/
+npm run build:chrome
+npm run build:firefox
+npm run build:edge
+npm run dist            # package all three targets
 ```
 
-While developing, load the `build/` directory as an unpacked extension (Chromium) or temporary add-on (Firefox) and keep the watch build running.
+While developing, load the matching `.output/<browser>-mv3/` directory as an unpacked extension or temporary add-on and keep the WXT watch build running. `npm run dev:edge` is also available for Edge development.
 
 ## Testing
 
@@ -127,11 +136,12 @@ Unit and integration tests use [Vitest](https://vitest.dev/).
 
 ```powershell
 npm run typecheck
+npm run lint
 npm test
-npm run vitest run tests/conversion-service.test.ts
+npx vitest run tests/conversion-service.test.ts
 ```
 
-CI runs linting, type checking, and tests on every pull request through GitHub Actions.
+The full local gate is `npm run ci`: it runs linting, type checking, tests, all three MV3 builds, and the generated-artifact verifier for each target. CI runs the same checks on every pull request.
 
 ## Data and privacy
 
@@ -141,9 +151,9 @@ CI runs linting, type checking, and tests on every pull request through GitHub A
 
 ## Troubleshooting
 
-- **Nothing changes after clicking convert** – Ensure the page is not excluded by the locale whitelist and that Origin/Target differ.
+- **Nothing changes after clicking convert** – Ensure the page is not excluded by the locale whitelist, that Origin/Target differ, and that the page uses HTTP or HTTPS. Protected browser pages cannot be injected.
 - **Auto mode feels slow** – Heavy pages with frequent DOM mutations may benefit from disabling auto mode or narrowing the scope using the whitelist.
-- **Firefox-specific quirks** – Firefox requires the extension to be reloaded after every build from source.
+- **Build output** – Load the target-specific `.output/<browser>-mv3/` directory, not the old `build/` directory. Firefox requires the extension to be reloaded after every source build.
 
 If you bump into a bug, please open an issue with reproduction steps, browser version, and the page URL (if shareable).
 

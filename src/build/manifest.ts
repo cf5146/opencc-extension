@@ -1,7 +1,7 @@
 export type TargetBrowser = 'chrome' | 'edge' | 'firefox';
 
 type ChromiumBackground = { service_worker: string; type: 'module' };
-type FirefoxBackground = { scripts: string[] };
+type FirefoxBackground = { scripts: string[]; type: 'module' };
 
 export interface ExtensionManifest {
   manifest_version: 3;
@@ -44,7 +44,7 @@ export function createManifest(browser: TargetBrowser): ExtensionManifest {
   if (browser === 'firefox') {
     return {
       ...commonManifest,
-      background: { scripts: ['background.js'] },
+      background: { scripts: ['background.js'], type: 'module' },
       browser_specific_settings: { gecko: { id: 'opencc.extension@tnychn' } },
     };
   }
