@@ -12,7 +12,7 @@
         <span id="subtitle" class="version-badge" title="Extension version"></span>
       </div>
       <nav class="header-actions">
-        <button id="convert" class="primary" title="Convert current page">Convert Page</button>
+        <button id="convert" class="primary" type="button" title="Convert current page">Convert Page</button>
       </nav>
     </header>
     <main class="app-main">
@@ -28,7 +28,7 @@
               <option value="twp">twp (臺灣常用詞彙)</option>
             </select>
           </div>
-          <button id="swap" class="icon" title="Swap">⇄</button>
+          <button id="swap" class="icon" type="button" title="Swap" aria-label="Swap source and target">⇄</button>
           <div class="select-group">
             <label for="target" class="sr-only">Target</label>
             <select id="target" aria-label="Target variant">
@@ -48,7 +48,7 @@
         <div class="panel-header">
           <span id="textbox-title" class="panel-title">Text Sandbox</span>
           <div class="panel-tools">
-            <button id="reset" class="icon" title="Reset textbox">⟳</button>
+            <button id="reset" class="icon" type="button" title="Reset textbox" aria-label="Reset textbox">⟳</button>
           </div>
         </div>
         <textarea
@@ -59,8 +59,8 @@
       </section>
     </main>
     <footer class="app-footer">
-      <span class="footnote">Powered by <a target="_blank" href="https://github.com/BYVoid/OpenCC">OpenCC</a></span>
-      <a class="repo-link" target="_blank" href="https://github.com/tnychn/opencc-extension">Repository</a>
+      <span id="status" class="footnote" role="status" aria-live="polite"></span>
+      <a class="repo-link" target="_blank" rel="noreferrer" href="https://github.com/tnychn/opencc-extension">Repository</a>
     </footer>
 
     <script type="module" src="./main.ts"></script>

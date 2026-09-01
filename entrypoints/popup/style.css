@@ -226,6 +226,18 @@ button.icon {
 .footnote {
   flex: 1;
 }
+.status-success {
+  color: #166534;
+}
+.status-no-op {
+  color: #4b5563;
+}
+.status-reload-required,
+.status-unavailable,
+.status-error {
+  color: #b91c1c;
+  font-weight: 600;
+}
 .repo-link {
   font-weight: 500;
 }
@@ -256,6 +268,13 @@ textarea::-webkit-scrollbar-thumb:hover {
   overflow: hidden;
   clip: rect(0 0 0 0);
   border: 0;
+}
+
+button:focus-visible,
+select:focus-visible,
+#textbox:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -327,6 +346,17 @@ textarea::-webkit-scrollbar-thumb:hover {
   }
   .app-footer {
     color: #94a3b8;
+  }
+  .status-success {
+    color: #86efac;
+  }
+  .status-no-op {
+    color: #cbd5e1;
+  }
+  .status-reload-required,
+  .status-unavailable,
+  .status-error {
+    color: #fca5a5;
   }
   textarea::-webkit-scrollbar-thumb {
     background: #475569;
