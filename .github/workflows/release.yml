@@ -25,14 +25,15 @@ jobs:
       contents: read
     steps:
       - name: Checkout
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        uses: actions/checkout@v7.0.1
         with:
-          persist-credentials: false
+          fetch-depth: 0
+          persist-credentials: true
 
       - name: Setup Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        uses: actions/setup-node@v7.0.0
         with:
-          node-version: 20
+          node-version: 24
           cache: "npm"
 
       - name: Install dependencies
@@ -51,15 +52,15 @@ jobs:
       contents: write
     steps:
       - name: Checkout
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0
-          persist-credentials: false
+          persist-credentials: true
 
       - name: Setup Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        uses: actions/setup-node@v7.0.0
         with:
-          node-version: 20
+          node-version: 24
           cache: "npm"
 
       - name: Install dependencies
@@ -172,20 +173,7 @@ jobs:
           RELEASE_VERSION: ${{ steps.version.outputs.version }}
         run: |
           TAG="v$RELEASE_VERSION"
-          AUTH_HEADER="http.https://github.com/.extraheader=AUTHORIZATION: bearer $GITHUB_TOKEN"
-          REMOTE_TAG_COMMIT="$(git -c "$AUTH_HEADER" ls-remote origin "refs/tags/$TAG^{}" | awk 'NR == 1 { print $1 }')"
-          LOCAL_TAG_COMMIT="$(git rev-list -n 1 "$TAG")"
-          if [[ -n "$REMOTE_TAG_COMMIT" && "$REMOTE_TAG_COMMIT" != "$LOCAL_TAG_COMMIT" ]]; then
-            echo "Remote tag $TAG already points to $REMOTE_TAG_COMMIT, expected $LOCAL_TAG_COMMIT. Refusing to overwrite it." >&2
-            echo "Recovery: restore the remote tag and main branch to the same release commit, then rerun." >&2
-            exit 1
-          fi
-          if [[ -n "$REMOTE_TAG_COMMIT" ]]; then
-            echo "Remote tag $TAG already exists at the expected commit; updating main only"
-            git -c "$AUTH_HEADER" push origin HEAD:main
-          else
-            git -c "$AUTH_HEADER" push --atomic origin HEAD:main "refs/tags/$TAG"
-          fi
+          git push --atomic origin HEAD:main "refs/tags/$TAG"
 
       - name: Add checksum summary
         shell: bash
