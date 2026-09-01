@@ -4,13 +4,22 @@ import fs from "node:fs/promises";
 import path from "node:path";
 
 const browser = process.argv[2];
-const allowed = new Set(["chrome", "firefox", "edge"]);
-if (!allowed.has(browser)) {
-  console.error("Usage: node scripts/verify-build-output.mjs <chrome|firefox|edge>");
-  process.exit(1);
+let outputDir;
+switch (browser) {
+  case "chrome":
+    outputDir = path.resolve(".output", "chrome-mv3");
+    break;
+  case "firefox":
+    outputDir = path.resolve(".output", "firefox-mv3");
+    break;
+  case "edge":
+    outputDir = path.resolve(".output", "edge-mv3");
+    break;
+  default:
+    console.error("Usage: node scripts/verify-build-output.mjs <chrome|firefox|edge>");
+    process.exit(1);
 }
 
-const outputDir = path.resolve(".output", `${browser}-mv3`);
 const manifestPath = path.join(outputDir, "manifest.json");
 const manifest = JSON.parse(await fs.readFile(manifestPath, "utf8"));
 const packageJson = JSON.parse(await fs.readFile("package.json", "utf8"));
