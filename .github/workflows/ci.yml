@@ -17,10 +17,10 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-node@v7.0.0
         with:
-          node-version: 20
+          node-version: 24
           cache: npm
       - name: Install dependencies
         run: |
@@ -51,10 +51,10 @@ jobs:
     needs: verify
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-node@v7.0.0
         with:
-          node-version: 20
+          node-version: 24
           cache: npm
       - name: Install dependencies
         run: |
@@ -62,8 +62,8 @@ jobs:
           node_modules/.bin/wxt prepare
       - name: Package (Chrome, Firefox, Edge)
         run: npm run dist
-      - name: Upload packaged artifacts
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      - name: Upload a Build Artifact
+        uses: actions/upload-artifact@v7.0.1
         with:
           name: webext-zips-${{ github.sha }}
           path: |

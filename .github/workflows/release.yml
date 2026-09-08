@@ -155,8 +155,8 @@ jobs:
       - name: Generate checksums
         run: (cd .output && sha256sum opencc.chrome.zip opencc.firefox.zip opencc.edge.zip) > SHA256SUMS
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      - name: Upload a Build Artifact
+        uses: actions/upload-artifact@v7.0.1
         with:
           name: build-artifacts-${{ steps.version.outputs.version }}
           path: |
@@ -184,8 +184,8 @@ jobs:
           echo "|------|--------|" >> $GITHUB_STEP_SUMMARY
           awk '{printf("| %s | `%s` |\n", $2, $1)}' SHA256SUMS >> $GITHUB_STEP_SUMMARY
 
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
+      - name: GH Release
+        uses: softprops/action-gh-release@v3.0.3
         with:
           tag_name: v${{ steps.version.outputs.version }}
           name: v${{ steps.version.outputs.version }}
