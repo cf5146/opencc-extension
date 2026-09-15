@@ -36,7 +36,7 @@
     "@types/node": "^26.5.1",
     "@typescript-eslint/eslint-plugin": "^8.68.0",
     "@typescript-eslint/parser": "^8.70.0",
-    "@wxt-dev/browser": "^0.2.8",
+    "@wxt-dev/browser": "^0.2.9",
     "esbuild": "^0.28.2",
     "eslint": "^10.9.1",
     "eslint-config-prettier": "^10.1.8",
