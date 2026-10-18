@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { JSDOM } from "jsdom";
 
 import { createConversionService } from "../src/application/conversion/conversion-service.js";
 import type { ConverterFactory } from "../src/infrastructure/conversion/opencc-factory.js";
@@ -14,12 +13,7 @@ describe("conversion service", () => {
     expect(service.convertTextNode(document.createTextNode(`cn->hk:${text}0`), "cn", "hk")).toBe(true);
   });
   beforeEach(() => {
-    const dom = new JSDOM("<!doctype html><html><head><title>原標題</title></head><body></body></html>", {
-      url: "https://example.com",
-    });
-    (globalThis as any).window = dom.window;
-    (globalThis as any).document = dom.window.document;
-    (globalThis as any).NodeFilter = dom.window.NodeFilter;
+    document.documentElement.innerHTML = "<head><title>原標題</title></head><body></body>";
   });
 
   const createService = () => createConversionService(mockFactory);
