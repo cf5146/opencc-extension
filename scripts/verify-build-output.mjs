@@ -4,6 +4,9 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 
+// Browser URL match patterns, not network request endpoints.
+export const webMatches = ["http:", "https:"].map((scheme) => `${scheme}//*/*`);
+
 export async function verifyBuildOutput(browser, root = process.cwd()) {
   let outputDir;
   switch (browser) {
@@ -23,8 +26,7 @@ export async function verifyBuildOutput(browser, root = process.cwd()) {
   const manifestPath = path.join(outputDir, "manifest.json");
   const manifest = JSON.parse(await fs.readFile(manifestPath, "utf8"));
   const packageJson = JSON.parse(await fs.readFile(path.join(root, "package.json"), "utf8"));
-  const httpMatch = ["http:", "//", "*/*"].join("");
-  const httpsMatch = ["https:", "//", "*/*"].join("");
+  const [httpMatch, httpsMatch] = webMatches;
   const expectedPermissions = ["storage", "contextMenus", "scripting", "activeTab"];
 
   if (manifest.manifest_version !== 3) throw new Error(`${browser}: manifest_version must be 3`);

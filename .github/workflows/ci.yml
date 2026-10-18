@@ -25,7 +25,7 @@ jobs:
       - name: Validate workflows
         run: |
           archive="$RUNNER_TEMP/actionlint.tar.gz"
-          curl --fail --silent --show-error --location https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_linux_amd64.tar.gz --output "$archive"
+          curl --proto '=https' --proto-redir '=https' --fail --silent --show-error --location https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_linux_amd64.tar.gz --output "$archive"
           echo "8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8  $archive" | sha256sum --check
           tar -xzf "$archive" -C "$RUNNER_TEMP" actionlint
           "$RUNNER_TEMP/actionlint"
@@ -38,7 +38,7 @@ jobs:
           npm ci --ignore-scripts
           node_modules/.bin/wxt prepare
       - name: Verify and build Chrome, Firefox, and Edge
-        run: npm run ci
+        run: npm --ignore-scripts run ci
       - name: Package verified builds
         run: npm run package:built
       - name: Upload build artifacts

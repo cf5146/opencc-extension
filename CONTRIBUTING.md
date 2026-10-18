@@ -90,6 +90,9 @@ Actions must be allowed to create PRs in **Settings > Actions > General > Workfl
 
 1. After merging the release PR, run **Release** from `main`. Optionally enter `expected_version` to assert the version you intend to publish. This input does not bump the version.
 2. The read-only build job freezes the dispatch commit SHA, verifies versions and release notes, runs the complete gate once, and packages those exact outputs.
+
+   Release artifact staging requires `GIT_EXECUTABLE` to point to a trusted absolute Git executable path; the hosted workflow uses `/usr/bin/git` instead of resolving Git through `PATH`.
+
 3. A separate publication job downloads the verified artifacts. It performs no repository checkout, dependency installation, or project-script execution. It verifies commit/version metadata and all local checksums before touching tags or releases.
 4. Publication creates `vX.Y.Z` at the verified commit and a draft GitHub Release. It uploads all three ZIPs and `SHA256SUMS`, verifies their remote bytes, then publishes the draft. It never edits version/changelog files or pushes main.
 
