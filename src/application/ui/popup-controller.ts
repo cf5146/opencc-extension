@@ -30,12 +30,12 @@ export interface PopupPorts {
   copy(text: string): Promise<void>;
 }
 const unavailableMessages: Record<UnavailableReason, string> = {
-  "no-active-tab": "There is no active page to convert.",
-  "unsupported-scheme": "This page address does not support conversion.",
-  "missing-content-script": "Reload this page and try again.",
-  "injection-denied": "The browser denied access to this page.",
-  "protected-page": "The browser protects this page from extensions.",
-  "unsupported-capability": "This browser cannot convert this page.",
+  "no-active-tab": "目前沒有可轉換的網頁。",
+  "unsupported-scheme": "此網頁網址不支援轉換。",
+  "missing-content-script": "請重新整理網頁後再試一次。",
+  "injection-denied": "瀏覽器拒絕存取此網頁。",
+  "protected-page": "瀏覽器不允許擴充功能存取此網頁。",
+  "unsupported-capability": "此瀏覽器無法轉換此網頁。",
 };
 export function createPopupController(
   platform: ExtensionPlatform,
@@ -89,7 +89,7 @@ export function createPopupController(
         e.targetSelect.value as LocaleCode,
       );
     } catch {
-      status("Text conversion failed. Your original text is unchanged.", "error");
+      status("文字轉換失敗，原文已保留。", "error");
     }
     updateButtons();
   };
@@ -99,9 +99,16 @@ export function createPopupController(
   };
   const renderPolicy = () => {
     const rule = e.siteSelect.value;
-    e.policy.textContent = !hostname
-      ? "Site rules are available on HTTP and HTTPS pages."
-      : `Configured policy: ${rule === "never" ? "never auto-convert" : rule === "always" ? "always auto-convert" : e.autoCheckbox.checked ? "use default (auto-convert on)" : "use default (auto-convert off)"}. Excluded URL patterns still apply. The page-language safeguard skips pages explicitly marked with a non-Chinese language.`;
+    if (!hostname) {
+      e.policy.textContent = "網站規則僅適用於 HTTP 與 HTTPS 網頁。";
+      return;
+    }
+    const policies: Record<string, string> = {
+      never: "不要自動轉換",
+      always: "一律自動轉換",
+      default: e.autoCheckbox.checked ? "使用預設設定（已開啟）" : "使用預設設定（已關閉）",
+    };
+    e.policy.textContent = `目前設定：${policies[rule]}。排除規則仍會生效；明確標示為非中文的網頁將略過自動轉換。`;
   };
   const apply = (settings: Settings) => {
     if (disposed) return;
@@ -109,7 +116,7 @@ export function createPopupController(
       if ((settings.origin === "jp" || settings.target === "jp") && !select.querySelector('option[value="jp"]')) {
         const option = document.createElement("option");
         option.value = "jp";
-        option.textContent = "Japanese Kanji (legacy)";
+        option.textContent = "日文漢字（舊版設定）";
         select.append(option);
       }
     }
@@ -132,13 +139,13 @@ export function createPopupController(
         await operation();
         if (disposed) return;
         if (!failed.length) {
-          status("Settings saved.");
+          status("設定已儲存。");
           e.retryButton.hidden = true;
         }
       } catch {
         if (disposed) return;
         failed.push(operation);
-        status("Could not save settings. Retry to apply your changes.", "error");
+        status("無法儲存設定，請重試以套用變更。", "error");
         e.retryButton.hidden = false;
       } finally {
         pending--;
@@ -186,33 +193,33 @@ export function createPopupController(
       while (pending) await queue;
       if (disposed) return;
       if (failed.length) {
-        status("Could not save settings. Retry before converting the page.", "error");
+        status("無法儲存設定，請先重試再轉換網頁。", "error");
         return;
       }
-      status("Converting page…");
+      status("正在轉換網頁…");
       const response = await platform.runtime.send<ConversionResponse>({ type: "convert-active-tab" });
       switch (response.kind) {
         case "success":
-          status(`${response.count} nodes changed in ${response.time}ms`);
+          status(`已轉換 ${response.count} 個節點，耗時 ${response.time} 毫秒`);
           break;
         case "no-op":
-          status("No changes needed.", "no-op");
+          status("此網頁不需要轉換。", "no-op");
           break;
         case "reload-required":
-          status("Reload the page to apply the new language direction.", "reload-required");
+          status("請重新整理網頁以套用新的轉換方向。", "reload-required");
           break;
         case "unavailable":
           status(unavailableMessages[response.reason], "unavailable");
           break;
         case "invalid-settings":
-          status("The saved language settings are invalid.", "error");
+          status("已儲存的語言設定無效。", "error");
           break;
         case "internal-failure":
-          status("Page conversion failed. Try again.", "error");
+          status("網頁轉換失敗，請再試一次。", "error");
           break;
       }
     } catch {
-      status("Page conversion failed. Try again.", "error");
+      status("網頁轉換失敗，請再試一次。", "error");
     } finally {
       busy = false;
       if (!disposed) updateButtons();
@@ -266,9 +273,9 @@ export function createPopupController(
     void (async () => {
       try {
         await ports.copy(e.result.value);
-        status("Result copied.");
+        status("已複製轉換結果。");
       } catch {
-        status("Could not copy. You can select and copy the result manually.", "error");
+        status("無法複製，請選取轉換結果並手動複製。", "error");
       }
     })();
   });
@@ -284,7 +291,7 @@ export function createPopupController(
     if (Object.keys(intent).length) persist({ ...intent });
     if (siteDirty) persistSite();
     if (!pending) {
-      status("Settings saved.");
+      status("設定已儲存。");
       e.retryButton.hidden = true;
     }
   });
@@ -305,7 +312,7 @@ export function createPopupController(
         }
         if (disposed) return;
         hostname = url ? normalizeHostname(url) : undefined;
-        e.hostname.textContent = hostname ?? "Unavailable page";
+        e.hostname.textContent = hostname ?? "無法取得目前網頁";
         ready = true;
         apply(settings);
         interactive();
@@ -321,7 +328,7 @@ export function createPopupController(
         }
       } catch {
         if (disposed) return;
-        status("Could not load settings. Retry to continue.", "error");
+        status("無法載入設定，請重試。", "error");
         e.retryButton.hidden = false;
       } finally {
         initializing = undefined;

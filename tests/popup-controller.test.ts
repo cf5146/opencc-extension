@@ -27,10 +27,15 @@ function makeElements(): PopupElements {
 }
 const flush = () => new Promise<void>((resolve) => setTimeout(resolve, 0));
 afterEach(() => vi.useRealTimers());
-it("links Settings to WXT's generated options page", () => {
+it("keeps settings inside the Traditional Chinese popup", () => {
   const markup = readFileSync("entrypoints/popup/index.html", "utf8");
   const popup = new DOMParser().parseFromString(markup, "text/html");
-  expect(popup.querySelector("a")?.getAttribute("href")).toBe("/options.html");
+  expect(popup.documentElement.lang).toBe("zh-Hant");
+  expect(popup.querySelector('a[href="/options.html"]')).toBeNull();
+  expect(popup.querySelector("#whitelist")).not.toBeNull();
+  expect(popup.querySelector("#site-rules")).not.toBeNull();
+  expect(popup.querySelector("#show-settings")?.textContent).toBe("設定");
+  expect(popup.querySelector("#save-settings")?.textContent).toContain("儲存");
 });
 it("gates initialization, retries load failure, and ignores completion after disposal", async () => {
   const store = createFakeSettingsStore();
@@ -40,7 +45,7 @@ it("gates initialization, retries load failure, and ignores completion after dis
   expect(e.convertButton.disabled).toBe(true);
   await c.initialize();
   expect(e.originSelect.disabled).toBe(true);
-  expect(e.status.textContent).toContain("load");
+  expect(e.status.textContent).toContain("載入");
   e.retryButton.click();
   await flush();
   expect(e.originSelect.disabled).toBe(false);
@@ -99,7 +104,7 @@ it("serializes saves, waits before conversion, blocks duplicate requests", async
   await flush();
   expect(set).toHaveBeenCalledTimes(2);
   expect(send).toHaveBeenCalledTimes(1);
-  expect(e.status.textContent).toContain("Reload");
+  expect(e.status.textContent).toContain("重新整理");
   c.dispose();
 });
 it("retains failed edits for retry and does not convert with unsaved settings", async () => {
@@ -112,7 +117,7 @@ it("retains failed edits for retry and does not convert with unsaved settings", 
   e.originSelect.value = "tw";
   e.originSelect.dispatchEvent(new Event("change"));
   await flush();
-  expect(e.status.textContent).toContain("save");
+  expect(e.status.textContent).toContain("儲存");
   await store.emit({ origin: "hk" });
   expect(e.originSelect.value).toBe("tw");
   e.convertButton.click();
@@ -137,14 +142,14 @@ it("shows configured hostname policy and handles copy failure without losing res
   );
   await c.initialize();
   expect(e.hostname.textContent).toBe("example.com");
-  expect(e.policy.textContent).toContain("Configured");
+  expect(e.policy.textContent).toContain("目前設定");
   e.textbox.value = "汉字";
   e.textbox.dispatchEvent(new Event("input"));
   await new Promise((resolve) => setTimeout(resolve, 260));
   e.copyButton.click();
   await flush();
   expect(e.result.value).toBe("漢字");
-  expect(e.status.textContent).toContain("select");
+  expect(e.status.textContent).toContain("選取");
   c.dispose();
 });
 it("retries the latest selected direction after an earlier save failed", async () => {
@@ -224,11 +229,11 @@ it("renders unavailable and no-op page results as plain text", async () => {
   await c.initialize();
   e.convertButton.click();
   await flush();
-  expect(e.status.textContent).toContain("protects");
+  expect(e.status.textContent).toContain("不允許");
   expect(e.status.querySelector("span")).toBeNull();
   e.convertButton.click();
   await flush();
-  expect(e.status.textContent).toContain("No changes");
+  expect(e.status.textContent).toContain("不需要轉換");
   c.dispose();
 });
 it("does not retry a clean external default when a direction save failed", async () => {

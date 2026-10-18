@@ -1,40 +1,36 @@
 <!doctype html>
-<html lang="en">
+<html lang="zh-Hant">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="light dark" />
-    <title>OpenCC settings</title>
+    <title>OpenCC 設定</title>
     <link rel="stylesheet" href="./style.css" />
   </head>
   <body>
     <main>
       <header>
-        <h1>OpenCC settings</h1>
-        <p>Choose when pages convert automatically. Set the global language pair in the popup.</p>
+        <h1>OpenCC 設定</h1>
+        <p>自動轉換、網站規則與排除設定也可直接在擴充功能彈出視窗修改。</p>
       </header>
       <section aria-labelledby="default-title">
-        <h2 id="default-title">Default policy</h2>
-        <label class="checkbox"><input id="auto" type="checkbox" /> Auto-convert pages by default</label>
-        <p>
-          Automatic conversion uses the source and target selected in the popup. The page-language safeguard skips pages
-          explicitly marked with a non-Chinese language.
-        </p>
+        <h2 id="default-title">預設設定</h2>
+        <label class="checkbox"><input id="auto" type="checkbox" /> 預設自動轉換網頁</label>
+        <p>自動轉換使用彈出視窗所選的來源與目標語言。網頁若明確標示為非中文，將略過自動轉換。</p>
       </section>
       <section aria-labelledby="sites-title">
-        <h2 id="sites-title">Site rules</h2>
+        <h2 id="sites-title">網站規則</h2>
         <p>
-          Use the popup on a site to choose Always, Never, or Use default. Rules apply to the exact hostname. Excluded
-          URL patterns still apply.
+          在網站上開啟擴充功能，選擇「一律自動轉換」、「不要自動轉換」或「使用預設設定」。規則僅適用於完全相同的主機名稱，排除規則仍會生效。
         </p>
         <ul id="site-rules"></ul>
       </section>
       <section aria-labelledby="advanced-title">
-        <h2 id="advanced-title">Advanced exclusions</h2>
-        <label for="whitelist">Excluded URL regular expressions</label>
+        <h2 id="advanced-title">進階排除設定</h2>
+        <label for="whitelist">排除的網址規則</label>
         <p id="whitelist-description">
-          One JavaScript regular expression per line, matched against the full URL. These are regular expressions, not
-          wildcard patterns. Existing patterns are shown exactly as saved. Invalid expressions cannot be saved.
+          每行一個 JavaScript
+          正規表示式，比對完整網址；不支援萬用字元格式。現有規則會原樣顯示，無效的正規表示式無法儲存。
         </p>
         <textarea
           id="whitelist"
@@ -44,8 +40,7 @@
         ></textarea>
       </section>
       <div class="actions">
-        <button id="save" type="button">Save changes</button
-        ><button id="retry" type="button" hidden>Retry loading settings</button>
+        <button id="save" type="button">儲存變更</button><button id="retry" type="button" hidden>重新載入設定</button>
       </div>
       <output id="status" aria-live="polite"></output>
     </main>

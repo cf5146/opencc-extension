@@ -3,7 +3,7 @@ import type { Settings, SettingsPatch } from "../settings/settings.js";
 import { createRemoteSettingsStore, type SettingsStore } from "../settings/settings-store.js";
 export interface OptionsElements {
   whitelist: HTMLTextAreaElement;
-  autoCheckbox: HTMLInputElement;
+  autoCheckbox?: HTMLInputElement;
   saveButton: HTMLButtonElement;
   retryButton: HTMLButtonElement;
   status: HTMLElement;
@@ -33,7 +33,7 @@ export function createOptionsController(
   };
   const gate = () => {
     e.whitelist.disabled = !ready;
-    e.autoCheckbox.disabled = !ready;
+    if (e.autoCheckbox) e.autoCheckbox.disabled = !ready;
     e.saveButton.disabled = !ready || busy;
   };
   const renderRules = (settings: Settings) => {
@@ -41,12 +41,10 @@ export function createOptionsController(
     for (const [hostname, rule] of Object.entries(settings.siteRules)) {
       const li = document.createElement("li"),
         button = document.createElement("button");
-      li.append(
-        document.createTextNode(`${hostname} — ${rule === "always" ? "Always auto-convert" : "Never auto-convert"} `),
-      );
+      li.append(document.createTextNode(`${hostname} — ${rule === "always" ? "一律自動轉換" : "不要自動轉換"} `));
       button.type = "button";
-      button.textContent = "Remove";
-      button.setAttribute("aria-label", `Remove rule for ${hostname}`);
+      button.textContent = "移除";
+      button.setAttribute("aria-label", `移除 ${hostname} 的規則`);
       button.addEventListener("click", () => {
         if (disposed || busy) return;
         busy = true;
@@ -58,10 +56,10 @@ export function createOptionsController(
             const settings = await store.setSiteRule(hostname, null);
             if (!disposed) {
               renderRules(settings);
-              say("Site rule removed.");
+              say("已移除網站規則。");
             }
           } catch {
-            say("Could not remove site rule. Try Remove again.");
+            say("無法移除網站規則，請再按一次「移除」。");
           } finally {
             busy = false;
             if (!disposed) {
@@ -76,7 +74,7 @@ export function createOptionsController(
     }
     if (!e.siteRules.childNodes.length) {
       const li = document.createElement("li");
-      li.textContent = "No site rules. Sites use your default policy.";
+      li.textContent = "尚無網站規則，所有網站使用預設設定。";
       e.siteRules.append(li);
     }
   };
@@ -84,17 +82,17 @@ export function createOptionsController(
     if (disposed) return;
     renderRules(settings);
     if (!dirtyPatterns) e.whitelist.value = settings.whitelist.join("\n");
-    if (!dirtyAuto) e.autoCheckbox.checked = settings.auto;
+    if (!dirtyAuto && e.autoCheckbox) e.autoCheckbox.checked = settings.auto;
   };
   const edit = () => {
     if (!ready || disposed) return;
-    e.saveButton.textContent = "Save changes";
-    say("Unsaved changes.");
+    e.saveButton.textContent = "儲存變更";
+    say("有尚未儲存的變更。");
   };
   const save = async () => {
     if (!ready || disposed || busy) return;
     if (!dirtyAuto && !dirtyPatterns) {
-      say("No unsaved changes.");
+      say("沒有需要儲存的變更。");
       return;
     }
     const whitelist = e.whitelist.value.split(/\r?\n/).filter((line) => line.trim().length > 0);
@@ -102,30 +100,30 @@ export function createOptionsController(
       try {
         new RegExp(whitelist[i]!);
       } catch {
-        say(`Invalid regular expression on line ${i + 1}. Your saved exclusions are unchanged.`);
+        say(`第 ${i + 1} 行的正規表示式無效，已儲存的排除規則未變更。`);
         return;
       }
     const savedPatternRevision = patternRevision;
     const savedAutoRevision = autoRevision;
     const patch: SettingsPatch = {};
     if (dirtyPatterns) patch.whitelist = whitelist;
-    if (dirtyAuto) patch.auto = e.autoCheckbox.checked;
+    if (dirtyAuto && e.autoCheckbox) patch.auto = e.autoCheckbox.checked;
     busy = true;
     gate();
-    say("Saving…");
+    say("正在儲存…");
     try {
       await store.set(patch);
       if (disposed) return;
       if (patch.whitelist && patternRevision === savedPatternRevision) dirtyPatterns = false;
       if (patch.auto !== undefined && autoRevision === savedAutoRevision) dirtyAuto = false;
       if (!dirtyPatterns && !dirtyAuto) {
-        e.saveButton.textContent = "Save changes";
-        say("Saved changes.");
-      } else say("Earlier changes saved. You still have unsaved changes.");
+        e.saveButton.textContent = "儲存變更";
+        say("已儲存變更。");
+      } else say("先前的變更已儲存，您仍有尚未儲存的變更。");
     } catch {
       if (disposed) return;
-      say("Could not save changes. Your edits are kept; select Save / retry.");
-      e.saveButton.textContent = "Save / retry";
+      say("無法儲存變更，您的編輯已保留；請按「儲存／重試」。");
+      e.saveButton.textContent = "儲存／重試";
     } finally {
       busy = false;
       if (!disposed) gate();
@@ -141,12 +139,13 @@ export function createOptionsController(
     patternRevision++;
     edit();
   });
-  on(e.autoCheckbox, "change", () => {
-    if (!ready || disposed) return;
-    dirtyAuto = true;
-    autoRevision++;
-    edit();
-  });
+  if (e.autoCheckbox)
+    on(e.autoCheckbox, "change", () => {
+      if (!ready || disposed) return;
+      dirtyAuto = true;
+      autoRevision++;
+      edit();
+    });
   on(e.saveButton, "click", () => {
     void save();
   });
@@ -169,7 +168,7 @@ export function createOptionsController(
         unsubscribe = store.subscribe(apply);
       } catch {
         if (disposed) return;
-        say("Could not load settings. Retry to continue.");
+        say("無法載入設定，請重試。");
         e.retryButton.hidden = false;
       } finally {
         initializing = undefined;
