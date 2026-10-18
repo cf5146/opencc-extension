@@ -5,6 +5,13 @@ import { createHash } from "node:crypto";
 import { describe, it, expect } from "vitest";
 import { artifactFixture } from "./helpers/artifact-fixture.mjs";
 
+const gitExecutable =
+  process.platform === "win32"
+    ? execFileSync(path.join(process.env.SystemRoot, "System32", "where.exe"), ["git"], { encoding: "utf8" })
+        .trim()
+        .split(/\r?\n/)[0]
+    : "/usr/bin/git";
+
 async function fixture() {
   const root = await artifactFixture();
   await fs.writeFile(
@@ -49,7 +56,12 @@ describe("release artifact staging", () => {
     try {
       const output = path.join(root, "github-output");
       const { releaseArtifacts } = await import("../scripts/release-artifacts.mjs");
-      await releaseArtifacts(root, { GITHUB_SHA: commit, EXPECTED_VERSION: expectedVersion, GITHUB_OUTPUT: output });
+      await releaseArtifacts(root, {
+        GIT_EXECUTABLE: gitExecutable,
+        GITHUB_SHA: commit,
+        EXPECTED_VERSION: expectedVersion,
+        GITHUB_OUTPUT: output,
+      });
       const metadata = JSON.parse(
         await fs.readFile(path.join(root, ".output/release-artifacts/release-metadata.json"), "utf8"),
       );
@@ -77,7 +89,7 @@ describe("release artifact staging", () => {
     async (failure) => {
       const { root, commit } = await fixture();
       try {
-        const env = { GITHUB_SHA: commit };
+        const env = { GIT_EXECUTABLE: gitExecutable, GITHUB_SHA: commit };
         if (failure === "expected version") env.EXPECTED_VERSION = "1.2.4";
         if (failure === "lock version")
           await fs.writeFile(
@@ -98,7 +110,7 @@ describe("release artifact staging", () => {
           checksum: /Checksum mismatch/,
           commit: /GITHUB_SHA does not match HEAD/,
           "invalid commit": /GITHUB_SHA must be/,
-          "source drift": /Command failed: git diff/,
+          "source drift": /Command failed: .*git(?:\.exe)? diff/,
         }[failure];
         await expect(releaseArtifacts(root, env)).rejects.toThrow(expectedError);
         await expect(fs.stat(path.join(root, ".output/release-artifacts"))).rejects.toThrow();
@@ -107,4 +119,16 @@ describe("release artifact staging", () => {
       }
     },
   );
+});
+
+it.each([undefined, "git", "./git"])("rejects Git executables resolved from PATH: %s", async (executable) => {
+  const { root, commit } = await fixture();
+  try {
+    const { releaseArtifacts } = await import("../scripts/release-artifacts.mjs");
+    await expect(releaseArtifacts(root, { GITHUB_SHA: commit, GIT_EXECUTABLE: executable })).rejects.toThrow(
+      /GIT_EXECUTABLE must be an absolute path/,
+    );
+  } finally {
+    await fs.rm(root, { recursive: true, force: true });
+  }
 });

@@ -1,6 +1,7 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
+import { webMatches } from "../../scripts/verify-build-output.mjs";
 
 export async function artifactFixture() {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), "opencc-packaging-"));
@@ -12,7 +13,7 @@ export async function artifactFixture() {
       manifest_version: 3,
       version: "1.2.3",
       permissions: ["storage", "contextMenus", "scripting", "activeTab"],
-      host_permissions: ["http://*/*", "https://*/*"],
+      host_permissions: [...webMatches],
       icons: { 128: "icon.png" },
       action: { default_popup: "popup.html", default_icon: { 128: "icon.png" } },
       options_ui: { page: "options.html" },
@@ -20,9 +21,7 @@ export async function artifactFixture() {
         browser === "firefox"
           ? { scripts: ["background.js"], type: "module" }
           : { service_worker: "background.js", type: "module" },
-      content_scripts: [
-        { matches: ["http://*/*", "https://*/*"], all_frames: false, run_at: "document_idle", js: ["content.js"] },
-      ],
+      content_scripts: [{ matches: [...webMatches], all_frames: false, run_at: "document_idle", js: ["content.js"] }],
       ...(browser === "firefox" ? { browser_specific_settings: { gecko: { id: "fixture@example.org" } } } : {}),
     };
     await fs.writeFile(path.join(dir, "manifest.json"), JSON.stringify(manifest));

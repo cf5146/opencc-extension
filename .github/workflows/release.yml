@@ -52,6 +52,7 @@ jobs:
         env:
           EXPECTED_VERSION: ${{ inputs.expected_version }}
           GITHUB_SHA: ${{ github.sha }}
+          GIT_EXECUTABLE: /usr/bin/git
       - name: Save artifact identity for publication retries
         id: artifact
         run: echo "artifact_name=release-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" >> "$GITHUB_OUTPUT"

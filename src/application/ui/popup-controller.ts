@@ -293,7 +293,7 @@ export function createPopupController(
   e.retryButton.hidden = true;
   function initialize(): Promise<void> {
     if (disposed || ready) return Promise.resolve();
-    if (initializing) return initializing;
+    if (initializing !== undefined) return initializing;
     initializing = (async () => {
       try {
         const settings = await store.load();

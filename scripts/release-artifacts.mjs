@@ -14,7 +14,9 @@ export async function releaseArtifacts(root = process.cwd(), env = process.env) 
   if (lock.version !== version || lock.packages?.[""]?.version !== version)
     throw new Error("Package lock version does not match package.json");
   if (!/^[a-f\d]{40}$/i.test(env.GITHUB_SHA ?? "")) throw new Error("GITHUB_SHA must be a full commit SHA");
-  const commit = execFileSync("git", ["rev-parse", "HEAD"], { cwd: root, encoding: "utf8" }).trim();
+  const gitExecutable = env.GIT_EXECUTABLE;
+  if (!gitExecutable || !path.isAbsolute(gitExecutable)) throw new Error("GIT_EXECUTABLE must be an absolute path");
+  const commit = execFileSync(gitExecutable, ["rev-parse", "HEAD"], { cwd: root, encoding: "utf8" }).trim();
   if (commit !== env.GITHUB_SHA) throw new Error("GITHUB_SHA does not match HEAD");
   const notes = await read("CHANGELOG_RELEASE.md");
   const heading = notes.toString("utf8").split(/\r?\n/, 1)[0];
@@ -34,7 +36,7 @@ export async function releaseArtifacts(root = process.cwd(), env = process.env) 
     files.set(name, contents);
   }
   hashes["CHANGELOG_RELEASE.md"] = sha256(notes);
-  execFileSync("git", ["diff", "--quiet", "HEAD", "--"], { cwd: root, stdio: "pipe" });
+  execFileSync(gitExecutable, ["diff", "--quiet", "HEAD", "--"], { cwd: root, stdio: "pipe" });
   files.set("SHA256SUMS", sums);
   files.set("CHANGELOG_RELEASE.md", notes);
   files.set("release-metadata.json", `${JSON.stringify({ version, commit, sha256: hashes }, null, 2)}\n`);
