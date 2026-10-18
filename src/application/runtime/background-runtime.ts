@@ -1,16 +1,61 @@
 import type { SettingsStore } from '../settings/settings-store.js';
-import { PlatformError, type ExtensionPlatform } from '../../platform/types.js';
-import type { ConversionResponse, RuntimeMessage } from '../../runtime/messages.js';
+import { PlatformError, type ExtensionPlatform, type MessageSender } from '../../platform/types.js';
+import type { ConversionResponse, RuntimeResponse, SettingsRequest, SettingsResponse } from '../../runtime/messages.js';
+import { normalizeSiteHostname, type SettingsPatch } from '../settings/settings.js';
+import { isLocaleCode } from '../../domain/conversion/locales.js';
 
 const selectionMenuId = 'convert-selection';
 const convertPageMessage = { type: 'convert-page' } as const;
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function isSettingsPatch(value: unknown): value is SettingsPatch {
+  if (!isRecord(value)) return false;
+  return Object.entries(value).every(([key, entry]) => {
+    if (key === 'origin' || key === 'target') return isLocaleCode(entry);
+    if (key === 'auto') return typeof entry === 'boolean';
+    if (key === 'whitelist') return Array.isArray(entry) && entry.every((pattern) => typeof pattern === 'string');
+    if (key === 'siteRules')
+      return (
+        isRecord(entry) &&
+        Object.entries(entry).every(
+          ([host, rule]) => normalizeSiteHostname(host) !== undefined && (rule === 'always' || rule === 'never'),
+        )
+      );
+    if (key === 'textboxSize')
+      return (
+        entry === null ||
+        (isRecord(entry) &&
+          Object.entries(entry).every(
+            ([dimension, size]) =>
+              (dimension === 'width' || dimension === 'height') &&
+              (size === null || (typeof size === 'number' && Number.isFinite(size) && size > 0)),
+          ))
+      );
+    return false;
+  });
+}
+
+function isSettingsRequest(message: Record<string, unknown>): message is Record<string, unknown> & SettingsRequest {
+  if (message.type === 'settings-patch') return isSettingsPatch(message.patch);
+  return (
+    message.type === 'settings-site-rule' &&
+    typeof message.hostname === 'string' &&
+    normalizeSiteHostname(message.hostname) !== undefined &&
+    (message.rule === null || message.rule === 'always' || message.rule === 'never')
+  );
+}
 
 export interface BackgroundRuntime {
   start(): void;
   dispose(): void;
 }
 
-function hasUsableTabId(tab: Awaited<ReturnType<ExtensionPlatform['tabs']['getActive']>>): tab is NonNullable<typeof tab> {
+function hasUsableTabId(
+  tab: Awaited<ReturnType<ExtensionPlatform['tabs']['getActive']>>,
+): tab is NonNullable<typeof tab> {
   return tab !== undefined && Number.isFinite(tab.id);
 }
 
@@ -23,8 +68,9 @@ function supportsContentScriptUrl(url: string): boolean {
   }
 }
 
-function unavailable(reason: 'no-active-tab' | 'unsupported-scheme' | 'injection-denied' | 'protected-page' | 'unsupported-capability'):
-  ConversionResponse {
+function unavailable(
+  reason: 'no-active-tab' | 'unsupported-scheme' | 'injection-denied' | 'protected-page' | 'unsupported-capability',
+): ConversionResponse {
   return { kind: 'unavailable', reason };
 }
 
@@ -77,6 +123,7 @@ export function createBackgroundRuntime(platform: ExtensionPlatform, settingsSto
   let lifecycle = 0;
   let badgeRequest = 0;
   let badgeWrite: Promise<void> = Promise.resolve();
+  let settingsWrite: Promise<unknown> = Promise.resolve();
 
   const updateBadge = (auto: boolean, expectedLifecycle: number) => {
     const request = ++badgeRequest;
@@ -89,7 +136,45 @@ export function createBackgroundRuntime(platform: ExtensionPlatform, settingsSto
       .catch(() => {});
   };
 
-  const handleRuntimeMessage = async (message: RuntimeMessage): Promise<ConversionResponse | undefined> => {
+  const handleRuntimeMessage = async (
+    message: unknown,
+    sender: MessageSender,
+  ): Promise<RuntimeResponse | undefined> => {
+    if (!isRecord(message)) return undefined;
+    if (message.type === 'settings-patch' || message.type === 'settings-site-rule') {
+      if ((sender.tabId !== undefined || sender.url !== undefined) && !sender.isExtensionPage) {
+        return { kind: 'settings-failure', reason: 'forbidden' };
+      }
+      if (!isSettingsRequest(message)) return { kind: 'settings-failure', reason: 'invalid-request' };
+      const request = message;
+      const result = settingsWrite
+        .catch(() => {})
+        .then(async (): Promise<SettingsResponse> => {
+          try {
+            let patch: SettingsPatch;
+            if (request.type === 'settings-patch') {
+              patch = request.patch;
+            } else {
+              const hostname = normalizeSiteHostname(request.hostname)!;
+              const siteRules = { ...(await settingsStore.load()).siteRules };
+              if (request.rule === null) delete siteRules[hostname];
+              else
+                Object.defineProperty(siteRules, hostname, {
+                  value: request.rule,
+                  enumerable: true,
+                  configurable: true,
+                  writable: true,
+                });
+              patch = { siteRules };
+            }
+            return { kind: 'settings-success', settings: await settingsStore.set(patch) };
+          } catch {
+            return { kind: 'settings-failure', reason: 'write-failed' };
+          }
+        });
+      settingsWrite = result;
+      return result;
+    }
     if (message.type !== 'convert-active-tab') return undefined;
     return convertActiveTab(platform);
   };

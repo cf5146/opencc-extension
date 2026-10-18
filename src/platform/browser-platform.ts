@@ -1,5 +1,5 @@
 import { browser } from 'wxt/browser';
-import type { ContentRequest, ConversionResponse, RuntimeMessage } from '../runtime/messages.js';
+import type { ContentRequest, ConversionResponse, RuntimeMessage, RuntimeResponse } from '../runtime/messages.js';
 import {
   PlatformError,
   type ContextMenuClickInfo,
@@ -65,6 +65,18 @@ function isPromiseLike(value: unknown): value is PromiseLike<unknown> {
 
 function readLastError(api: typeof browser): unknown {
   return api.runtime.lastError;
+}
+
+function isOwnExtensionPage(api: typeof browser, url: string | undefined): boolean {
+  if (!url) return false;
+  try {
+    const expected = new URL(api.runtime.getURL('/'));
+    const actual = new URL(url);
+    // Extension schemes can have a null URL.origin, so compare both components.
+    return actual.protocol === expected.protocol && actual.host === expected.host;
+  } catch {
+    return false;
+  }
 }
 
 function invokeCallbackApi(
@@ -151,7 +163,7 @@ export function createBrowserPlatform(api: typeof browser = browser): ExtensionP
       },
     },
     runtime: {
-      send: async <TResponse extends ConversionResponse>(message: RuntimeMessage) => {
+      send: async <TResponse extends RuntimeResponse>(message: RuntimeMessage) => {
         try {
           return await api.runtime.sendMessage<RuntimeMessage, TResponse>(message);
         } catch (error) {
@@ -161,13 +173,15 @@ export function createBrowserPlatform(api: typeof browser = browser): ExtensionP
       subscribe: (listener) => {
         const browserListener = (
           message: RuntimeMessage,
-          sender: { tab?: { id?: number } },
-          sendResponse: (response?: ConversionResponse) => void,
+          sender: { url?: string; tab?: { id?: number } },
+          sendResponse: (response?: RuntimeResponse) => void,
         ) => {
           void Promise.resolve()
             .then(() =>
               listener(message, {
                 tabId: typeof sender?.tab?.id === 'number' ? sender.tab.id : undefined,
+                url: sender?.url,
+                isExtensionPage: isOwnExtensionPage(api, sender?.url),
               } satisfies MessageSender),
             )
             .then(
@@ -229,7 +243,9 @@ export function createBrowserPlatform(api: typeof browser = browser): ExtensionP
     contextMenus: {
       ensureSelectionMenu: async () => {
         try {
-          await invokeCallbackApi(api, 'contextMenus.remove', (callback) => api.contextMenus.remove(selectionMenuId, callback));
+          await invokeCallbackApi(api, 'contextMenus.remove', (callback) =>
+            api.contextMenus.remove(selectionMenuId, callback),
+          );
         } catch (error) {
           if (!isMissingMenuError(error)) {
             throw toPlatformError('request-failed', 'contextMenus.remove', error);
@@ -252,10 +268,7 @@ export function createBrowserPlatform(api: typeof browser = browser): ExtensionP
         }
       },
       subscribe: (listener) => {
-        const browserListener = (
-          info: { menuItemId: string | number },
-          tab?: { id?: number },
-        ) => {
+        const browserListener = (info: { menuItemId: string | number }, tab?: { id?: number }) => {
           const menuInfo: ContextMenuClickInfo = {
             menuItemId: info.menuItemId,
             tabId: typeof tab?.id === 'number' ? tab.id : undefined,

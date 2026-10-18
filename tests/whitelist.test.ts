@@ -2,6 +2,15 @@ import { describe, it, expect } from 'vitest';
 import { matchesWhitelist, compileWhitelist } from '../src/core/whitelist.js';
 
 describe('whitelist utilities', () => {
+  it('ignores invalid stored expressions without losing valid exclusions', () => {
+    expect(matchesWhitelist('https://example.com', ['[', 'example\\.com'])).toBe(true);
+    expect(matchesWhitelist('https://other.com', ['['])).toBe(false);
+  });
+
+  it('distinguishes a newline inside one pattern from two patterns', () => {
+    compileWhitelist(['first\nsecond']);
+    expect(matchesWhitelist('first', ['first', 'second'])).toBe(true);
+  });
   it('compiles patterns once and caches', () => {
     const first = compileWhitelist(['example']);
     const second = compileWhitelist(['example']);

@@ -1,12 +1,13 @@
-import type { LocaleCode } from '../../domain/conversion/locales.js';
-import { createOpenCCFactory } from '../../infrastructure/conversion/opencc-factory.js';
-import type { ConverterFactory } from '../../infrastructure/conversion/opencc-factory.js';
+import type { LocaleCode } from "../../domain/conversion/locales.js";
+import { createOpenCCFactory } from "../../infrastructure/conversion/opencc-factory.js";
+import type { ConverterFactory } from "../../infrastructure/conversion/opencc-factory.js";
 
 const CJK_REGEX = /[\u4e00-\u9fff]/;
 
 interface NodeMeta {
   from: LocaleCode;
   to: LocaleCode;
+  value: string;
 }
 
 export interface ConversionService {
@@ -22,6 +23,21 @@ export interface ConversionService {
 export function createConversionService(factory: ConverterFactory = createOpenCCFactory()): ConversionService {
   let nodeMeta = new WeakMap<Text, NodeMeta>();
   const convertedOutputs = new Map<string, Set<string>>();
+  const outputSizes = new WeakMap<Set<string>, number>();
+
+  const remember = (outputs: Set<string>, value: string) => {
+    // Bound retained page strings; live nodes are tracked independently in the WeakMap.
+    if (value.length > 4096) return;
+    let size = outputSizes.get(outputs) ?? 0;
+    if (!outputs.has(value)) size += value.length;
+    outputs.add(value);
+    while (outputs.size > 512 || size > 65536) {
+      const oldest = outputs.values().next().value!;
+      size -= oldest.length;
+      outputs.delete(oldest);
+    }
+    outputSizes.set(outputs, size);
+  };
 
   const getOutputsSet = (key: string) => {
     let set = convertedOutputs.get(key);
@@ -38,39 +54,40 @@ export function createConversionService(factory: ConverterFactory = createOpenCC
 
   const convertNode = (node: Text, from: LocaleCode, to: LocaleCode) => {
     const meta = nodeMeta.get(node);
-    if (meta?.from === from && meta.to === to) {
+    if (meta?.from === from && meta.to === to && meta.value === node.nodeValue) {
       return false;
     }
 
-  const original = node.nodeValue ?? '';
+    const original = node.nodeValue ?? "";
     if (!original || !CJK_REGEX.test(original)) {
-      nodeMeta.set(node, { from, to });
+      nodeMeta.set(node, { from, to, value: original });
       return false;
     }
 
     const key = `${from}->${to}`;
     const outputs = getOutputsSet(key);
     if (outputs.has(original)) {
-      nodeMeta.set(node, { from, to });
+      nodeMeta.set(node, { from, to, value: original });
       return false;
     }
 
     const converted = convertText(original, from, to);
     if (converted !== original) {
       node.nodeValue = converted;
-      outputs.add(converted);
-      nodeMeta.set(node, { from, to });
+      remember(outputs, converted);
+      nodeMeta.set(node, { from, to, value: converted });
       return true;
     }
 
-    outputs.add(original);
-    nodeMeta.set(node, { from, to });
+    remember(outputs, original);
+    nodeMeta.set(node, { from, to, value: original });
     return false;
   };
 
   const convertDocument = (from: LocaleCode, to: LocaleCode, root: Node | null = document.body) => {
     if (!root) return 0;
-    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null);
+    const owner = root.ownerDocument ?? document;
+    const walker = owner.createTreeWalker(root, 4, null);
     let count = 0;
     for (let node = walker.nextNode(); node; node = walker.nextNode()) {
       if (convertNode(node as Text, from, to)) {
@@ -81,7 +98,8 @@ export function createConversionService(factory: ConverterFactory = createOpenCC
   };
 
   const convertTitle = (from: LocaleCode, to: LocaleCode) => {
-    document.title = convertText(document.title, from, to);
+    const title = document.querySelector("title");
+    if (title) convertDocument(from, to, title);
   };
 
   const convertSelection = (selection: Selection | null, from: LocaleCode, to: LocaleCode) => {
@@ -90,7 +108,7 @@ export function createConversionService(factory: ConverterFactory = createOpenCC
     }
 
     const range = selection.getRangeAt(0);
-  const fragment = range.cloneContents();
+    const fragment = range.cloneContents();
     let changed = false;
     const walker = document.createTreeWalker(fragment, NodeFilter.SHOW_TEXT, null);
 
@@ -112,7 +130,7 @@ export function createConversionService(factory: ConverterFactory = createOpenCC
 
   const hasConverted = (node: Node, from: LocaleCode, to: LocaleCode) => {
     const meta = nodeMeta.get(node as Text);
-    return !!meta && meta.from === from && meta.to === to;
+    return !!meta && meta.from === from && meta.to === to && meta.value === node.nodeValue;
   };
 
   const resetCaches = () => {

@@ -2,15 +2,52 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>OpenCC Options</title>
-    <meta name="color-scheme" content="dark light" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>OpenCC settings</title>
     <link rel="stylesheet" href="./style.css" />
   </head>
   <body>
     <main>
-      <label for="whitelist">Whitelist</label>
-      <p id="whitelist-description">Specify the URL patterns of sites that you want to be excluded from converting in auto mode.</p>
-      <textarea id="whitelist" placeholder="https://*.example.com/*" aria-describedby="whitelist-description" spellcheck="false"></textarea>
+      <header>
+        <h1>OpenCC settings</h1>
+        <p>Choose when pages convert automatically. Set the global language pair in the popup.</p>
+      </header>
+      <section aria-labelledby="default-title">
+        <h2 id="default-title">Default policy</h2>
+        <label class="checkbox"><input id="auto" type="checkbox" /> Auto-convert pages by default</label>
+        <p>
+          Automatic conversion uses the source and target selected in the popup. The page-language safeguard skips pages
+          explicitly marked with a non-Chinese language.
+        </p>
+      </section>
+      <section aria-labelledby="sites-title">
+        <h2 id="sites-title">Site rules</h2>
+        <p>
+          Use the popup on a site to choose Always, Never, or Use default. Rules apply to the exact hostname. Excluded
+          URL patterns still apply.
+        </p>
+        <ul id="site-rules"></ul>
+      </section>
+      <section aria-labelledby="advanced-title">
+        <h2 id="advanced-title">Advanced exclusions</h2>
+        <label for="whitelist">Excluded URL regular expressions</label>
+        <p id="whitelist-description">
+          One JavaScript regular expression per line, matched against the full URL. These are regular expressions, not
+          wildcard patterns. Existing patterns are shown exactly as saved. Invalid expressions cannot be saved.
+        </p>
+        <textarea
+          id="whitelist"
+          aria-describedby="whitelist-description"
+          spellcheck="false"
+          placeholder="^https://example\.com/private/"
+        ></textarea>
+      </section>
+      <div class="actions">
+        <button id="save" type="button">Save changes</button
+        ><button id="retry" type="button" hidden>Retry loading settings</button>
+      </div>
+      <output id="status" aria-live="polite"></output>
     </main>
     <script type="module" src="./main.ts"></script>
   </body>

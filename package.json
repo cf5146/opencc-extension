@@ -22,6 +22,7 @@
     "zip:firefox": "wxt zip -b firefox --mv3",
     "zip:edge": "wxt zip -b edge --mv3",
     "dist": "npm run zip:chrome && npm run zip:firefox && npm run zip:edge",
+    "package:built": "node scripts/package-built.mjs",
     "postinstall": "wxt prepare",
     "lint": "eslint src entrypoints wxt.config.ts --ext .ts,.js,.mjs",
     "typecheck": "tsc --noEmit",
@@ -32,6 +33,7 @@
     "ci": "npm run lint && npm run typecheck && npm test && npm run build:chrome && node scripts/verify-build-output.mjs chrome && npm run build:firefox && node scripts/verify-build-output.mjs firefox && npm run build:edge && node scripts/verify-build-output.mjs edge"
   },
   "devDependencies": {
+    "@aklinker1/zero-zip": "1.0.1",
     "@eslint/js": "^10.0.1",
     "@types/node": "^26.6.4",
     "@typescript-eslint/eslint-plugin": "^8.71.1",

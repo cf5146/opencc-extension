@@ -70,14 +70,40 @@ Use present tense, imperative mood. Example:
 feat: add auto mode badge hover tooltip
 ```
 
+## CI and packaging
+
+The `CI` workflow keeps one `verify` job for branch protection. It runs on pushes to main/dev, pull requests targeting main, and manual dispatches. Each run installs dependencies once, prepares WXT explicitly, checks lint/types/tests, and builds/verifies all three MV3 targets once.
+
+`npm run package:built` packages existing verified `.output/<browser>-mv3/` directories without rebuilding. It writes `opencc.chrome.zip`, `opencc.firefox.zip`, `opencc.edge.zip`, and `SHA256SUMS` into `.output/`. Run the full local gate first so packages reflect current source. Missing, invalid, or version-mismatched builds are rejected. Push/manual CI runs upload these files for 14 days. Existing `dist` commands remain available when a fresh local build and package are wanted together.
+
 ## Release Process
 
-Maintainers:
+### Prepare and review
 
-1. Run the `Release` workflow from the `main` branch. An optional semver override and release notes can be supplied in the dispatch form.
-2. The workflow updates `package.json` and `package-lock.json`, generates the changelog, builds and verifies all three targets, and packages the distributions.
-3. The workflow atomically pushes the release commit and `vX.Y.Z` tag, then publishes the GitHub Release with checksums.
-4. To resume an interrupted publication, dispatch the workflow again with the same version after confirming that `main` and `vX.Y.Z` point to the same release commit. The workflow preserves the existing release notes and replaces matching assets.
+1. Run **Prepare release** on `main`. Leave version blank for the next patch above the package version and existing tags, or supply a version without a leading v. Optional additional notes are included in the reviewed release notes.
+2. The workflow updates package/lockfile versions and both changelogs, pushes `codex/release-vX.Y.Z`, and opens a PR against main. It never pushes main or approves/merges the PR. An existing release branch/PR is reused without overwriting edits; failures after branch creation can be retried.
+3. Preparation explicitly dispatches CI for the release branch. Review the release diff and checks, then merge the PR normally. To change reviewed content, edit that branch through the normal PR flow; rerunning preparation does not regenerate existing branch content.
+
+Actions must be allowed to create PRs in **Settings > Actions > General > Workflow permissions**. Preparation requests contents/write, pull-requests/write, and actions/write for branch creation, PR creation, and CI dispatch. No PAT is required. Repository or organization policy may prevent this setting; the workflow must fail clearly rather than bypass that policy. Bot-created PR workflows may separately await approval; preparation also dispatches CI explicitly.
+
+### Publish the reviewed commit
+
+1. After merging the release PR, run **Release** from `main`. Optionally enter `expected_version` to assert the version you intend to publish. This input does not bump the version.
+2. The read-only build job freezes the dispatch commit SHA, verifies versions and release notes, runs the complete gate once, and packages those exact outputs.
+3. A separate publication job downloads the verified artifacts. It performs no repository checkout, dependency installation, or project-script execution. It verifies commit/version metadata and all local checksums before touching tags or releases.
+4. Publication creates `vX.Y.Z` at the verified commit and a draft GitHub Release. It uploads all three ZIPs and `SHA256SUMS`, verifies their remote bytes, then publishes the draft. It never edits version/changelog files or pushes main.
+
+### Recovery
+
+- If preparation stops after pushing the branch or opening the PR, rerun it with the same version. It reuses existing work and dispatches CI again.
+- If publication stops after creating the tag/draft or uploading some assets, use **Re-run failed jobs** on that Release run. The publication job reuses the successful build job's original artifact identity and source SHA. Matching assets are preserved, missing draft assets are uploaded, and conflicting bytes are rejected.
+- If all assets were published but the response was lost, retrying verifies the existing release and completes without replacing assets.
+- Artifact retention is 14 days. If they have expired, rerun all jobs of the original run to rebuild its frozen source commit. A new dispatch uses the then-current main commit and may be rejected if its version tag points elsewhere.
+- A tag pointing to a different commit, a conflicting asset, or changed release notes causes a failure. Investigate the mismatch; workflows never move tags, force-push branches, or overwrite published binaries automatically.
+
+### First hosted run
+
+After merging these workflows, confirm CI's `verify` check is recognized by existing branch rules, preparation can create PRs and dispatch CI, and the publication job can download same-run artifacts. Local tests mock GitHub publication; they do not establish hosted permissions. This implementation does not change repository settings or branch protection, publish a real release, or submit to browser stores.
 
 ## Issue Reporting
 

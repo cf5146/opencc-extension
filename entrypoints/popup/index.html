@@ -1,70 +1,68 @@
 <!doctype html>
-<html lang="zh" xml:lang="zh">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
     <title>OpenCC</title>
     <link rel="stylesheet" href="./style.css" />
   </head>
   <body>
-    <header class="app-header">
-      <div class="brand">
-        <a id="title" target="_blank" href="https://github.com/tnychn/opencc-extension">OpenCC</a>
-        <span id="subtitle" class="version-badge" title="Extension version"></span>
-      </div>
-      <nav class="header-actions">
-        <button id="convert" class="primary" type="button" title="Convert current page">Convert Page</button>
-      </nav>
+    <header>
+      <div><strong>OpenCC</strong> <span id="subtitle"></span></div>
+      <a href="/options.html" target="_blank">Settings</a>
     </header>
-    <main class="app-main">
-      <section class="panel panel-inline" aria-labelledby="direction-title">
-        <span id="direction-title" class="panel-title">Direction</span>
+    <main>
+      <section aria-labelledby="direction-title">
+        <h1 id="direction-title">Chinese conversion</h1>
+        <p class="hint">One global language pair for pages and text.</p>
         <div class="direction-row">
-          <div class="select-group">
-            <label for="origin" class="sr-only">Source</label>
-            <select id="origin" aria-label="Source variant">
-              <option value="cn" selected>cn (简)</option>
-              <option value="hk">hk (港)</option>
-              <option value="tw">tw (臺)</option>
-              <option value="twp">twp (臺灣常用詞彙)</option>
-            </select>
-          </div>
-          <button id="swap" class="icon" type="button" title="Swap" aria-label="Swap source and target">⇄</button>
-          <div class="select-group">
-            <label for="target" class="sr-only">Target</label>
-            <select id="target" aria-label="Target variant">
-              <option value="hk" selected>hk (港)</option>
-              <option value="cn">cn (简)</option>
-              <option value="tw">tw (臺)</option>
-              <option value="twp">twp (臺灣常用詞彙)</option>
-            </select>
-          </div>
-        </div>
-        <div class="auto-toggle">
-          <input id="auto" type="checkbox" />
-          <label for="auto">Auto convert on load</label>
+          <label
+            >From<select id="origin">
+              <option value="cn">Simplified Chinese</option>
+              <option value="hk" title="Traditional Chinese — Hong Kong">Traditional — Hong Kong</option>
+              <option value="tw" title="Traditional Chinese — Taiwan">Traditional — Taiwan</option>
+              <option value="twp" title="Traditional Chinese — Taiwan vocabulary">Taiwan vocabulary</option>
+            </select></label
+          >
+          <button id="swap" type="button" aria-label="Swap source and target" title="Swap source and target">⇄</button>
+          <label
+            >To<select id="target">
+              <option value="hk" title="Traditional Chinese — Hong Kong">Traditional — Hong Kong</option>
+              <option value="cn">Simplified Chinese</option>
+              <option value="tw" title="Traditional Chinese — Taiwan">Traditional — Taiwan</option>
+              <option value="twp" title="Traditional Chinese — Taiwan vocabulary">Taiwan vocabulary</option>
+            </select></label
+          >
         </div>
       </section>
-      <section class="panel" aria-labelledby="textbox-title">
-        <div class="panel-header">
-          <span id="textbox-title" class="panel-title">Text Sandbox</span>
-          <div class="panel-tools">
-            <button id="reset" class="icon" type="button" title="Reset textbox" aria-label="Reset textbox">⟳</button>
-          </div>
+      <section aria-labelledby="site-title">
+        <h2 id="site-title">This site <span id="hostname"></span></h2>
+        <label for="site-rule">Auto-conversion rule</label>
+        <select id="site-rule">
+          <option value="default">Use default</option>
+          <option value="always">Always auto-convert</option>
+          <option value="never">Never auto-convert</option>
+        </select>
+        <label class="checkbox"><input id="auto" type="checkbox" /> Auto-convert by default</label>
+        <p id="policy" class="hint"></p>
+      </section>
+      <section aria-labelledby="text-title">
+        <h2 id="text-title">Convert text</h2>
+        <p class="hint">Text stays in this popup and is cleared when it closes.</p>
+        <label for="textbox">Original</label>
+        <textarea id="textbox" placeholder="Type or paste Chinese text…" spellcheck="false"></textarea>
+        <label for="result">Result</label>
+        <textarea id="result" readonly placeholder="Converted text appears here" spellcheck="false"></textarea>
+        <div class="tools">
+          <button id="copy" type="button">Copy result</button><button id="reset" type="button">Clear text</button>
         </div>
-        <textarea
-          id="textbox"
-          placeholder="Paste or type text here to convert…"
-          aria-label="Conversion textbox"
-        ></textarea>
       </section>
     </main>
-    <footer class="app-footer">
-      <output id="status" class="footnote" aria-live="polite"></output>
-      <a class="repo-link" target="_blank" rel="noreferrer" href="https://github.com/tnychn/opencc-extension"
-        >Repository</a
-      >
+    <footer>
+      <button id="convert" class="primary" type="button">Convert page</button>
+      <output id="status" aria-live="polite"></output><button id="retry" type="button" hidden>Retry</button>
     </footer>
-
     <script type="module" src="./main.ts"></script>
   </body>
 </html>

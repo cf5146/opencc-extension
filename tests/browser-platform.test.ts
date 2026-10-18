@@ -3,6 +3,9 @@ import { createBrowserPlatform } from '../src/platform/browser-platform.js';
 import type { ContextMenuClickInfo, StorageChange } from '../src/platform/types.js';
 import { PlatformError } from '../src/platform/types.js';
 import type { RuntimeMessage } from '../src/runtime/messages.js';
+import type { RuntimeResponse } from '../src/runtime/messages.js';
+import { createBackgroundRuntime } from '../src/application/runtime/background-runtime.js';
+import { createFakePlatform, createFakeSettingsStore } from './helpers/fakes.js';
 
 type Listener<Arguments extends never[]> = (...args: Arguments) => unknown;
 
@@ -21,6 +24,40 @@ function createEvent<T extends Listener<never[]>>() {
 }
 
 describe('browser platform', () => {
+  it.each([
+    ['chrome-extension://own-id/options.html', 'settings-success'],
+    ['https://example.com/options.html', 'settings-failure'],
+    ['chrome-extension://other-id/options.html', 'settings-failure'],
+    ['chrome-extension://own-id.evil/options.html', 'settings-failure'],
+  ])('authorizes settings from %s using the current extension origin', async (url, kind) => {
+    const onMessage =
+      createEvent<
+        (
+          message: RuntimeMessage,
+          sender: { url?: string; tab?: { id?: number } },
+          sendResponse: (response?: RuntimeResponse) => void,
+        ) => void
+      >();
+    const browserPlatform = createBrowserPlatform({
+      runtime: {
+        onMessage,
+        getURL: () => 'chrome-extension://own-id/',
+      },
+    } as never);
+    const store = createFakeSettingsStore();
+    const background = createBackgroundRuntime(createFakePlatform({ runtime: browserPlatform.runtime }), store);
+    background.start();
+    try {
+      const result = await new Promise<RuntimeResponse | undefined>((resolve) => {
+        onMessage.emit({ type: 'settings-patch', patch: { auto: true } }, { url, tab: { id: 42 } }, resolve);
+      });
+      expect(result?.kind).toBe(kind);
+      expect((await store.load()).auto).toBe(kind === 'settings-success');
+      if (kind === 'settings-failure') expect(result).toEqual({ kind, reason: 'forbidden' });
+    } finally {
+      background.dispose();
+    }
+  });
   it('delegates storage operations and removes its change listener on unsubscribe', async () => {
     const onChanged = createEvent<(changes: Record<string, StorageChange>, areaName: string) => void>();
     const get = vi.fn().mockResolvedValue({ auto: true });
@@ -82,9 +119,10 @@ describe('browser platform', () => {
   });
 
   it('bridges runtime callbacks, maps sender tabs, and cleans up the listener', async () => {
-    const onMessage = createEvent<
-      (message: RuntimeMessage, sender: { tab?: { id?: number } }, sendResponse: (response?: unknown) => void) => void
-    >();
+    const onMessage =
+      createEvent<
+        (message: RuntimeMessage, sender: { tab?: { id?: number } }, sendResponse: (response?: unknown) => void) => void
+      >();
     const platform = createBrowserPlatform({
       runtime: { onMessage },
     } as never);
@@ -98,7 +136,7 @@ describe('browser platform', () => {
     await new Promise<void>((resolve) => setTimeout(resolve, 0));
 
     expect(returns).toEqual([true]);
-    expect(listener).toHaveBeenCalledWith(message, { tabId: 31 });
+    expect(listener).toHaveBeenCalledWith(message, { tabId: 31, url: undefined, isExtensionPage: false });
     expect(sendResponse).toHaveBeenCalledWith(response);
 
     unsubscribe();
@@ -107,9 +145,10 @@ describe('browser platform', () => {
   });
 
   it('returns an internal failure response when a runtime listener rejects', async () => {
-    const onMessage = createEvent<
-      (message: RuntimeMessage, sender: { tab?: { id?: number } }, sendResponse: (response?: unknown) => void) => void
-    >();
+    const onMessage =
+      createEvent<
+        (message: RuntimeMessage, sender: { tab?: { id?: number } }, sendResponse: (response?: unknown) => void) => void
+      >();
     const platform = createBrowserPlatform({ runtime: { onMessage } } as never);
     const sendResponse = vi.fn();
 
@@ -207,7 +246,9 @@ describe('browser platform', () => {
       scripting: {
         executeScript: vi
           .fn()
-          .mockRejectedValue(new Error('Cannot access contents of the page. Extension manifest must request permission.')),
+          .mockRejectedValue(
+            new Error('Cannot access contents of the page. Extension manifest must request permission.'),
+          ),
       },
     } as never);
     const unexpected = createBrowserPlatform({

@@ -2,6 +2,8 @@ import { describe, expect, it, vi } from 'vitest';
 import { convertActiveTab, createBackgroundRuntime } from '../src/application/runtime/background-runtime.js';
 import { PlatformError, type ActiveTab } from '../src/platform/types.js';
 import type { Settings } from '../src/application/settings/settings.js';
+import type { RuntimeMessage } from '../src/runtime/messages.js';
+import { createSettingsStore } from '../src/application/settings/settings-store.js';
 import {
   createContextMenuDispatcher,
   createFakePlatform,
@@ -16,6 +18,7 @@ function makeSettings(auto: boolean): Settings {
     origin: 'cn',
     target: 'hk',
     auto,
+    siteRules: {},
     whitelist: [],
     textboxSize: { width: null, height: null },
   };
@@ -167,6 +170,77 @@ describe('convertActiveTab', () => {
 });
 
 describe('background runtime', () => {
+  it('serializes independent site changes and patches without dropping other preferences', async () => {
+    let stored: Record<string, unknown> = { auto: false, whitelist: ['legacy'] };
+    const capture = createRuntimeListenerCapture();
+    const platform = createFakePlatform({
+      runtime: { subscribe: capture.subscribe },
+      storage: {
+        get: async () => ({ ...stored }),
+        set: async (next) => {
+          await Promise.resolve();
+          stored = next;
+        },
+      },
+    });
+    const runtime = createBackgroundRuntime(platform, createSettingsStore(platform.storage));
+    runtime.start();
+    const results = await Promise.all([
+      capture.invoke({ type: 'settings-site-rule', hostname: 'EXAMPLE.com.', rule: 'always' } as RuntimeMessage),
+      capture.invoke({ type: 'settings-site-rule', hostname: 'other.com', rule: 'never' } as RuntimeMessage),
+      capture.invoke({ type: 'settings-patch', patch: { auto: true } } as RuntimeMessage),
+    ]);
+    expect(results.every((result) => result?.kind === 'settings-success')).toBe(true);
+    expect(stored).toMatchObject({
+      auto: true,
+      whitelist: ['legacy'],
+      siteRules: {
+        'example.com': 'always',
+        'other.com': 'never',
+      },
+    });
+    await capture.invoke({ type: 'settings-site-rule', hostname: 'example.com', rule: null } as RuntimeMessage);
+    expect(stored.siteRules).toEqual({ 'other.com': 'never' });
+    runtime.dispose();
+  });
+
+  it('rejects malformed and content-script mutations and recovers after a failed write', async () => {
+    let stored: Record<string, unknown> = {};
+    let writes = 0;
+    const capture = createRuntimeListenerCapture();
+    const platform = createFakePlatform({
+      runtime: { subscribe: capture.subscribe },
+      storage: {
+        get: async () => stored,
+        set: async (next) => {
+          if (++writes === 1) throw new Error('disk');
+          stored = next;
+        },
+      },
+    });
+    const runtime = createBackgroundRuntime(platform, createSettingsStore(platform.storage));
+    runtime.start();
+    for (const message of [
+      { type: 'settings-patch', patch: null },
+      { type: 'settings-patch', patch: { auto: 'yes' } },
+      { type: 'settings-site-rule', hostname: 'bad/path', rule: 'always' },
+      { type: 'settings-site-rule', hostname: 'example.com', rule: 'invalid' },
+    ]) {
+      expect(await capture.invoke(message as RuntimeMessage)).toEqual({
+        kind: 'settings-failure',
+        reason: 'invalid-request',
+      });
+    }
+    expect(
+      await capture.invoke({ type: 'settings-patch', patch: { auto: true } } as RuntimeMessage, { tabId: 3 }),
+    ).toEqual({ kind: 'settings-failure', reason: 'forbidden' });
+    expect(writes).toBe(0);
+    const failed = capture.invoke({ type: 'settings-patch', patch: { auto: true } } as RuntimeMessage);
+    const succeeding = capture.invoke({ type: 'settings-patch', patch: { target: 'tw' } } as RuntimeMessage);
+    expect(await failed).toEqual({ kind: 'settings-failure', reason: 'write-failed' });
+    expect(await succeeding).toMatchObject({ kind: 'settings-success', settings: { auto: false, target: 'tw' } });
+    runtime.dispose();
+  });
   it('uses the context-menu event tab ID without querying the active tab', async () => {
     const send = vi.fn().mockResolvedValue({ kind: 'no-op', count: 0, time: 0 });
     const getActive = vi.fn();
@@ -254,18 +328,22 @@ describe('background runtime', () => {
     let resolveLoad!: (settings: Settings) => void;
     let settingsListener: ((settings: Settings) => void) | undefined;
     const settingsStore = {
-      load: vi.fn(() => new Promise<Settings>((resolve) => { resolveLoad = resolve; })),
+      load: vi.fn(
+        () =>
+          new Promise<Settings>((resolve) => {
+            resolveLoad = resolve;
+          }),
+      ),
       set: vi.fn(),
       subscribe: vi.fn((listener: (settings: Settings) => void) => {
         settingsListener = listener;
-        return () => { settingsListener = undefined; };
+        return () => {
+          settingsListener = undefined;
+        };
       }),
     };
     const setBadgeText = vi.fn().mockResolvedValue(undefined);
-    const runtime = createBackgroundRuntime(
-      createFakePlatform({ action: { setBadgeText } }),
-      settingsStore,
-    );
+    const runtime = createBackgroundRuntime(createFakePlatform({ action: { setBadgeText } }), settingsStore);
 
     runtime.start();
     settingsListener?.(makeSettings(true));
@@ -280,15 +358,17 @@ describe('background runtime', () => {
   it('ignores an initial badge load from a disposed runtime after restart', async () => {
     const resolvers: Array<(settings: Settings) => void> = [];
     const settingsStore = {
-      load: vi.fn(() => new Promise<Settings>((resolve) => { resolvers.push(resolve); })),
+      load: vi.fn(
+        () =>
+          new Promise<Settings>((resolve) => {
+            resolvers.push(resolve);
+          }),
+      ),
       set: vi.fn(),
       subscribe: vi.fn(() => () => {}),
     };
     const setBadgeText = vi.fn().mockResolvedValue(undefined);
-    const runtime = createBackgroundRuntime(
-      createFakePlatform({ action: { setBadgeText } }),
-      settingsStore,
-    );
+    const runtime = createBackgroundRuntime(createFakePlatform({ action: { setBadgeText } }), settingsStore);
 
     runtime.start();
     runtime.dispose();
@@ -319,10 +399,7 @@ describe('background runtime', () => {
       }),
     };
     const setBadgeText = vi.fn().mockResolvedValue(undefined);
-    const runtime = createBackgroundRuntime(
-      createFakePlatform({ action: { setBadgeText } }),
-      settingsStore,
-    );
+    const runtime = createBackgroundRuntime(createFakePlatform({ action: { setBadgeText } }), settingsStore);
 
     runtime.start();
     runtime.dispose();
@@ -357,10 +434,7 @@ describe('background runtime', () => {
       }
       return Promise.resolve();
     });
-    const runtime = createBackgroundRuntime(
-      createFakePlatform({ action: { setBadgeText } }),
-      settingsStore,
-    );
+    const runtime = createBackgroundRuntime(createFakePlatform({ action: { setBadgeText } }), settingsStore);
 
     runtime.start();
     listener?.(makeSettings(true));
@@ -383,7 +457,13 @@ describe('background runtime', () => {
     const menuUnsubscribe = vi.fn();
     const settingsUnsubscribe = vi.fn();
     const settingsStore = {
-      load: vi.fn().mockResolvedValue({ origin: 'cn', target: 'hk', auto: false, whitelist: [], textboxSize: { width: null, height: null } }),
+      load: vi.fn().mockResolvedValue({
+        origin: 'cn',
+        target: 'hk',
+        auto: false,
+        whitelist: [],
+        textboxSize: { width: null, height: null },
+      }),
       set: vi.fn(),
       subscribe: vi.fn(() => settingsUnsubscribe),
     };

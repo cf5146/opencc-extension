@@ -49,10 +49,11 @@ The legacy OpenCC presets `t` and `jp` are intentionally excluded to keep the UI
 ## Feature snapshot
 
 - One-click page-wide conversion using a fast [`TreeWalker`](https://developer.mozilla.org/docs/Web/API/TreeWalker).
-- Auto mode that watches for new DOM nodes via [`MutationObserver`](https://developer.mozilla.org/docs/Web/API/MutationObserver).
+- Auto mode that watches new and changed content via [`MutationObserver`](https://developer.mozilla.org/docs/Web/API/MutationObserver), using a deduplicated queue that yields between small batches.
 - Context-menu action to convert highlighted selections in place.
-- Popup textbox for quick phrase-by-phrase conversion.
-- Locale whitelist to avoid converting unsuitable sections such as code blocks.
+- Popup text conversion with separate Original and Result fields, copy, clear, and IME-aware previews.
+- Exact-host Always/Never auto-conversion rules, with a global default and advanced URL exclusions.
+- URL exclusions to skip selected sites in auto mode.
 - All work happens offline—no tracking, no telemetry.
 
 ![Converting a highlighted text selection](./select.gif)
@@ -97,20 +98,24 @@ The `npm run dist` command writes all three target packages to `.output/` as `op
 3. Use one of the entry points:
    - **Convert page**: Transforms visible text in the active tab.
    - **Convert selection**: Right-click any highlighted text and choose “Convert with OpenCC”.
-   - **Textbox conversion**: Type or paste phrases in the popup to convert as you go.
+   - **Textbox conversion**: Type or paste into Original; the read-only Result updates without changing your original text. Swap the direction to recompute from Original, use Copy result, or Clear text. Text is never saved.
 
 If a tab was opened before the static content script was ready, page conversion performs one active-tab injection fallback and one retry.
 
-The extension remembers your last origin/target pair for future sessions.
+The extension remembers your last origin/target pair for future sessions. It is shared by page, selection, and popup text conversion. If a page loads more content after a manual conversion, click Convert page again to convert the new text. Unchanged text is skipped.
 
 ## Auto mode
 
-Enable auto mode from the popup to continually convert new content—perfect for sites that stream or dynamically load text.
+Enable **Auto-convert by default** in the popup or settings to continually convert new content, including text replaced inside an existing node. In **This site**, choose **Use default**, **Always auto-convert**, or **Never auto-convert**. Rules match the exact hostname: subdomains are separate, while paths and ports share the rule. An Always rule enables auto conversion even when the global default is off. Excluded URLs and the page-language safeguard still take priority. Manual conversion remains available on excluded sites.
 
 > [!NOTE]
 > To avoid unwanted conversions, auto mode skips pages whose `<html>` tag sets a non-Chinese `lang` attribute (for example, `lang="en"`).
 
-Content scripts are declared statically for HTTP and HTTPS pages. Auto mode enables or disables the observer inside that already-declared content script; it never registers or unregisters scripts at runtime. When auto mode is active, a grey badge with the letter “A” appears on the toolbar icon. Toggle it off from the popup at any time.
+Content scripts are declared statically for HTTP and HTTPS pages. Auto mode enables or disables the observer inside that already-declared content script; it never registers or unregisters scripts at runtime. The toolbar badge “A” indicates that the global auto-conversion default is on; it does not report whether the current page is eligible or whether a site override is active. Toggle the default from the popup or settings.
+
+Auto conversion processes queued DOM work in tasks limited to 200 visited nodes or an 8ms cooperative budget. It does not repeatedly scan the page when unrelated elements change. Disabling auto mode cancels queued work and stops observation; it leaves already converted text in place. Reenabling it checks content loaded while it was off. Changing direction on a converted page, or encountering a conversion failure, pauses auto conversion until the page is reloaded. A single long text conversion or cold dictionary initialization can exceed the task budget.
+
+Open **Settings** to remove hostname rules or edit advanced exclusions. Exclusions are JavaScript regular expressions matched against the full URL, one per line. Existing stored expressions are retained. Invalid edited expressions cannot be saved; malformed expressions already in storage are ignored individually. Select **Save changes** to apply edits. Save failures keep your edits for retry.
 
 ![Automatic conversion mode badge](./auto.gif)
 
@@ -143,16 +148,20 @@ npx vitest run tests/conversion-service.test.ts
 
 The full local gate is `npm run ci`: it runs linting, type checking, tests, all three MV3 builds, and the generated-artifact verifier for each target. CI runs the same checks on every pull request.
 
+## CI and releases
+
+CI installs once, checks the source, builds each browser once, and packages those verified outputs with SHA-256 checksums. Manual release preparation opens a version/changelog PR; after review and merge, manual publication tags the selected main commit and publishes the verified packages through a recoverable draft release. See [the contributor release and recovery guide](./CONTRIBUTING.md#release-process).
+
 ## Data and privacy
 
 - Conversions execute entirely in the browser; no text ever leaves your machine.
-- The extension stores only minimal preferences (origin/target locales and auto-mode flag) using browser storage APIs.
+- The extension stores preferences (origin/target locales, auto-mode default, hostname rules, URL exclusions, and legacy textbox size) using browser storage APIs. Popup input and results are never persisted.
 - No analytics, telemetry, or advertising trackers are included.
 
 ## Troubleshooting
 
-- **Nothing changes after clicking convert** – Ensure the page is not excluded by the locale whitelist, that Origin/Target differ, and that the page uses HTTP or HTTPS. Protected browser pages cannot be injected.
-- **Auto mode feels slow** – Heavy pages with frequent DOM mutations may benefit from disabling auto mode or narrowing the scope using the whitelist.
+- **Nothing changes after clicking convert** – Ensure Origin/Target differ and that the page uses HTTP or HTTPS. Protected browser pages cannot be injected.
+- **Auto mode feels slow** – Use Never auto-convert for busy sites or disable the global default. Auto conversion queues only changed content, but very large individual text nodes and initial dictionary construction can still take time.
 - **Build output** – Load the target-specific `.output/<browser>-mv3/` directory, not the old `build/` directory. Firefox requires the extension to be reloaded after every source build.
 
 If you bump into a bug, please open an issue with reproduction steps, browser version, and the page URL (if shareable).

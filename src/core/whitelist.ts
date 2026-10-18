@@ -9,10 +9,16 @@ let cacheKey = '';
 let cached: WhitelistEntry[] = [];
 
 export function compileWhitelist(patterns: string[]): WhitelistEntry[] {
-  const key = patterns.join('\n');
+  const key = JSON.stringify(patterns);
   if (key === cacheKey) return cached;
   cacheKey = key;
-  cached = patterns.map((p) => ({ raw: p, regex: new RegExp(p) }));
+  cached = patterns.flatMap((raw) => {
+    try {
+      return [{ raw, regex: new RegExp(raw) }];
+    } catch {
+      return [];
+    }
+  });
   return cached;
 }
 
