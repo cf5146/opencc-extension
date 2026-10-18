@@ -1,4 +1,4 @@
-import type { ContentRequest, ConversionResponse, RuntimeMessage } from '../runtime/messages.js';
+import type { ContentRequest, ConversionResponse, RuntimeMessage, RuntimeResponse } from '../runtime/messages.js';
 
 export interface StorageChange {
   oldValue?: unknown;
@@ -13,15 +13,17 @@ export interface StoragePort {
 
 export interface MessageSender {
   tabId?: number;
+  url?: string;
+  isExtensionPage?: boolean;
 }
 
 export type RuntimeMessageListener = (
   message: RuntimeMessage,
   sender: MessageSender,
-) => Promise<ConversionResponse | undefined>;
+) => Promise<RuntimeResponse | undefined>;
 
 export interface RuntimePort {
-  send<TResponse extends ConversionResponse>(message: RuntimeMessage): Promise<TResponse>;
+  send<TResponse extends RuntimeResponse>(message: RuntimeMessage): Promise<TResponse>;
   subscribe(listener: RuntimeMessageListener): () => void;
 }
 
@@ -59,11 +61,7 @@ export interface RuntimeManifest {
   content_scripts?: Array<{ js?: string[] }>;
 }
 
-export type PlatformErrorCode =
-  | 'no-receiver'
-  | 'unsupported-capability'
-  | 'request-failed'
-  | 'permission-denied';
+export type PlatformErrorCode = 'no-receiver' | 'unsupported-capability' | 'request-failed' | 'permission-denied';
 
 export class PlatformError extends Error {
   constructor(

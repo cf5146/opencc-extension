@@ -5,6 +5,7 @@ on:
     branches: [main, dev]
   pull_request:
     branches: [main]
+  workflow_dispatch:
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
@@ -16,9 +17,19 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v7.0.1
-      - uses: actions/setup-node@v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Validate workflows
+        run: |
+          archive="$RUNNER_TEMP/actionlint.tar.gz"
+          curl --fail --silent --show-error --location https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_linux_amd64.tar.gz --output "$archive"
+          echo "8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8  $archive" | sha256sum --check
+          tar -xzf "$archive" -C "$RUNNER_TEMP" actionlint
+          "$RUNNER_TEMP/actionlint"
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 24
           cache: npm
@@ -26,48 +37,19 @@ jobs:
         run: |
           npm ci --ignore-scripts
           node_modules/.bin/wxt prepare
-      - name: Lint
-        run: npm run lint
-      - name: Typecheck
-        run: npm run typecheck
-      - name: Test
-        run: npm test
-      - name: Build Chrome
-        run: npm run build:chrome
-      - name: Verify Chrome artifact
-        run: node scripts/verify-build-output.mjs chrome
-      - name: Build Firefox
-        run: npm run build:firefox
-      - name: Verify Firefox artifact
-        run: node scripts/verify-build-output.mjs firefox
-      - name: Build Edge
-        run: npm run build:edge
-      - name: Verify Edge artifact
-        run: node scripts/verify-build-output.mjs edge
-
-  package:
-    # Packaging is valuable but slower; run it on pushes (main/dev) so PR checks stay quick.
-    if: github.event_name == 'push'
-    needs: verify
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7.0.1
-      - uses: actions/setup-node@v7.0.0
+      - name: Verify and build Chrome, Firefox, and Edge
+        run: npm run ci
+      - name: Package verified builds
+        run: npm run package:built
+      - name: Upload build artifacts
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          node-version: 24
-          cache: npm
-      - name: Install dependencies
-        run: |
-          npm ci --ignore-scripts
-          node_modules/.bin/wxt prepare
-      - name: Package (Chrome, Firefox, Edge)
-        run: npm run dist
-      - name: Upload a Build Artifact
-        uses: actions/upload-artifact@v7.0.1
-        with:
-          name: webext-zips-${{ github.sha }}
+          name: webext-zips-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
             .output/opencc.chrome.zip
             .output/opencc.firefox.zip
             .output/opencc.edge.zip
+            .output/SHA256SUMS
           if-no-files-found: error
+          retention-days: 14

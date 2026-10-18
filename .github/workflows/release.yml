@@ -3,200 +3,171 @@ name: Release
 on:
   workflow_dispatch:
     inputs:
-      version:
-        description: "Optional version override (semver, without leading v)"
+      expected_version:
+        description: "Optional assertion of the checked-in version (without leading v)"
         required: false
-      notes:
-        description: "Additional release notes (markdown)"
-        required: false
+        type: string
 
 permissions:
   contents: read
 
 concurrency:
-  group: release-${{ github.ref }}
+  group: release-publication
   cancel-in-progress: false
 
 jobs:
-  verify:
+  build:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    timeout-minutes: 20
     permissions:
       contents: read
+    outputs:
+      version: ${{ steps.metadata.outputs.version }}
+      artifact_name: ${{ steps.artifact.outputs.artifact_name }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v7.0.1
+      - name: Require main branch
+        if: github.ref != 'refs/heads/main'
+        run: echo "Release publication must be dispatched from main" >&2; exit 1
+      - name: Checkout frozen source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          fetch-depth: 0
-          persist-credentials: true
-
+          ref: ${{ github.sha }}
+          persist-credentials: false
       - name: Setup Node.js
-        uses: actions/setup-node@v7.0.0
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 24
-          cache: "npm"
-
+          cache: npm
       - name: Install dependencies
         run: |
           npm ci --ignore-scripts
           node_modules/.bin/wxt prepare
-
-      - name: Verify (lint, typecheck, test, builds)
+      - name: Verify source and build all browsers
         run: npm --ignore-scripts run ci
+      - name: Package verified builds
+        run: npm run package:built
+      - name: Prepare immutable release artifacts
+        id: metadata
+        run: node scripts/release-artifacts.mjs
+        env:
+          EXPECTED_VERSION: ${{ inputs.expected_version }}
+          GITHUB_SHA: ${{ github.sha }}
+      - name: Save artifact identity for publication retries
+        id: artifact
+        run: echo "artifact_name=release-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" >> "$GITHUB_OUTPUT"
+      - name: Upload verified release artifacts
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: ${{ steps.artifact.outputs.artifact_name }}
+          path: .output/release-artifacts/*
+          if-no-files-found: error
+          retention-days: 14
 
-  build-and-release:
+  publish:
+    needs: build
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
-    needs: verify
+    timeout-minutes: 20
     permissions:
       contents: write
     steps:
-      - name: Checkout
-        uses: actions/checkout@v7.0.1
+      - name: Download verified release artifacts
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
-          fetch-depth: 0
-          persist-credentials: true
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v7.0.0
+          name: ${{ needs.build.outputs.artifact_name }}
+          path: ${{ github.workspace }}/release-artifacts
+      - name: Verify and publish release
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          SOURCE_SHA: ${{ github.sha }}
+          VERSION: ${{ needs.build.outputs.version }}
+          ARTIFACT_DIR: ${{ github.workspace }}/release-artifacts
         with:
-          node-version: 24
-          cache: "npm"
-
-      - name: Install dependencies
-        run: |
-          npm ci --ignore-scripts
-          node_modules/.bin/wxt prepare
-
-      - name: Determine version
-        id: version
-        shell: bash
-        run: node scripts/resolve-release-version.mjs
-        env:
-          RELEASE_VERSION: ${{ inputs.version }}
-
-      - name: Show computed version
-        env:
-          RELEASE_VERSION: ${{ steps.version.outputs.version }}
-        run: |
-          if [[ -z "$RELEASE_VERSION" ]]; then
-            echo "Version missing" >&2; exit 1; fi
-          if [[ ! "$RELEASE_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "Invalid semver" >&2; exit 1; fi
-          echo "Version => $RELEASE_VERSION"
-
-      - name: Bump version in sources
-        env:
-          RELEASE_VERSION: ${{ steps.version.outputs.version }}
-        run: |
-          if [[ -z "$RELEASE_VERSION" ]]; then echo "No version; abort" >&2; exit 1; fi
-          node scripts/bump-version.cjs "$RELEASE_VERSION"
-
-      - name: Generate changelog
-        if: steps.version.outputs.resumed != 'true'
-        env:
-          RELEASE_VERSION: ${{ steps.version.outputs.version }}
-        run: |
-          if [[ -z "$RELEASE_VERSION" ]]; then echo "No version; abort" >&2; exit 1; fi
-          node scripts/generate-changelog.cjs "$RELEASE_VERSION" --update
-
-      - name: Append manual notes
-        if: inputs.notes != '' && steps.version.outputs.resumed != 'true'
-        shell: bash
-        run: |
-          echo "" >> CHANGELOG_RELEASE.md
-          echo "### Additional Notes" >> CHANGELOG_RELEASE.md
-          # Preserve line breaks from workflow_dispatch input
-          printf '%s\n' "$RELEASE_NOTES" >> CHANGELOG_RELEASE.md
-        env:
-          RELEASE_NOTES: ${{ inputs.notes }}
-
-      - name: Verify final versioned artifacts
-        run: npm --ignore-scripts run ci
-
-      - name: Commit changes
-        shell: bash
-        env:
-          RELEASE_VERSION: ${{ steps.version.outputs.version }}
-        run: |
-          if [[ ! "$RELEASE_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "Refusing to tag invalid version" >&2; exit 1; fi
-          git config user.name github-actions
-          git config user.email github-actions@github.com
-          git add package.json package-lock.json CHANGELOG.md CHANGELOG_RELEASE.md
-          if git diff --cached --quiet; then
-            echo "Nothing to commit (working tree clean)"
-          else
-            git commit -m "chore: release v$RELEASE_VERSION"
-          fi
-
-      - name: Create local tag
-        shell: bash
-        env:
-          RELEASE_VERSION: ${{ steps.version.outputs.version }}
-        run: |
-          TAG="v$RELEASE_VERSION"
-          HEAD_COMMIT="$(git rev-parse HEAD)"
-          if git show-ref --tags --verify --quiet "refs/tags/$TAG"; then
-            TAG_COMMIT="$(git rev-list -n 1 "$TAG")"
-            if [[ "$TAG_COMMIT" != "$HEAD_COMMIT" ]]; then
-              echo "Tag $TAG already exists at $TAG_COMMIT, expected $HEAD_COMMIT. Refusing to overwrite it." >&2
-              echo "Recovery: restore main and the tag to the same commit, then rerun with version $RELEASE_VERSION." >&2
-              exit 1
-            fi
-            echo "Tag $TAG already points to HEAD; resuming publication"
-          else
-            git tag -a "$TAG" -m "Release $TAG"
-          fi
-
-      - name: Build distributions
-        run: npm run dist
-
-      - name: Generate checksums
-        run: (cd .output && sha256sum opencc.chrome.zip opencc.firefox.zip opencc.edge.zip) > SHA256SUMS
-
-      - name: Upload a Build Artifact
-        uses: actions/upload-artifact@v7.0.1
-        with:
-          name: build-artifacts-${{ steps.version.outputs.version }}
-          path: |
-            .output/opencc.chrome.zip
-            .output/opencc.firefox.zip
-            .output/opencc.edge.zip
-            SHA256SUMS
-          retention-days: 14
-
-      - name: Push commit + tag
-        shell: bash
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          RELEASE_VERSION: ${{ steps.version.outputs.version }}
-        run: |
-          TAG="v$RELEASE_VERSION"
-          git push --atomic origin HEAD:main "refs/tags/$TAG"
-
-      - name: Add checksum summary
-        shell: bash
-        run: |
-          echo "### Artifact Checksums" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| File | SHA256 |" >> $GITHUB_STEP_SUMMARY
-          echo "|------|--------|" >> $GITHUB_STEP_SUMMARY
-          awk '{printf("| %s | `%s` |\n", $2, $1)}' SHA256SUMS >> $GITHUB_STEP_SUMMARY
-
-      - name: GH Release
-        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 #v3.0.3
-        with:
-          tag_name: v${{ steps.version.outputs.version }}
-          name: v${{ steps.version.outputs.version }}
-          body_path: CHANGELOG_RELEASE.md
-          draft: false
-          prerelease: false
-          overwrite_files: true
-          files: |
-            .output/opencc.chrome.zip
-            .output/opencc.firefox.zip
-            .output/opencc.edge.zip
-            SHA256SUMS
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            // BEGIN PUBLICATION
+            const fs = require('node:fs');
+            const path = require('node:path');
+            const { createHash } = require('node:crypto');
+            const { SOURCE_SHA: commit, VERSION: version, ARTIFACT_DIR: dir } = process.env;
+            const fail = (message) => { throw new Error(message); };
+            const hash = (data) => createHash('sha256').update(data).digest('hex');
+            const zips = ['opencc.chrome.zip', 'opencc.firefox.zip', 'opencc.edge.zip'];
+            const noteName = 'CHANGELOG_RELEASE.md';
+            const assets = [...zips, 'SHA256SUMS'];
+            const files = [...assets, noteName, 'release-metadata.json'];
+            const sameKeys = (actual, expected) => JSON.stringify([...actual].sort()) === JSON.stringify([...expected].sort());
+            if (!/^[a-f0-9]{40}$/.test(commit || '')) fail('Invalid source commit');
+            if (!/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/.test(version || '')) fail('Invalid release version');
+            if (!sameKeys(fs.readdirSync(dir), files)) fail('Unexpected or missing artifact files');
+            const bytes = Object.fromEntries(files.map((name) => {
+              const file = path.join(dir, name);
+              if (!fs.lstatSync(file).isFile()) fail(`Invalid artifact file: ${name}`);
+              return [name, fs.readFileSync(file)];
+            }));
+            const metadata = JSON.parse(bytes['release-metadata.json'].toString('utf8'));
+            if (metadata.commit !== commit) fail('Artifact commit differs from source commit');
+            if (metadata.version !== version) fail('Artifact version differs from verified version');
+            if (!metadata.sha256 || !sameKeys(Object.keys(metadata.sha256), [...zips, noteName])) fail('Invalid artifact hash metadata');
+            for (const name of [...zips, noteName]) {
+              if (!/^[a-f0-9]{64}$/.test(metadata.sha256[name]) || hash(bytes[name]) !== metadata.sha256[name]) fail(`Artifact checksum mismatch: ${name}`);
+            }
+            const checksumText = bytes.SHA256SUMS.toString('utf8');
+            const expectedChecksums = zips.map((name) => `${metadata.sha256[name]}  ${name}\n`).join('');
+            if (checksumText !== expectedChecksums) fail('Invalid checksum file');
+            const notes = bytes[noteName].toString('utf8');
+            const heading = notes.split(/\r?\n/, 1)[0];
+            const headingPrefix = `## v${version} - `;
+            if (!heading.startsWith(headingPrefix) || !/^\d{4}-\d{2}-\d{2}$/.test(heading.slice(headingPrefix.length))) fail('Release notes heading does not match version');
+            const tag = `v${version}`;
+            const repo = context.repo;
+            const readTag = async () => {
+              let object = (await github.rest.git.getRef({ ...repo, ref: `tags/${tag}` })).data.object;
+              for (let depth = 0; object.type === 'tag' && depth < 8; depth++) {
+                object = (await github.rest.git.getTag({ ...repo, tag_sha: object.sha })).data.object;
+              }
+              if (object.type !== 'commit' || object.sha !== commit) fail(`Tag ${tag} does not point to source commit`);
+            };
+            try { await readTag(); }
+            catch (error) {
+              if (error.status !== 404) throw error;
+              try { await github.rest.git.createRef({ ...repo, ref: `refs/tags/${tag}`, sha: commit }); }
+              catch (race) { if (![409, 422].includes(race.status)) throw race; }
+              await readTag();
+            }
+            let release;
+            try { release = (await github.rest.repos.getReleaseByTag({ ...repo, tag })).data; }
+            catch (error) {
+              if (error.status !== 404) throw error;
+              // The by-tag endpoint does not return drafts. The write token can
+              // discover them through the paginated repository release listing.
+              const matches = (await github.paginate(github.rest.repos.listReleases, { ...repo, per_page: 100 }))
+                .filter((candidate) => candidate.tag_name === tag);
+              if (matches.length > 1) fail(`Multiple existing releases match tag ${tag}`);
+              release = matches[0];
+              if (!release) {
+                release = (await github.rest.repos.createRelease({ ...repo, tag_name: tag, target_commitish: commit, name: tag, body: notes, draft: true, prerelease: false })).data;
+              }
+            }
+            if (release.tag_name !== tag || release.prerelease || release.body !== notes) fail('Existing release conflicts with verified release notes or tag');
+            const listAssets = () => github.paginate(github.rest.repos.listReleaseAssets, { ...repo, release_id: release.id, per_page: 100 });
+            const verifyAssets = async (remoteAssets, requireComplete) => {
+              if (!sameKeys(remoteAssets.map((asset) => asset.name), [...new Set(remoteAssets.map((asset) => asset.name))])) fail('Duplicate release assets');
+              if (remoteAssets.some((asset) => !assets.includes(asset.name))) fail('Unexpected release asset');
+              for (const name of assets) {
+                const asset = remoteAssets.find((item) => item.name === name);
+                if (!asset) { if (requireComplete) fail(`Published release missing asset: ${name}`); continue; }
+                const response = await github.rest.repos.getReleaseAsset({ ...repo, asset_id: asset.id, headers: { accept: 'application/octet-stream' } });
+                if (hash(Buffer.from(response.data)) !== hash(bytes[name])) fail(`Remote asset checksum mismatch: ${name}`);
+              }
+            };
+            const existing = await listAssets();
+            await verifyAssets(existing, !release.draft);
+            if (!release.draft) { core.info(`Release ${tag} is already complete and verified`); return; }
+            for (const name of assets) {
+              if (!existing.some((asset) => asset.name === name)) {
+                await github.rest.repos.uploadReleaseAsset({ ...repo, release_id: release.id, name, data: bytes[name], headers: { 'content-type': 'application/octet-stream', 'content-length': bytes[name].length } });
+              }
+            }
+            await verifyAssets(await listAssets(), true);
+            await github.rest.repos.updateRelease({ ...repo, release_id: release.id, draft: false });
+            core.info(`Published verified release ${tag} at ${commit}`);
+            // END PUBLICATION

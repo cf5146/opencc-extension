@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { JSDOM } from 'jsdom';
 
 import { createContentRuntime } from '../src/application/runtime/content-runtime.js';
+import { createConversionService } from '../src/application/conversion/conversion-service.js';
 import type { Settings } from '../src/application/settings/settings.js';
 import type { SettingsStore } from '../src/application/settings/settings-store.js';
 import {
@@ -24,6 +25,7 @@ function makeSettings(overrides: Partial<Settings> = {}): Settings {
     target: 'hk',
     auto: false,
     whitelist: [],
+    siteRules: {},
     textboxSize: { width: null, height: null },
     ...overrides,
   };
@@ -52,6 +54,89 @@ function createRuntime(
 const flushAsyncWork = () => new Promise<void>((resolve) => setTimeout(resolve, 0));
 
 describe('content runtime', () => {
+  it('converts appended content on a later manual request and leaves unchanged output alone', async () => {
+    const dom = createDom();
+    dom.window.document.querySelector('p')!.textContent = '汉语';
+    vi.stubGlobal('document', dom.window.document);
+    vi.stubGlobal('NodeFilter', dom.window.NodeFilter);
+    const service = createConversionService();
+    const listener = createRuntimeListenerCapture();
+    const runtime = createContentRuntime({
+      platform: createFakePlatform({ runtime: { subscribe: listener.subscribe } }),
+      settingsStore: createFakeSettingsStore(),
+      document: dom.window.document,
+      getSelection: () => null,
+      now: () => 100,
+      operations: {
+        convertTextNode: (from, to, node) => service.convertTextNode(node, from, to),
+        convertDocument: service.convertDocument,
+        convertTitle: service.convertTitle,
+        convertSelection: (from, to, selection) => service.convertSelection(selection, from, to),
+        hasConverted: service.hasConverted,
+        resetCaches: service.resetCaches,
+      },
+    });
+    try {
+      await runtime.start();
+      expect(await listener.invoke({ type: 'convert-page' })).toEqual({ kind: 'success', count: 1, time: 0 });
+      expect(dom.window.document.querySelector('p')!.textContent).toBe('漢語');
+      dom.window.document.body.insertAdjacentHTML('beforeend', '<p>电脑</p>');
+      expect(await listener.invoke({ type: 'convert-page' })).toEqual({ kind: 'success', count: 1, time: 0 });
+      expect(dom.window.document.body.textContent).toBe('漢語電腦');
+      expect(await listener.invoke({ type: 'convert-page' })).toEqual({ kind: 'no-op', count: 0, time: 0 });
+      expect(dom.window.document.body.textContent).toBe('漢語電腦');
+    } finally {
+      runtime.dispose();
+      dom.window.close();
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it('observes and converts new data written into an already converted text node', async () => {
+    const dom = createDom();
+    dom.window.document.querySelector('p')!.textContent = '汉语';
+    vi.stubGlobal('document', dom.window.document);
+    vi.stubGlobal('NodeFilter', dom.window.NodeFilter);
+    const service = createConversionService();
+    const runtime = createContentRuntime({
+      platform: createFakePlatform(),
+      settingsStore: createFakeSettingsStore({ auto: true }),
+      document: dom.window.document,
+      getSelection: () => null,
+      operations: {
+        convertTextNode: (from, to, node) => service.convertTextNode(node, from, to),
+        convertDocument: service.convertDocument,
+        convertTitle: service.convertTitle,
+        convertSelection: (from, to, selection) => service.convertSelection(selection, from, to),
+        hasConverted: service.hasConverted,
+        resetCaches: service.resetCaches,
+      },
+    });
+    try {
+      const text = dom.window.document.querySelector('p')!.firstChild as Text;
+      await runtime.start();
+      await vi.waitFor(() => expect(text.data).toBe('漢語'));
+      text.data = '电脑';
+      await vi.waitFor(() => expect(text.data).toBe('電腦'));
+      await flushAsyncWork();
+      expect(text.data).toBe('電腦');
+      expect(service.hasConverted(text, 'cn', 'hk')).toBe(true);
+    } finally {
+      runtime.dispose();
+      dom.window.close();
+      vi.unstubAllGlobals();
+    }
+  });
+  it('rescans on an explicit request after load more', async () => {
+    const dom = createDom();
+    const { listener, operations, runtime } = createRuntime(dom);
+    await runtime.start();
+    await listener.invoke({ type: 'convert-page' });
+    dom.window.document.body.insertAdjacentHTML('beforeend', '<p>更多內容</p>');
+    await listener.invoke({ type: 'convert-page' });
+    expect(operations.convertDocument).toHaveBeenCalledTimes(2);
+    runtime.dispose();
+  });
   it('queues a page request received while startup settings are loading', async () => {
     const dom = createDom();
     const settings = makeSettings();
@@ -60,7 +145,10 @@ describe('content runtime', () => {
     const settingsStore: SettingsStore = {
       load: vi.fn(() => {
         loadCount += 1;
-        if (loadCount === 1) return new Promise<Settings>((resolve) => { releaseInitialLoad = resolve; });
+        if (loadCount === 1)
+          return new Promise<Settings>((resolve) => {
+            releaseInitialLoad = resolve;
+          });
         return Promise.resolve(settings);
       }),
       set: vi.fn(),
@@ -88,7 +176,9 @@ describe('content runtime', () => {
         loadCount += 1;
         return loadCount === 1
           ? Promise.resolve(settings)
-          : new Promise<Settings>((resolve) => { releaseRequestLoad = resolve; });
+          : new Promise<Settings>((resolve) => {
+              releaseRequestLoad = resolve;
+            });
       }),
       set: vi.fn(),
       subscribe: () => () => {},
@@ -107,16 +197,24 @@ describe('content runtime', () => {
     expect(operations.convertDocument).not.toHaveBeenCalled();
   });
 
-  it('starts auto mode from settings and answers a page request', async () => {
+  it('queues auto text conversion and still rescans on an explicit page request', async () => {
     const dom = createDom();
     const store = createFakeSettingsStore({ auto: true, origin: 'cn', target: 'hk' });
     const { listener, operations, runtime } = createRuntime(dom, store);
 
     const dispose = await runtime.start();
+    await vi.waitFor(() =>
+      expect(operations.convertTextNode).toHaveBeenCalledWith(
+        'cn',
+        'hk',
+        dom.window.document.querySelector('p')!.firstChild,
+      ),
+    );
+    expect(operations.convertDocument).not.toHaveBeenCalled();
     const response = await listener.invoke({ type: 'convert-page' }, {});
 
     expect(operations.convertDocument).toHaveBeenCalledTimes(1);
-    expect(response).toEqual({ kind: 'no-op', count: 0, time: 0 });
+    expect(response).toEqual({ kind: 'success', count: 1, time: 0 });
     dispose();
   });
 
@@ -124,9 +222,12 @@ describe('content runtime', () => {
     const dom = createDom();
     const operations = createRecordingConversionOperations();
     operations.convertDocument.mockReturnValue(4);
-    const { listener, runtime } = createRuntime(dom, createFakeSettingsStore(), operations, vi.fn()
-      .mockReturnValueOnce(100)
-      .mockReturnValueOnce(143));
+    const { listener, runtime } = createRuntime(
+      dom,
+      createFakeSettingsStore(),
+      operations,
+      vi.fn().mockReturnValueOnce(100).mockReturnValueOnce(143),
+    );
 
     await runtime.start();
 
@@ -151,9 +252,12 @@ describe('content runtime', () => {
 
     const operations = createRecordingConversionOperations();
     operations.convertSelection.mockReturnValue(true);
-    const { listener, runtime } = createRuntime(dom, createFakeSettingsStore(), operations, vi.fn()
-      .mockReturnValueOnce(20)
-      .mockReturnValueOnce(28));
+    const { listener, runtime } = createRuntime(
+      dom,
+      createFakeSettingsStore(),
+      operations,
+      vi.fn().mockReturnValueOnce(20).mockReturnValueOnce(28),
+    );
 
     await runtime.start();
 
@@ -242,12 +346,19 @@ describe('content runtime', () => {
     });
 
     await runtime.start();
+    await vi.waitFor(() => expect(operations.convertTextNode).toHaveBeenCalledOnce());
     await store.emit({ auto: true, origin: 'tw', target: 'cn' });
 
     await expect(listener.invoke({ type: 'convert-page' }, {})).resolves.toEqual({
       kind: 'reload-required',
     });
-    expect(operations.convertDocument).toHaveBeenCalledTimes(1);
+    expect(operations.convertDocument).not.toHaveBeenCalled();
+    expect(operations.convertTextNode).toHaveBeenCalledWith(
+      'cn',
+      'hk',
+      dom.window.document.querySelector('p')!.firstChild,
+    );
+    runtime.dispose();
   });
 
   it('starts and stops auto conversion when settings change', async () => {
@@ -262,15 +373,18 @@ describe('content runtime', () => {
     expect(operations.convertDocument).not.toHaveBeenCalled();
 
     await store.emit({ auto: true });
-    await flushAsyncWork();
-    expect(operations.convertDocument).toHaveBeenCalledTimes(1);
+    await vi.waitFor(() => expect(operations.convertTextNode).toHaveBeenCalledOnce());
 
     await store.emit({ auto: false });
     await flushAsyncWork();
-    dom.window.document.body.appendChild(dom.window.document.createElement('section'));
+    const added = dom.window.document.createElement('section');
+    added.textContent = 'new text';
+    dom.window.document.body.appendChild(added);
     await flushAsyncWork();
 
-    expect(operations.convertDocument).toHaveBeenCalledTimes(1);
+    expect(operations.convertTextNode).toHaveBeenCalledOnce();
+    expect(operations.convertDocument).not.toHaveBeenCalled();
+    runtime.dispose();
   });
 
   it('applies the latest settings event when updates arrive before reconciliation runs', async () => {
@@ -287,6 +401,8 @@ describe('content runtime', () => {
     await flushAsyncWork();
 
     expect(operations.convertDocument).not.toHaveBeenCalled();
+    expect(operations.convertTextNode).not.toHaveBeenCalled();
+    runtime.dispose();
   });
 
   it('returns internal-failure when the latest settings reconciliation fails', async () => {
@@ -318,7 +434,7 @@ describe('content runtime', () => {
     const { listener, runtime } = createRuntime(dom, store, operations);
 
     await runtime.start();
-    expect(operations.convertDocument).toHaveBeenCalledTimes(1);
+    await vi.waitFor(() => expect(operations.convertTextNode).toHaveBeenCalledOnce());
 
     await store.emit({ auto: false });
     await flushAsyncWork();
@@ -326,21 +442,29 @@ describe('content runtime', () => {
     await flushAsyncWork();
 
     await expect(listener.invoke({ type: 'convert-page' }, {})).resolves.toEqual({ kind: 'reload-required' });
-    expect(operations.convertDocument).toHaveBeenCalledTimes(1);
+    expect(operations.convertDocument).not.toHaveBeenCalled();
+    expect(operations.convertTextNode).toHaveBeenCalledOnce();
+    runtime.dispose();
   });
 
-  it('does not rescan a processed document for manual conversion after auto stops', async () => {
+  it('rescans on a manual request after auto stops', async () => {
     const dom = createDom();
     const store = createFakeSettingsStore({ auto: true, origin: 'cn', target: 'hk' });
     const operations = createRecordingConversionOperations();
     const { listener, runtime } = createRuntime(dom, store, operations);
 
     await runtime.start();
+    await vi.waitFor(() => expect(operations.convertTextNode).toHaveBeenCalledOnce());
     await store.emit({ auto: false });
     await flushAsyncWork();
 
-    await expect(listener.invoke({ type: 'convert-page' }, {})).resolves.toEqual({ kind: 'no-op', count: 0, time: 0 });
+    await expect(listener.invoke({ type: 'convert-page' }, {})).resolves.toEqual({
+      kind: 'success',
+      count: 1,
+      time: 0,
+    });
     expect(operations.convertDocument).toHaveBeenCalledTimes(1);
+    runtime.dispose();
   });
 
   it('returns reload-required when a manually converted document changes locale pair', async () => {
@@ -419,13 +543,23 @@ describe('content runtime', () => {
     const runtimeUnsubscribe = vi.fn();
     const settingsUnsubscribe = vi.fn();
     const settingsStore: SettingsStore = {
-      load: vi.fn(() => new Promise<Settings>((resolve) => { releaseLoad = resolve; })),
+      load: vi.fn(
+        () =>
+          new Promise<Settings>((resolve) => {
+            releaseLoad = resolve;
+          }),
+      ),
       set: vi.fn(),
       subscribe: vi.fn(() => settingsUnsubscribe),
     };
     const listener = createRuntimeListenerCapture();
     const platform = createFakePlatform({
-      runtime: { subscribe: vi.fn(() => { listener.subscribe(async () => undefined); return runtimeUnsubscribe; }) },
+      runtime: {
+        subscribe: vi.fn(() => {
+          listener.subscribe(async () => undefined);
+          return runtimeUnsubscribe;
+        }),
+      },
     });
     const runtime = createContentRuntime({
       platform,
@@ -532,6 +666,7 @@ describe('content runtime', () => {
     });
 
     const dispose = await runtime.start();
+    expect(operations.convertTextNode).not.toHaveBeenCalled();
     dispose();
     dispose();
     settingsListener?.(makeSettings({ auto: true }));
@@ -540,7 +675,8 @@ describe('content runtime', () => {
 
     expect(runtimeUnsubscribe).toHaveBeenCalledOnce();
     expect(settingsUnsubscribe).toHaveBeenCalledOnce();
-    expect(operations.convertDocument).toHaveBeenCalledOnce();
+    expect(operations.convertDocument).not.toHaveBeenCalled();
+    expect(operations.convertTextNode).not.toHaveBeenCalled();
   });
 
   it('contains conversion failures as internal-failure responses', async () => {
@@ -580,7 +716,9 @@ describe('content runtime', () => {
       load: vi.fn(() => {
         loadCount += 1;
         if (loadCount === 1) return Promise.resolve(makeSettings());
-        return new Promise<Settings>((_resolve, reject) => { rejectLoad = reject; });
+        return new Promise<Settings>((_resolve, reject) => {
+          rejectLoad = reject;
+        });
       }),
       set: vi.fn(),
       subscribe: () => () => {},

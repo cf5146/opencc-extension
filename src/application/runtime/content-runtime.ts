@@ -105,7 +105,6 @@ export function createContentRuntime(options: ContentRuntimeOptions): ContentRun
     if (settings.origin === settings.target) return noOp();
     const documentState = controller.getDocumentState(settings);
     if (documentState === 'reload-required') return { kind: 'reload-required' };
-    if (documentState === 'processed') return noOp();
 
     const startedAt = now();
     options.operations.convertTitle(settings.origin, settings.target);

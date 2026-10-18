@@ -124,14 +124,14 @@ describe("release version resolver", () => {
     }
   });
 
-  it("signals an exact package and tag match as resumable", async () => {
+  it("rejects an already tagged version during preparation", async () => {
     const root = await fs.mkdtemp(path.join(os.tmpdir(), "opencc-resolver-"));
     try {
       await writeFile(root, "package.json", JSON.stringify({ version: "1.2.3" }));
       await writeFile(root, ".git/refs/tags/v1.2.3", "a");
       const result = runScript(resolverPath, root, { RELEASE_VERSION: "1.2.3" });
-      expect(result.status).toBe(0);
-      expect(result.stdout).toContain("Resuming existing release: v1.2.3");
+      expect(result.status).not.toBe(0);
+      expect(result.stdout + result.stderr).toContain("must be greater");
     } finally {
       await fs.rm(root, { recursive: true, force: true });
     }
@@ -145,5 +145,51 @@ describe("release version resolver", () => {
     } finally {
       await fs.rm(root, { recursive: true, force: true });
     }
+  });
+});
+
+describe("release package update", () => {
+  it("fails instead of continuing when package.json cannot be parsed", async () => {
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "opencc-bump-"));
+    try {
+      await writeFile(root, "package.json", "not JSON");
+      await writeFile(root, "package-lock.json", JSON.stringify({ version: "1.0.0" }));
+      const result = runScript(path.resolve("scripts/bump-version.cjs"), root, {}, ["1.0.1"]);
+      expect(result.status).not.toBe(0);
+      expect(JSON.parse(await fs.readFile(path.join(root, "package-lock.json"), "utf8")).version).toBe("1.0.0");
+    } finally {
+      await fs.rm(root, { recursive: true, force: true });
+    }
+  });
+  it.each(["0.0.0", "1.2.65536", "999999999999999999999.1.0", "01.2.3", "1.0.0;echo unsafe"])(
+    "rejects invalid browser version %s before editing files",
+    async (version) => {
+      const root = await fs.mkdtemp(path.join(os.tmpdir(), "opencc-bump-"));
+      try {
+        await writeFile(root, "package.json", JSON.stringify({ version: "1.0.0" }));
+        const result = runScript(path.resolve("scripts/bump-version.cjs"), root, {}, [version]);
+        expect(result.status).not.toBe(0);
+        expect(JSON.parse(await fs.readFile(path.join(root, "package.json"), "utf8")).version).toBe("1.0.0");
+      } finally {
+        await fs.rm(root, { recursive: true, force: true });
+      }
+    },
+  );
+});
+
+describe("browser release version boundaries", () => {
+  it.each(["0.0.0", "1.2.65536", "999999999999999999999.1.0", "01.2.3"])(
+    "rejects requested version %s",
+    async (requestedVersion) => {
+      const { resolveReleaseVersion } = await import("../scripts/resolve-release-version.mjs");
+      expect(() => resolveReleaseVersion({ packageVersion: "1.0.0", requestedVersion })).toThrow(
+        /Invalid release version/,
+      );
+    },
+  );
+  it("requires an explicit version when the patch component is exhausted", async () => {
+    const { resolveReleaseVersion } = await import("../scripts/resolve-release-version.mjs");
+    expect(() => resolveReleaseVersion({ packageVersion: "1.2.65535" })).toThrow(/explicit release version/);
+    expect(resolveReleaseVersion({ packageVersion: "1.2.65535", requestedVersion: "1.3.0" })).toBe("1.3.0");
   });
 });

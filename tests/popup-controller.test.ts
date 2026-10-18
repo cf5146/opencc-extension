@@ -1,254 +1,252 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, expect, it, vi } from "vitest";
+import { readFileSync } from "node:fs";
 import { createPopupController, type PopupElements } from "../src/application/ui/popup-controller.js";
 import { DEFAULT_SETTINGS, type Settings } from "../src/application/settings/settings.js";
-import type { SettingsStore } from "../src/application/settings/settings-store.js";
 import { createFakePlatform, createFakeSettingsStore } from "./helpers/fakes.js";
 
-function makePopupElements(): PopupElements {
-  document.body.innerHTML = `
-    <select id="origin"><option value="cn">cn</option><option value="hk">hk</option><option value="tw">tw</option></select>
-    <select id="target"><option value="hk">hk</option><option value="cn">cn</option><option value="tw">tw</option></select>
-    <button id="swap"></button>
-    <button id="reset"></button>
-    <textarea id="textbox"></textarea>
-    <button id="convert"></button>
-    <input id="auto" type="checkbox" />
-    <span id="status"></span>
-  `;
+function makeElements(): PopupElements {
+  document.body.innerHTML = `<select id="origin"><option value="cn">cn</option><option value="hk">hk</option><option value="tw">tw</option></select><select id="target"><option value="hk">hk</option><option value="cn">cn</option><option value="tw">tw</option></select><button id="swap"></button><button id="clear"></button><textarea id="original"></textarea><textarea id="result"></textarea><button id="convert"></button><input id="auto" type="checkbox"><output id="status"></output><button id="retry"></button><button id="copy"></button><select id="site"><option value="default">Default</option><option value="always">Always</option><option value="never">Never</option></select><span id="hostname"></span><p id="policy"></p>`;
+  const get = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
   return {
-    originSelect: document.getElementById("origin") as HTMLSelectElement,
-    targetSelect: document.getElementById("target") as HTMLSelectElement,
-    swapButton: document.getElementById("swap") as HTMLButtonElement,
-    resetButton: document.getElementById("reset") as HTMLButtonElement,
-    textbox: document.getElementById("textbox") as HTMLTextAreaElement,
-    convertButton: document.getElementById("convert") as HTMLButtonElement,
-    autoCheckbox: document.getElementById("auto") as HTMLInputElement,
-    status: document.getElementById("status") as HTMLElement,
+    originSelect: get("origin"),
+    targetSelect: get("target"),
+    swapButton: get("swap"),
+    resetButton: get("clear"),
+    textbox: get("original"),
+    result: get("result"),
+    convertButton: get("convert"),
+    autoCheckbox: get("auto"),
+    status: get("status"),
     subtitle: null,
+    retryButton: get("retry"),
+    copyButton: get("copy"),
+    siteSelect: get("site"),
+    hostname: get("hostname"),
+    policy: get("policy"),
   };
 }
-
-describe("popup controller", () => {
-  it("keeps controls gated until settings hydration finishes", async () => {
-    let releaseLoad!: (settings: Settings) => void;
-    const settingsStore: SettingsStore = {
-      load: vi.fn(() => new Promise<Settings>((resolve) => { releaseLoad = resolve; })),
-      set: vi.fn(),
-      subscribe: () => () => {},
-    };
-    const elements = makePopupElements();
-    const controller = createPopupController(createFakePlatform(), elements, settingsStore);
-    const initializePromise = controller.initialize();
-
-    expect(elements.originSelect.disabled).toBe(true);
-    expect(elements.targetSelect.disabled).toBe(true);
-    expect(elements.textbox.disabled).toBe(true);
-    elements.originSelect.value = "hk";
-    elements.originSelect.dispatchEvent(new Event("change"));
-    expect(settingsStore.set).not.toHaveBeenCalled();
-
-    releaseLoad({ ...DEFAULT_SETTINGS, origin: "tw" });
-    await initializePromise;
-
-    expect(elements.originSelect.value).toBe("tw");
-    expect(elements.originSelect.disabled).toBe(false);
-    controller.dispose();
-  });
-
-  it("sends active-tab conversion through runtime and renders a text-only result", async () => {
-    const send = vi.fn().mockResolvedValue({ kind: "success", count: 2, time: 8 });
-    const getActive = vi.fn();
-    const platform = createFakePlatform({ runtime: { send }, tabs: { getActive } });
-    const elements = makePopupElements();
-    const controller = createPopupController(platform, elements);
-
-    await controller.initialize();
-    elements.convertButton.click();
-    await new Promise<void>((resolve) => setTimeout(resolve, 0));
-
-    expect(send).toHaveBeenCalledWith({ type: "convert-active-tab" });
-    expect(getActive).not.toHaveBeenCalled();
-    expect(elements.status.textContent).toBe("2 nodes changed in 8ms");
-    expect(elements.status.innerHTML).toBe("2 nodes changed in 8ms");
-    controller.dispose();
-  });
-
-  it("renders unavailable results without HTML injection", async () => {
-    const platform = createFakePlatform({
-      runtime: { send: vi.fn().mockResolvedValue({ kind: "unavailable", reason: "protected-page" }) },
-    });
-    const elements = makePopupElements();
-    const controller = createPopupController(platform, elements);
-
-    await controller.initialize();
-    elements.convertButton.click();
-    await new Promise<void>((resolve) => setTimeout(resolve, 0));
-
-    expect(elements.status.textContent).toContain("PROTECTED");
-    expect(elements.status.textContent).toBe("NO ACCESS / PROTECTED PAGE");
-    expect(elements.status.querySelector("span")).toBeNull();
-    controller.dispose();
-  });
-
-  it("loads settings into controls and persists popup setting changes", async () => {
-    const settingsStore = createFakeSettingsStore({
-      origin: "tw",
-      target: "cn",
-      auto: true,
-      textboxSize: { width: 420, height: 180 },
-    });
-    const set = vi.spyOn(settingsStore, "set");
-    const elements = makePopupElements();
-    const controller = createPopupController(createFakePlatform(), elements, settingsStore);
-
-    await controller.initialize();
-
-    expect(elements.originSelect.value).toBe("tw");
-    expect(elements.targetSelect.value).toBe("cn");
-    expect(elements.autoCheckbox.checked).toBe(true);
-    expect(elements.textbox.style.width).toBe("420px");
-    expect(elements.textbox.style.height).toBe("180px");
-
-    elements.originSelect.value = "hk";
-    elements.originSelect.dispatchEvent(new Event("change"));
-    elements.targetSelect.value = "tw";
-    elements.targetSelect.dispatchEvent(new Event("change"));
-    elements.swapButton.click();
-    elements.autoCheckbox.checked = false;
-    elements.autoCheckbox.dispatchEvent(new Event("change"));
-    await new Promise<void>((resolve) => setTimeout(resolve, 0));
-
-    expect(set).toHaveBeenCalledWith({ origin: "hk" });
-    expect(set).toHaveBeenCalledWith({ target: "tw" });
-    expect(set).toHaveBeenCalledWith({ origin: "tw", target: "hk" });
-    expect(set).toHaveBeenCalledWith({ auto: false });
-    controller.dispose();
-  });
-
-  it("converts textbox input locally after the debounce and cancels work on dispose", async () => {
-    vi.useFakeTimers();
-    try {
-      const send = vi.fn();
-      const elements = makePopupElements();
-      const controller = createPopupController(createFakePlatform({ runtime: { send } }), elements);
-
-      await controller.initialize();
-      elements.textbox.value = "汉字";
-      elements.textbox.dispatchEvent(new Event("input"));
-      await vi.advanceTimersByTimeAsync(250);
-
-      expect(elements.textbox.value).not.toBe("汉字");
-      expect(send).not.toHaveBeenCalled();
-
-      elements.textbox.value = "繁體";
-      elements.textbox.dispatchEvent(new Event("input"));
-      controller.dispose();
-      await vi.advanceTimersByTimeAsync(250);
-      expect(elements.textbox.value).toBe("繁體");
-    } finally {
-      vi.useRealTimers();
-    }
-  });
-
-  it("cancels a pending textbox conversion when direction changes immediately", async () => {
-    vi.useFakeTimers();
-    try {
-      const elements = makePopupElements();
-      const controller = createPopupController(createFakePlatform(), elements);
-      await controller.initialize();
-
-      elements.textbox.value = "汉字";
-      elements.textbox.dispatchEvent(new Event("input"));
-      elements.originSelect.value = "hk";
-      elements.originSelect.dispatchEvent(new Event("change"));
-      await vi.advanceTimersByTimeAsync(250);
-
-      expect(elements.textbox.value).toBe("汉字");
-      controller.dispose();
-    } finally {
-      vi.useRealTimers();
-    }
-  });
-
-  it("serializes rapid settings writes", async () => {
-    let releaseFirst!: (settings: Settings) => void;
-    let setCalls = 0;
-    const settingsStore: SettingsStore = {
-      load: vi.fn().mockResolvedValue(DEFAULT_SETTINGS),
-      set: vi.fn((patch) => {
-        setCalls += 1;
-        if (setCalls === 1) {
-          return new Promise<Settings>((resolve) => { releaseFirst = resolve; });
-        }
-        return Promise.resolve({ ...DEFAULT_SETTINGS, ...patch });
+const flush = () => new Promise<void>((resolve) => setTimeout(resolve, 0));
+afterEach(() => vi.useRealTimers());
+it("links Settings to WXT's generated options page", () => {
+  const markup = readFileSync("entrypoints/popup/index.html", "utf8");
+  const popup = new DOMParser().parseFromString(markup, "text/html");
+  expect(popup.querySelector("a")?.getAttribute("href")).toBe("/options.html");
+});
+it("gates initialization, retries load failure, and ignores completion after disposal", async () => {
+  const store = createFakeSettingsStore();
+  vi.spyOn(store, "load").mockRejectedValueOnce(new Error("offline"));
+  const e = makeElements();
+  const c = createPopupController(createFakePlatform(), e, store);
+  expect(e.convertButton.disabled).toBe(true);
+  await c.initialize();
+  expect(e.originSelect.disabled).toBe(true);
+  expect(e.status.textContent).toContain("load");
+  e.retryButton.click();
+  await flush();
+  expect(e.originSelect.disabled).toBe(false);
+  c.dispose();
+  e.swapButton.click();
+});
+it("keeps original intact, recomputes on swap, respects composition, clear and disposal", async () => {
+  vi.useFakeTimers();
+  const e = makeElements();
+  const c = createPopupController(createFakePlatform(), e, createFakeSettingsStore());
+  await c.initialize();
+  e.textbox.value = "汉字";
+  e.textbox.dispatchEvent(new Event("compositionstart"));
+  e.textbox.dispatchEvent(new Event("input"));
+  await vi.advanceTimersByTimeAsync(300);
+  expect(e.result.value).toBe("");
+  e.textbox.dispatchEvent(new Event("compositionend"));
+  await vi.advanceTimersByTimeAsync(250);
+  expect(e.result.value).toBe("漢字");
+  expect(e.textbox.value).toBe("汉字");
+  e.swapButton.click();
+  expect(e.result.value).toBe("汉字");
+  e.textbox.dispatchEvent(new Event("input"));
+  e.resetButton.click();
+  await vi.advanceTimersByTimeAsync(300);
+  expect(e.result.value).toBe("");
+  expect(e.textbox.value).toBe("");
+  e.textbox.value = "汉字";
+  e.textbox.dispatchEvent(new Event("input"));
+  c.dispose();
+  await vi.advanceTimersByTimeAsync(300);
+  expect(e.result.value).toBe("");
+});
+it("serializes saves, waits before conversion, blocks duplicate requests", async () => {
+  let release!: (settings: Settings) => void;
+  const store = createFakeSettingsStore();
+  const set = vi.spyOn(store, "set").mockImplementationOnce(
+    () =>
+      new Promise((resolve) => {
+        release = resolve;
       }),
-      subscribe: () => () => {},
-    };
-    const elements = makePopupElements();
-    const controller = createPopupController(createFakePlatform(), elements, settingsStore);
-    await controller.initialize();
-
-    elements.originSelect.value = "tw";
-    elements.originSelect.dispatchEvent(new Event("change"));
-    elements.targetSelect.value = "cn";
-    elements.targetSelect.dispatchEvent(new Event("change"));
-
-    expect(setCalls).toBe(1);
-    releaseFirst(DEFAULT_SETTINGS);
-    await vi.waitFor(() => expect(setCalls).toBe(2));
-    controller.dispose();
-  });
-
-  it("uses ResizeObserver for size persistence and disconnects it", async () => {
-    const observers: Array<{ observe: ReturnType<typeof vi.fn>; disconnect: ReturnType<typeof vi.fn> }> = [];
-    class FakeResizeObserver {
-      observe = vi.fn();
-      disconnect = vi.fn();
-
-      constructor() {
-        observers.push(this);
-      }
-    }
-    vi.stubGlobal("ResizeObserver", FakeResizeObserver);
-    try {
-      const settingsStore = createFakeSettingsStore();
-      const set = vi.spyOn(settingsStore, "set");
-      const controller = createPopupController(createFakePlatform(), makePopupElements(), settingsStore);
-      await controller.initialize();
-
-      expect(observers).toHaveLength(1);
-      expect(observers[0]?.observe).toHaveBeenCalledOnce();
-      controller.dispose();
-      expect(observers[0]?.disconnect).toHaveBeenCalledOnce();
-      expect(set).not.toHaveBeenCalled();
-    } finally {
-      vi.unstubAllGlobals();
-    }
-  });
-
-  it("renders every conversion response with a text-only status", async () => {
-    const responses = [
-      { kind: "success" as const, count: 1, time: 2 },
-      { kind: "no-op" as const, count: 0 as const, time: 0 },
-      { kind: "reload-required" as const },
-      { kind: "unavailable" as const, reason: "unsupported-scheme" as const },
-      { kind: "invalid-settings" as const },
-      { kind: "internal-failure" as const },
-    ];
-    const send = vi.fn();
-    for (const response of responses) send.mockResolvedValueOnce(response);
-    const elements = makePopupElements();
-    const controller = createPopupController(createFakePlatform({ runtime: { send } }), elements);
-    await controller.initialize();
-
-    for (const response of responses) {
-      elements.convertButton.click();
-      await new Promise<void>((resolve) => setTimeout(resolve, 0));
-      expect(elements.status.innerHTML).not.toContain("<");
-      expect(elements.status.textContent).toBeTruthy();
-      expect(elements.status.className).toContain("status-");
-      if (response.kind === "success") expect(elements.status.textContent).toBe("1 nodes changed in 2ms");
-    }
-    controller.dispose();
-  });
+  );
+  const send = vi.fn().mockResolvedValue({ kind: "reload-required" });
+  const e = makeElements();
+  const c = createPopupController(createFakePlatform({ runtime: { send } }), e, store);
+  await c.initialize();
+  e.originSelect.value = "tw";
+  e.originSelect.dispatchEvent(new Event("change"));
+  e.autoCheckbox.dispatchEvent(new Event("change"));
+  e.convertButton.click();
+  e.convertButton.click();
+  expect(set).toHaveBeenCalledTimes(1);
+  expect(send).not.toHaveBeenCalled();
+  release(DEFAULT_SETTINGS);
+  await flush();
+  await flush();
+  expect(set).toHaveBeenCalledTimes(2);
+  expect(send).toHaveBeenCalledTimes(1);
+  expect(e.status.textContent).toContain("Reload");
+  c.dispose();
+});
+it("retains failed edits for retry and does not convert with unsaved settings", async () => {
+  const store = createFakeSettingsStore();
+  vi.spyOn(store, "set").mockRejectedValueOnce(new Error("offline"));
+  const send = vi.fn();
+  const e = makeElements();
+  const c = createPopupController(createFakePlatform({ runtime: { send } }), e, store);
+  await c.initialize();
+  e.originSelect.value = "tw";
+  e.originSelect.dispatchEvent(new Event("change"));
+  await flush();
+  expect(e.status.textContent).toContain("save");
+  await store.emit({ origin: "hk" });
+  expect(e.originSelect.value).toBe("tw");
+  e.convertButton.click();
+  await flush();
+  expect(send).not.toHaveBeenCalled();
+  e.retryButton.click();
+  await flush();
+  expect((await store.load()).origin).toBe("tw");
+  c.dispose();
+});
+it("shows configured hostname policy and handles copy failure without losing result", async () => {
+  const e = makeElements();
+  const c = createPopupController(
+    createFakePlatform({ tabs: { getActive: async () => ({ id: 1, url: "https://EXAMPLE.com./path" }) } }),
+    e,
+    createFakeSettingsStore({ auto: true }),
+    {
+      copy: async () => {
+        throw new Error("denied");
+      },
+    },
+  );
+  await c.initialize();
+  expect(e.hostname.textContent).toBe("example.com");
+  expect(e.policy.textContent).toContain("Configured");
+  e.textbox.value = "汉字";
+  e.textbox.dispatchEvent(new Event("input"));
+  await new Promise((resolve) => setTimeout(resolve, 260));
+  e.copyButton.click();
+  await flush();
+  expect(e.result.value).toBe("漢字");
+  expect(e.status.textContent).toContain("select");
+  c.dispose();
+});
+it("retries the latest selected direction after an earlier save failed", async () => {
+  const store = createFakeSettingsStore();
+  vi.spyOn(store, "set").mockRejectedValueOnce(new Error("offline"));
+  const e = makeElements();
+  const c = createPopupController(createFakePlatform(), e, store);
+  await c.initialize();
+  e.originSelect.value = "tw";
+  e.originSelect.dispatchEvent(new Event("change"));
+  await flush();
+  e.originSelect.value = "cn";
+  e.originSelect.dispatchEvent(new Event("change"));
+  await flush();
+  e.retryButton.click();
+  await flush();
+  expect((await store.load()).origin).toBe("cn");
+  c.dispose();
+});
+it("does not hydrate controls or subscribe after disposal during startup", async () => {
+  let resolve!: (settings: Settings) => void;
+  const store = createFakeSettingsStore();
+  vi.spyOn(store, "load").mockImplementation(
+    () =>
+      new Promise((r) => {
+        resolve = r;
+      }),
+  );
+  const subscribe = vi.spyOn(store, "subscribe");
+  const e = makeElements();
+  const c = createPopupController(createFakePlatform(), e, store);
+  const loading = c.initialize();
+  expect(c.initialize()).toBe(loading);
+  c.dispose();
+  resolve(DEFAULT_SETTINGS);
+  await loading;
+  expect(e.originSelect.disabled).toBe(true);
+  expect(subscribe).not.toHaveBeenCalled();
+});
+it("uses exact normalized site rules and disables site policy on unsupported pages", async () => {
+  const store = createFakeSettingsStore();
+  const setSiteRule = vi.fn().mockResolvedValue(DEFAULT_SETTINGS);
+  store.setSiteRule = setSiteRule;
+  const e = makeElements();
+  const c = createPopupController(
+    createFakePlatform({ tabs: { getActive: async () => ({ id: 1, url: "https://Example.COM./x" }) } }),
+    e,
+    store,
+  );
+  await c.initialize();
+  e.siteSelect.value = "never";
+  e.siteSelect.dispatchEvent(new Event("change"));
+  await flush();
+  expect(setSiteRule).toHaveBeenCalledWith("example.com", "never");
+  e.siteSelect.value = "default";
+  e.siteSelect.dispatchEvent(new Event("change"));
+  await flush();
+  expect(setSiteRule).toHaveBeenCalledWith("example.com", null);
+  c.dispose();
+  const other = makeElements();
+  const d = createPopupController(
+    createFakePlatform({ tabs: { getActive: async () => ({ id: 1, url: "chrome://settings" }) } }),
+    other,
+    store,
+  );
+  await d.initialize();
+  expect(other.siteSelect.disabled).toBe(true);
+  d.dispose();
+});
+it("renders unavailable and no-op page results as plain text", async () => {
+  const send = vi
+    .fn()
+    .mockResolvedValueOnce({ kind: "unavailable", reason: "protected-page" })
+    .mockResolvedValueOnce({ kind: "no-op" });
+  const e = makeElements();
+  const c = createPopupController(createFakePlatform({ runtime: { send } }), e, createFakeSettingsStore());
+  await c.initialize();
+  e.convertButton.click();
+  await flush();
+  expect(e.status.textContent).toContain("protects");
+  expect(e.status.querySelector("span")).toBeNull();
+  e.convertButton.click();
+  await flush();
+  expect(e.status.textContent).toContain("No changes");
+  c.dispose();
+});
+it("does not retry a clean external default when a direction save failed", async () => {
+  const store = createFakeSettingsStore();
+  const set = vi.spyOn(store, "set").mockRejectedValueOnce(new Error("offline"));
+  const e = makeElements();
+  const c = createPopupController(createFakePlatform(), e, store);
+  await c.initialize();
+  e.originSelect.value = "tw";
+  e.originSelect.dispatchEvent(new Event("change"));
+  await flush();
+  await store.emit({ auto: true, target: "cn" });
+  expect(e.autoCheckbox.checked).toBe(true);
+  expect(e.targetSelect.value).toBe("cn");
+  expect(e.originSelect.value).toBe("tw");
+  e.retryButton.click();
+  await flush();
+  expect(set).toHaveBeenLastCalledWith({ origin: "tw" });
+  expect((await store.load()).auto).toBe(true);
+  c.dispose();
 });
