@@ -94,11 +94,11 @@ The `npm run dist` command writes all three target packages to `.output/` as `op
 ## Usage
 
 1. Click the extension icon to open the popup.
-2. Choose the **Origin** (current text variant) and **Target** (desired variant).
+2. Choose **來源** (current text variant) and **目標** (desired variant). The interface uses Traditional Chinese.
 3. Use one of the entry points:
-   - **Convert page**: Transforms visible text in the active tab.
-   - **Convert selection**: Right-click any highlighted text and choose “Convert with OpenCC”.
-   - **Textbox conversion**: Type or paste into Original; the read-only Result updates without changing your original text. Swap the direction to recompute from Original, use Copy result, or Clear text. Text is never saved.
+   - **轉換目前網頁**: Transforms visible text in the active tab.
+   - **Convert selection**: Right-click highlighted text and choose “轉換選取的中文字”.
+   - **Textbox conversion**: Type or paste into **原文**; **轉換結果** updates without changing your original text. Swap the direction to recompute, use **複製結果**, or **清除文字**. Text is never saved.
 
 If a tab was opened before the static content script was ready, page conversion performs one active-tab injection fallback and one retry.
 
@@ -115,7 +115,7 @@ Content scripts are declared statically for HTTP and HTTPS pages. Auto mode enab
 
 Auto conversion processes queued DOM work in tasks limited to 200 visited nodes or an 8ms cooperative budget. It does not repeatedly scan the page when unrelated elements change. Disabling auto mode cancels queued work and stops observation; it leaves already converted text in place. Reenabling it checks content loaded while it was off. Changing direction on a converted page, or encountering a conversion failure, pauses auto conversion until the page is reloaded. A single long text conversion or cold dictionary initialization can exceed the task budget.
 
-Open **Settings** to remove hostname rules or edit advanced exclusions. Exclusions are JavaScript regular expressions matched against the full URL, one per line. Existing stored expressions are retained. Invalid edited expressions cannot be saved; malformed expressions already in storage are ignored individually. Select **Save changes** to apply edits. Save failures keep your edits for retry.
+Click **設定** in the popup header to expand **網站規則與進階設定** inside the same popup. Remove hostname rules and edit advanced exclusions here without opening a separate extension settings page. Exclusions are JavaScript regular expressions matched against the full URL, one per line. Existing stored expressions are retained. Invalid edited expressions cannot be saved; malformed expressions already in storage are ignored individually. Select **儲存變更** to apply edits. Save failures keep your edits for retry. The popup keeps its action button visible while the content scrolls, including when the browser limits the available height.
 
 ![Automatic conversion mode badge](./auto.gif)
 

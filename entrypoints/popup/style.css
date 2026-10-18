@@ -8,14 +8,19 @@
 * {
   box-sizing: border-box;
 }
-body {
+html {
   width: 400px;
-  max-width: 100vw;
+  height: 600px;
+  overflow: clip;
+}
+body {
+  position: fixed;
+  inset: 0;
+  width: 100%;
   margin: 0;
-  height: min(600px, 100vh);
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
-  overflow: hidden;
+  overflow: clip;
 }
 header {
   display: flex;
@@ -30,6 +35,11 @@ header strong {
 #subtitle {
   font-size: 11px;
   opacity: 0.7;
+}
+header > div {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
 }
 a {
   color: light-dark(#194aaf, #a5c7ff);
@@ -83,7 +93,7 @@ label {
 }
 .direction-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 34px;
+  grid-template-columns: minmax(0, 1fr) 34px minmax(0, 1fr);
   gap: 6px;
   align-items: end;
   margin: 12px 0;
@@ -91,13 +101,11 @@ label {
 .direction-row label {
   margin: 0;
   min-width: 0;
-  grid-column: 1;
 }
 .direction-row button {
   margin-bottom: 0;
   grid-column: 2;
-  grid-row: 1 / span 2;
-  align-self: center;
+  grid-row: 1;
 }
 select,
 textarea,
@@ -186,5 +194,19 @@ footer button {
   outline-offset: 2px;
 }
 [hidden] {
-  display: none !important;
+  display: none;
+}
+summary {
+  cursor: pointer;
+  font-weight: 650;
+}
+#site-rules {
+  padding-left: 18px;
+  overflow-wrap: anywhere;
+}
+#site-rules li {
+  margin: 8px 0;
+}
+#settings-status {
+  margin-top: 8px;
 }

@@ -8,7 +8,7 @@ function elements(): OptionsElements {
   const get = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
   return {
     whitelist: get("patterns"),
-    autoCheckbox: get("auto"),
+    autoCheckbox: get<HTMLInputElement>("auto"),
     saveButton: get("save"),
     retryButton: get("retry"),
     status: get("status"),
@@ -16,6 +16,24 @@ function elements(): OptionsElements {
   };
 }
 const flush = () => new Promise<void>((resolve) => setTimeout(resolve, 0));
+it("edits exclusions inline without owning the popup auto-convert checkbox", async () => {
+  const store = createFakeSettingsStore({ auto: true, siteRules: { "example.com": "never" } });
+  store.setSiteRule = async () => store.set({ siteRules: {} });
+  const e = elements();
+  const { autoCheckbox: _autoCheckbox, ...inlineElements } = e;
+  const c = createOptionsController(createFakePlatform(), inlineElements, store);
+  await c.initialize();
+  e.whitelist.value = "example";
+  e.whitelist.dispatchEvent(new Event("input"));
+  e.saveButton.click();
+  await flush();
+  expect((await store.load()).whitelist).toEqual(["example"]);
+  expect((await store.load()).auto).toBe(true);
+  e.siteRules.querySelector("button")!.click();
+  await flush();
+  expect((await store.load()).siteRules).toEqual({});
+  c.dispose();
+});
 it("loads legacy regular expressions verbatim and saves explicitly", async () => {
   const store = createFakeSettingsStore({ whitelist: ["https://[^ ]*.example.com/[^ ]*"] });
   const set = vi.spyOn(store, "set");
@@ -31,7 +49,7 @@ it("loads legacy regular expressions verbatim and saves explicitly", async () =>
   e.saveButton.click();
   await flush();
   expect(set).toHaveBeenCalledWith({ whitelist: ["https://example\\.com/.*"] });
-  expect(e.status.textContent).toContain("Saved");
+  expect(e.status.textContent).toContain("已儲存");
   c.dispose();
 });
 it("rejects invalid regex and preserves saved patterns", async () => {
@@ -45,7 +63,7 @@ it("rejects invalid regex and preserves saved patterns", async () => {
   e.saveButton.click();
   await flush();
   expect(set).not.toHaveBeenCalled();
-  expect(e.status.textContent).toContain("regular expression");
+  expect(e.status.textContent).toContain("正規表示式");
   expect((await store.load()).whitelist).toEqual(["good"]);
   c.dispose();
 });
@@ -61,12 +79,12 @@ it("retains dirty edits during subscription and failed save, then retries", asyn
   expect(e.whitelist.value).toBe("edited");
   e.saveButton.click();
   await flush();
-  expect(e.status.textContent).toContain("save");
+  expect(e.status.textContent).toContain("儲存");
   expect(e.whitelist.value).toBe("edited");
   e.saveButton.click();
   await flush();
   expect(set).toHaveBeenCalledTimes(2);
-  expect(e.status.textContent).toContain("Saved");
+  expect(e.status.textContent).toContain("已儲存");
   c.dispose();
 });
 it("gates after load failure and retries, removes site rule, and detaches on disposal", async () => {
@@ -96,7 +114,7 @@ it("saves only edited patterns while applying an external default change", async
   e.whitelist.value = "edited";
   e.whitelist.dispatchEvent(new Event("input"));
   await store.emit({ auto: true, whitelist: ["remote"] });
-  expect(e.autoCheckbox.checked).toBe(true);
+  expect(e.autoCheckbox!.checked).toBe(true);
   expect(e.whitelist.value).toBe("edited");
   e.saveButton.click();
   await flush();
@@ -110,10 +128,10 @@ it("saves only the edited default while applying external patterns", async () =>
   const e = elements();
   const c = createOptionsController(createFakePlatform(), e, store);
   await c.initialize();
-  e.autoCheckbox.checked = true;
-  e.autoCheckbox.dispatchEvent(new Event("change"));
+  e.autoCheckbox!.checked = true;
+  e.autoCheckbox!.dispatchEvent(new Event("change"));
   await store.emit({ auto: false, whitelist: ["remote"] });
-  expect(e.autoCheckbox.checked).toBe(true);
+  expect(e.autoCheckbox!.checked).toBe(true);
   expect(e.whitelist.value).toBe("remote");
   e.saveButton.click();
   await flush();

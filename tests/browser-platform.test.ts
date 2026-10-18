@@ -281,7 +281,7 @@ describe('browser platform', () => {
     expect(remove).toHaveBeenCalledWith('convert-selection', expect.any(Function));
     expect(create.mock.calls[0]![0]).toEqual({
       id: 'convert-selection',
-      title: 'Convert Chinese Characters',
+      title: '轉換選取的中文字',
       contexts: ['selection'],
     });
   });

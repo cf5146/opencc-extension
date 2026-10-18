@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="zh-Hant">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -10,58 +10,81 @@
   <body>
     <header>
       <div><strong>OpenCC</strong> <span id="subtitle"></span></div>
-      <a href="/options.html" target="_blank">Settings</a>
+      <button id="show-settings" type="button" aria-controls="settings">設定</button>
     </header>
     <main>
       <section aria-labelledby="direction-title">
-        <h1 id="direction-title">Chinese conversion</h1>
-        <p class="hint">One global language pair for pages and text.</p>
+        <h1 id="direction-title">中文轉換</h1>
+        <p class="hint">網頁與文字共用以下轉換方向。</p>
         <div class="direction-row">
           <label
-            >From<select id="origin">
-              <option value="cn">Simplified Chinese</option>
-              <option value="hk" title="Traditional Chinese — Hong Kong">Traditional — Hong Kong</option>
-              <option value="tw" title="Traditional Chinese — Taiwan">Traditional — Taiwan</option>
-              <option value="twp" title="Traditional Chinese — Taiwan vocabulary">Taiwan vocabulary</option>
+            >來源<select id="origin">
+              <option value="cn">簡體中文</option>
+              <option value="hk">繁體中文（香港）</option>
+              <option value="tw">繁體中文（臺灣）</option>
+              <option value="twp">繁體中文（臺灣詞彙）</option>
             </select></label
           >
-          <button id="swap" type="button" aria-label="Swap source and target" title="Swap source and target">⇄</button>
+          <button id="swap" type="button" aria-label="交換來源與目標" title="交換來源與目標">⇄</button>
           <label
-            >To<select id="target">
-              <option value="hk" title="Traditional Chinese — Hong Kong">Traditional — Hong Kong</option>
-              <option value="cn">Simplified Chinese</option>
-              <option value="tw" title="Traditional Chinese — Taiwan">Traditional — Taiwan</option>
-              <option value="twp" title="Traditional Chinese — Taiwan vocabulary">Taiwan vocabulary</option>
+            >目標<select id="target">
+              <option value="hk">繁體中文（香港）</option>
+              <option value="cn">簡體中文</option>
+              <option value="tw">繁體中文（臺灣）</option>
+              <option value="twp">繁體中文（臺灣詞彙）</option>
             </select></label
           >
         </div>
       </section>
       <section aria-labelledby="site-title">
-        <h2 id="site-title">This site <span id="hostname"></span></h2>
-        <label for="site-rule">Auto-conversion rule</label>
+        <h2 id="site-title">目前網站 <span id="hostname"></span></h2>
+        <label for="site-rule">此網站的自動轉換規則</label>
         <select id="site-rule">
-          <option value="default">Use default</option>
-          <option value="always">Always auto-convert</option>
-          <option value="never">Never auto-convert</option>
+          <option value="default">使用預設設定</option>
+          <option value="always">一律自動轉換</option>
+          <option value="never">不要自動轉換</option>
         </select>
-        <label class="checkbox"><input id="auto" type="checkbox" /> Auto-convert by default</label>
+        <label class="checkbox"><input id="auto" type="checkbox" /> 預設自動轉換網頁</label>
         <p id="policy" class="hint"></p>
       </section>
       <section aria-labelledby="text-title">
-        <h2 id="text-title">Convert text</h2>
-        <p class="hint">Text stays in this popup and is cleared when it closes.</p>
-        <label for="textbox">Original</label>
-        <textarea id="textbox" placeholder="Type or paste Chinese text…" spellcheck="false"></textarea>
-        <label for="result">Result</label>
-        <textarea id="result" readonly placeholder="Converted text appears here" spellcheck="false"></textarea>
+        <h2 id="text-title">文字轉換</h2>
+        <p class="hint">文字僅保留於此視窗，關閉後即清除。</p>
+        <label for="textbox">原文</label>
+        <textarea id="textbox" placeholder="輸入或貼上中文…" spellcheck="false"></textarea>
+        <label for="result">轉換結果</label>
+        <textarea id="result" readonly placeholder="轉換後的文字會顯示在這裡" spellcheck="false"></textarea>
         <div class="tools">
-          <button id="copy" type="button">Copy result</button><button id="reset" type="button">Clear text</button>
+          <button id="copy" type="button">複製結果</button><button id="reset" type="button">清除文字</button>
         </div>
+      </section>
+      <section aria-label="設定">
+        <details id="settings">
+          <summary>網站規則與進階設定</summary>
+          <p class="hint">設定可直接在此修改，不需另開擴充功能設定頁面。</p>
+          <h2>已儲存的網站規則</h2>
+          <ul id="site-rules"></ul>
+          <label for="whitelist">排除的網址規則</label>
+          <p id="whitelist-description" class="hint">
+            每行一個 JavaScript 正規表示式，比對完整網址；不支援萬用字元格式。符合的網頁不會自動轉換。
+          </p>
+          <textarea
+            id="whitelist"
+            aria-describedby="whitelist-description"
+            spellcheck="false"
+            placeholder="^https://example\.com/private/"
+          ></textarea>
+          <div class="tools">
+            <button id="save-settings" type="button">儲存排除規則</button>
+            <button id="retry-settings" type="button" hidden>重新載入設定</button>
+          </div>
+          <output id="settings-status" aria-live="polite"></output>
+        </details>
       </section>
     </main>
     <footer>
-      <button id="convert" class="primary" type="button">Convert page</button>
-      <output id="status" aria-live="polite"></output><button id="retry" type="button" hidden>Retry</button>
+      <button id="convert" class="primary" type="button">轉換目前網頁</button>
+      <output id="status" aria-live="polite"></output><button id="retry" type="button" hidden>重試</button>
     </footer>
     <script type="module" src="./main.ts"></script>
   </body>

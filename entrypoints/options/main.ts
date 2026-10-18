@@ -7,7 +7,7 @@ const controller = createOptionsController(
   platform,
   {
     whitelist: get("whitelist"),
-    autoCheckbox: get("auto"),
+    autoCheckbox: get<HTMLInputElement>("auto"),
     saveButton: get("save"),
     retryButton: get("retry"),
     status: get("status"),

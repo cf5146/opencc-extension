@@ -257,7 +257,7 @@ export function createBrowserPlatform(api: typeof browser = browser): ExtensionP
             api.contextMenus.create(
               {
                 id: selectionMenuId,
-                title: 'Convert Chinese Characters',
+                title: '轉換選取的中文字',
                 contexts: ['selection'],
               },
               callback,
