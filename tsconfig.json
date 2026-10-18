@@ -13,9 +13,8 @@
     "isolatedModules": true,
     "noEmit": true,
     "types": ["node", "vitest/globals"],
-    "baseUrl": ".",
     "paths": {
-      "@core/*": ["src/core/*"]
+      "@core/*": ["./src/core/*"]
     }
   },
   "include": ["src", "entrypoints", "tests", "wxt.config.ts", "scripts"],

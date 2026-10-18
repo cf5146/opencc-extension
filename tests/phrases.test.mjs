@@ -1,11 +1,8 @@
 import { describe, it, beforeEach, expect } from 'vitest';
-import { JSDOM } from 'jsdom';
 import { convertAllNewTextNodes, resetConversionCache } from '../src/core/conversion.ts';
 
 function setupDom(html) {
-  const dom = new JSDOM(html, { url: 'https://example.com' });
-  globalThis.document = dom.window.document;
-  globalThis.NodeFilter = dom.window.NodeFilter;
+  document.documentElement.innerHTML = html;
 }
 
 describe('phrases conversion (legacy test port)', () => {

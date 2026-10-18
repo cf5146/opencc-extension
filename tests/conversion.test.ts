@@ -1,12 +1,8 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { JSDOM } from 'jsdom';
 import { convertAllNewTextNodes, resetConversionCache } from '../src/core/conversion.js';
 
 function setupDom(html: string) {
-  const dom = new JSDOM(html, { url: 'https://example.com' });
-  (globalThis as any).document = dom.window.document;
-  (globalThis as any).NodeFilter = dom.window.NodeFilter;
-  return dom;
+  document.documentElement.innerHTML = html;
 }
 
 describe('conversion', () => {

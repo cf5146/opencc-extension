@@ -121,7 +121,7 @@ Click **設定** in the popup header to expand **網站規則與進階設定** i
 
 ## Development
 
-The project uses Node.js ≥ 20.19, [npm](https://www.npmjs.com/) ≥ 9, [WXT](https://wxt.dev/), and TypeScript. Chrome, Edge, and Firefox are built from one shared source tree with explicit Manifest V3 targets.
+The project uses Node.js 22.22.2+, 24.15.0+, or 26+, [npm](https://www.npmjs.com/) ≥ 9, [WXT](https://wxt.dev/), and TypeScript. Chrome, Edge, and Firefox are built from one shared source tree with explicit Manifest V3 targets.
 
 ```powershell
 npm ci
