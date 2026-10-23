@@ -1,6 +1,6 @@
 # Bundled third-party notices
 
-The extension application code retains its repository MIT license. The bundled conversion engine/data have their own licenses.
+The extension application code retains the original Tony Chan copyright and [MIT license](../LICENSE.txt), included in the packaged extension. The bundled conversion engine/data have their own licenses.
 
 - OpenCC core/configuration/dictionaries, ver.1.4.2 commit 025f371dc76b598d77384fbdab90c937471844d8: Apache-2.0; see notices/OpenCC/LICENSE.
 - cppjieba and its bundled model/resources from that same official source: MIT; see notices/OpenCC/plugins/jieba/deps/cppjieba/LICENSE.

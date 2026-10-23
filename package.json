@@ -2,11 +2,13 @@
   "name": "opencc-extension",
   "version": "0.6.0",
   "description": "A browser extension to convert webpages between different Chinese variants.",
-  "repository": "github:tnychn/opencc-extension",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cf5146/opencc-extension.git"
+  },
   "author": {
-    "name": "Tony Chan",
-    "email": "tnychn@protonmail.com",
-    "url": "https://github.com/tnychn"
+    "name": "cf5146",
+    "url": "https://github.com/cf5146"
   },
   "type": "module",
   "license": "MIT",
@@ -59,5 +61,16 @@
   },
   "engines": {
     "node": "^22.22.2 || ^24.15.0 || >=26.0.0"
+  },
+  "contributors": [
+    {
+      "name": "Tony Chan",
+      "email": "tnychn@protonmail.com",
+      "url": "https://github.com/tnychn"
+    }
+  ],
+  "homepage": "https://github.com/cf5146/opencc-extension#readme",
+  "bugs": {
+    "url": "https://github.com/cf5146/opencc-extension/issues"
   }
 }

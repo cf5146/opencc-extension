@@ -26,10 +26,10 @@ describe("target manifest factory", () => {
     });
   });
 
-  it("uses the Firefox MV3 background shape and preserves the Gecko ID", () => {
+  it("uses the independent Firefox MV3 identity and declares no external data collection", () => {
     expect(createManifest("firefox").background).toEqual({ scripts: ["background.js"], type: "module" });
     expect(createManifest("firefox").browser_specific_settings).toEqual({
-      gecko: { id: "opencc.extension@tnychn" },
+      gecko: { id: "opencc-extension@cf5146", data_collection_permissions: { required: ["none"] } },
     });
   });
 });

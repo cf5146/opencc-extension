@@ -21,15 +21,15 @@ export interface ExtensionManifest {
   permissions: string[];
   content_security_policy?: { extension_pages: string };
   host_permissions: string[];
-  browser_specific_settings?: { gecko: { id: string } };
+  browser_specific_settings?: { gecko: { id: string; data_collection_permissions: { required: ["none"] } } };
 }
 
 const commonManifest = {
   manifest_version: 3 as const,
   name: "OpenCC",
-  author: "Tony Chan",
-  description: "Convert webpages between different Chinese variants.",
-  homepage_url: "https://github.com/tnychn/opencc-extension",
+  author: "cf5146",
+  description: "Convert Chinese text and webpages. Independently maintained by cf5146.",
+  homepage_url: "https://github.com/cf5146/opencc-extension",
   icons: { 128: "icon.png" },
   options_ui: { page: "options.html", open_in_tab: false },
   action: {
@@ -47,7 +47,12 @@ export function createManifest(browser: TargetBrowser): ExtensionManifest {
     return {
       ...commonManifest,
       background: { scripts: ["background.js"], type: "module" },
-      browser_specific_settings: { gecko: { id: "opencc.extension@tnychn" } },
+      browser_specific_settings: {
+        gecko: {
+          id: "opencc-extension@cf5146",
+          data_collection_permissions: { required: ["none"] },
+        },
+      },
     };
   }
 
