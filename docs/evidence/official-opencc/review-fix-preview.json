@@ -1,0 +1,20 @@
+{
+  "url": "chrome-extension://aaknpmikdfjddgpopehghkoolflegbbl/popup.html",
+  "preset": "s2twp",
+  "mode": "jieba",
+  "result": "勇敢的士兵在軟體開發中心使用滑鼠。",
+  "status": "文字轉換完成",
+  "contexts": [
+    {
+      "contextId": "9e2ddb98-5472-4431-b2c3-da1879c5fb85",
+      "contextType": "OFFSCREEN_DOCUMENT",
+      "documentId": "6C693A055D740B19D79709F2A4D2822D",
+      "documentOrigin": "chrome-extension://aaknpmikdfjddgpopehghkoolflegbbl",
+      "documentUrl": "chrome-extension://aaknpmikdfjddgpopehghkoolflegbbl/opencc-offscreen.html",
+      "frameId": 0,
+      "incognito": false,
+      "tabId": -1,
+      "windowId": -1
+    }
+  ]
+}

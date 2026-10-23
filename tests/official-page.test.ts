@@ -89,3 +89,63 @@ it("does not convert a later selection while the requested selection waits in th
   expect(calls).toBe(1);
   c.dispose();
 });
+
+it.each(["init-failure", "no-op", "stale-result"])(
+  "allows another mode after %s without any DOM write",
+  async (scenario) => {
+    document.head.innerHTML = "";
+    document.body.innerHTML = scenario === "no-op" ? "<p>English</p>" : "<p>汉字</p>";
+    let calls = 0,
+      resolve!: (xs: string[]) => void;
+    const c = createPageController(document, async (xs) => {
+      calls++;
+      if (calls === 1 && scenario === "init-failure") throw Error("Jieba init failed");
+      if (calls === 1 && scenario === "stale-result")
+        return new Promise((r) => {
+          resolve = r;
+        });
+      return xs.map((x) => x.replaceAll("汉", "漢"));
+    });
+    const initial = normalizeOfficialSettings({ version: 2, preset: "s2twp", mode: "jieba" });
+    try {
+      c.update(initial);
+      const first = c.manual(false);
+      if (scenario === "stale-result") {
+        await Promise.resolve();
+        await Promise.resolve();
+        document.querySelector("p")!.firstChild!.nodeValue = "汉新";
+        resolve(["漢字"]);
+      }
+      await first;
+      c.update({ ...initial, mode: "mmseg" });
+      const retry = await c.manual(false);
+      expect(retry.kind).toBe(scenario === "no-op" ? "no-op" : "success");
+      expect(document.body.textContent).toBe(
+        scenario === "no-op" ? "English" : scenario === "stale-result" ? "漢新" : "漢字",
+      );
+    } finally {
+      c.dispose();
+    }
+  },
+);
+it("retains reload protection when an earlier batch wrote before a later failure", async () => {
+  document.head.innerHTML = "";
+  document.body.innerHTML = "<span>汉</span>".repeat(129);
+  let calls = 0;
+  const c = createPageController(document, async (xs) => {
+    if (++calls === 2) throw Error("later batch failed");
+    return xs.map((x) => x.replaceAll("汉", "漢"));
+  });
+  const initial = normalizeOfficialSettings({ version: 2, preset: "s2twp", mode: "jieba" });
+  try {
+    c.update(initial);
+    expect((await c.manual(false)).kind).toBe("internal-failure");
+    expect(document.body.firstChild!.textContent).toBe("漢");
+    expect(document.body.lastChild!.textContent).toBe("汉");
+    c.update({ ...initial, mode: "mmseg" });
+    expect((await c.manual(false)).kind).toBe("reload-required");
+    expect(calls).toBe(2);
+  } finally {
+    c.dispose();
+  }
+});

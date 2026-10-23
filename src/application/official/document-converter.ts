@@ -9,6 +9,7 @@ function eligible(node: Text) {
 }
 export function createDocumentConverter(convertBatch: ConvertBatch) {
   let generation = 0;
+  let appliedConfig: string | undefined;
   const meta = new WeakMap<Text, { key: string; value: string }>();
   const cancel = () => {
     generation++;
@@ -29,6 +30,7 @@ export function createDocumentConverter(convertBatch: ConvertBatch) {
       const next = s.value.slice(0, s.start) + output + s.value.slice(s.end);
       if (next !== s.value) {
         s.node.data = next;
+        appliedConfig = key;
         count++;
       }
       if (s.start === 0 && s.end === s.value.length) meta.set(s.node, { key, value: next });
@@ -100,5 +102,13 @@ export function createDocumentConverter(convertBatch: ConvertBatch) {
       true,
     );
   };
-  return { convert, selection, cancel, hasConverted };
+  return {
+    convert,
+    selection,
+    cancel,
+    hasConverted,
+    get appliedConfig() {
+      return appliedConfig;
+    },
+  };
 }
