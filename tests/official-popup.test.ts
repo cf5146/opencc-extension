@@ -94,3 +94,62 @@ it("removing a site override renders and previews the effective default settings
   );
   window.dispatchEvent(new Event("pagehide"));
 });
+it.each([
+  { preset: "s2twp", mode: "mmseg", config: "s2twp" },
+  { preset: "s2hk", mode: "jieba", config: "s2hk_jieba" },
+])("a delayed migration dismissal cannot overwrite $preset/$mode", async (selected) => {
+  document.documentElement.innerHTML = fs.readFileSync("entrypoints/popup/index.html", "utf8");
+  let state = { version: 2, preset: "s2twp", mode: "jieba", sites: {}, migrationNotice: true };
+  let release!: () => void;
+  const dismissed = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  let writes: Promise<unknown> = Promise.resolve();
+  fake.storage.local.get.mockImplementation(async () => ({ officialOpenCC: structuredClone(state) }));
+  fake.tabs.query.mockResolvedValue([{ url: "https://example.com" }]);
+  fake.storage.onChanged.addListener.mockClear();
+  fake.runtime.sendMessage.mockClear();
+  fake.runtime.sendMessage.mockImplementation((message: any) => {
+    if (message.type === "official-convert")
+      return Promise.resolve({ texts: [message.config + ":" + message.texts[0]] });
+    const job = writes.then(async () => {
+      if (message.action === "dismiss") {
+        await dismissed;
+        state = { ...state, migrationNotice: false };
+      } else state = { ...state, ...message.options };
+      for (const [notify] of fake.storage.onChanged.addListener.mock.calls) notify({ officialOpenCC: {} }, "local");
+      return { settings: structuredClone(state) };
+    });
+    writes = job;
+    return job;
+  });
+  await startPopup();
+  try {
+    const input = document.getElementById("textbox") as HTMLTextAreaElement,
+      preset = document.getElementById("preset") as HTMLSelectElement,
+      mode = document.getElementById("mode") as HTMLSelectElement;
+    input.value = "汉";
+    expect(document.getElementById("migration")!.hidden).toBe(false);
+    document.getElementById("dismiss")!.click();
+    if (selected.preset !== preset.value) {
+      preset.value = selected.preset;
+      preset.dispatchEvent(new Event("change"));
+    }
+    if (selected.mode !== mode.value) {
+      mode.value = selected.mode;
+      mode.dispatchEvent(new Event("change"));
+    }
+    release();
+    await vi.waitFor(() =>
+      expect((document.getElementById("result") as HTMLTextAreaElement).value).toBe(selected.config + ":汉"),
+    );
+    expect(state.preset).toBe(selected.preset);
+    expect(state.mode).toBe(selected.mode);
+    expect(preset.value).toBe(selected.preset);
+    expect(mode.value).toBe(selected.mode);
+    expect(document.getElementById("migration")!.hidden).toBe(true);
+  } finally {
+    release();
+    window.dispatchEvent(new Event("pagehide"));
+  }
+});
