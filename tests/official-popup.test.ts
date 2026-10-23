@@ -270,3 +270,118 @@ it("manual page conversion waits for settings queued while an earlier save is pe
     window.dispatchEvent(new Event("pagehide"));
   }
 });
+
+it.each(["external", "local", "error"])("ignores a stale settings read after a newer %s update", async (source) => {
+  document.documentElement.innerHTML = fs.readFileSync("entrypoints/popup/index.html", "utf8");
+  let state: any = { version: 2, preset: "s2twp", mode: "jieba", sites: {}, migrationNotice: false };
+  let hold = false,
+    release!: () => void;
+  fake.storage.local.get.mockImplementation(() => {
+    const snapshot = structuredClone(state);
+    if (hold) {
+      hold = false;
+      return new Promise((resolve, reject) => {
+        release = () =>
+          source === "error" ? reject(Error("obsolete read failure")) : resolve({ officialOpenCC: snapshot });
+      });
+    }
+    return Promise.resolve({ officialOpenCC: snapshot });
+  });
+  fake.tabs.query.mockResolvedValue([{ url: "https://example.com" }]);
+  fake.storage.onChanged.addListener.mockClear();
+  fake.runtime.sendMessage.mockClear();
+  const notify = () => {
+    for (const [listener] of fake.storage.onChanged.addListener.mock.calls) listener({ officialOpenCC: {} }, "local");
+  };
+  fake.runtime.sendMessage.mockImplementation(async (message: any) => {
+    if (message.type === "official-convert") return { texts: [message.config + ":" + message.texts[0]] };
+    state = { ...state, ...message.options };
+    notify();
+    return { settings: structuredClone(state) };
+  });
+  await startPopup();
+  try {
+    (document.getElementById("textbox") as HTMLTextAreaElement).value = "汉";
+    state = { ...state, mode: "mmseg" };
+    hold = true;
+    notify();
+    if (source === "local") {
+      const preset = document.getElementById("preset") as HTMLSelectElement;
+      preset.value = "s2hk";
+      preset.dispatchEvent(new Event("change"));
+    } else {
+      state = { ...state, preset: "s2hk", mode: "jieba" };
+      notify();
+    }
+    await vi.waitFor(() =>
+      expect((document.getElementById("result") as HTMLTextAreaElement).value).toBe("s2hk_jieba:汉"),
+    );
+    release();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect((document.getElementById("preset") as HTMLSelectElement).value).toBe("s2hk");
+    expect((document.getElementById("mode") as HTMLSelectElement).value).toBe("jieba");
+    expect((document.getElementById("result") as HTMLTextAreaElement).value).toBe("s2hk_jieba:汉");
+    expect(document.getElementById("status")!.textContent).toBe("文字轉換完成");
+  } finally {
+    release?.();
+    window.dispatchEvent(new Event("pagehide"));
+  }
+});
+it.each([false, true])(
+  "recovers preview after a failed write when fresh persisted settings arrive (same choices=%s)",
+  async (same) => {
+    document.documentElement.innerHTML = fs.readFileSync("entrypoints/popup/index.html", "utf8");
+    let state: any = { version: 2, preset: "s2twp", mode: "jieba", sites: {}, migrationNotice: false };
+    fake.storage.local.get.mockImplementation(async () => ({ officialOpenCC: structuredClone(state) }));
+    fake.tabs.query.mockResolvedValue([{ url: "https://example.com" }]);
+    fake.storage.onChanged.addListener.mockClear();
+    fake.runtime.sendMessage.mockClear();
+    fake.runtime.sendMessage.mockImplementation(async (message: any) =>
+      message.type === "official-convert"
+        ? { texts: [message.config + ":" + message.texts[0]] }
+        : { error: "storage unavailable" },
+    );
+    await startPopup();
+    try {
+      (document.getElementById("textbox") as HTMLTextAreaElement).value = "汉";
+      const mode = document.getElementById("mode") as HTMLSelectElement;
+      mode.value = "mmseg";
+      mode.dispatchEvent(new Event("change"));
+      await vi.waitFor(() => expect(document.getElementById("status")!.textContent).toContain("儲存失敗"));
+      state = { ...state, preset: same ? "s2twp" : "s2hk", mode: same ? "mmseg" : "jieba" };
+      for (const [notify] of fake.storage.onChanged.addListener.mock.calls) notify({ officialOpenCC: {} }, "local");
+      await vi.waitFor(() =>
+        expect((document.getElementById("result") as HTMLTextAreaElement).value).toBe(
+          same ? "s2twp:汉" : "s2hk_jieba:汉",
+        ),
+      );
+    } finally {
+      window.dispatchEvent(new Event("pagehide"));
+    }
+  },
+);
+
+it("refreshes settings changed while the popup was still initializing", async () => {
+  document.documentElement.innerHTML = fs.readFileSync("entrypoints/popup/index.html", "utf8");
+  let state: any = { version: 2, preset: "s2twp", mode: "jieba", sites: {}, migrationNotice: false };
+  fake.storage.local.get.mockImplementation(async () => ({ officialOpenCC: structuredClone(state) }));
+  let release!: (tabs: unknown) => void;
+  fake.tabs.query.mockImplementationOnce(
+    () =>
+      new Promise((resolve) => {
+        release = resolve;
+      }),
+  );
+  fake.storage.onChanged.addListener.mockClear();
+  const opening = startPopup();
+  state = { ...state, preset: "s2hk", mode: "mmseg" };
+  for (const [notify] of fake.storage.onChanged.addListener.mock.calls) notify({ officialOpenCC: {} }, "local");
+  release([{ url: "https://example.com" }]);
+  await opening;
+  try {
+    await vi.waitFor(() => expect((document.getElementById("preset") as HTMLSelectElement).value).toBe("s2hk"));
+    expect((document.getElementById("mode") as HTMLSelectElement).value).toBe("mmseg");
+  } finally {
+    window.dispatchEvent(new Event("pagehide"));
+  }
+});
