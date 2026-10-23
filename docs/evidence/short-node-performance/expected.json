@@ -1,0 +1,22 @@
+{
+  "mmseg-unique": {
+    "hash1000": "d2243c37f7695186cbd1dda48a19459cc50ab728b03fc7037c2da85a6882eb91",
+    "hash20000": "dfcebc062ee2ce4794ac4c1271fe9dd2221d3339c50604a512b0f3e5e633ee2f",
+    "firstOutput": "勇敢計程車兵在軟體開發中心使用滑鼠。0"
+  },
+  "mmseg-repeated": {
+    "hash1000": "1d2f8f0e8a387fa45f4a74a1e3e85b49d41053b8f346924374f7ec5be5829f0c",
+    "hash20000": "183d331fee196c0d521ad4246e5cccc22b1479c07f130f48a1c9d70729fce88f",
+    "firstOutput": "勇敢計程車兵在軟體開發中心使用滑鼠。"
+  },
+  "jieba-unique": {
+    "hash1000": "e596afb2693daca760552a9c59d26d6507f60dcc0968ec8bb3164a7ec2afd04b",
+    "hash20000": "e951a3b279496338b1d4e826a3b8ecd79209c3b15317770eccb5e584087ff955",
+    "firstOutput": "勇敢的士兵在軟體開發中心使用滑鼠。0"
+  },
+  "jieba-repeated": {
+    "hash1000": "790a1f04f72040a695db754a830df970e2ce8aa2a0563686fa457024a59bfe1a",
+    "hash20000": "e011d884ba9ec52c635e981d9adbe778e7766d0a918c68e8ea4a97870733f5e6",
+    "firstOutput": "勇敢的士兵在軟體開發中心使用滑鼠。"
+  }
+}
