@@ -16,6 +16,23 @@ export async function verifyOfficialAssets(directory = path.join(root, "public/o
   return lock;
 }
 if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
-  await verifyOfficialAssets(process.argv[2]);
+  // CLI inputs select reviewed build locations rather than arbitrary filesystem paths.
+  let directory;
+  switch (process.argv[2]) {
+    case undefined:
+      break;
+    case "chrome":
+      directory = path.join(root, ".output/chrome-mv3/opencc/engine");
+      break;
+    case "firefox":
+      directory = path.join(root, ".output/firefox-mv3/opencc/engine");
+      break;
+    case "edge":
+      directory = path.join(root, ".output/edge-mv3/opencc/engine");
+      break;
+    default:
+      throw new Error("Unknown build target; use chrome, firefox or edge");
+  }
+  await verifyOfficialAssets(directory);
   console.log("Official source, manifest and 32 bundled engine/resource hashes verified.");
 }

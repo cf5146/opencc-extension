@@ -6,7 +6,7 @@ mkdir -p "$base/tools"
 export UV_CACHE_DIR="$base/cache/uv" UV_PYTHON_INSTALL_DIR="$base/tools/python"
 uv="$base/tools/uv-x86_64-unknown-linux-gnu/uv"
 if test ! -f "$uv"; then
-  curl --fail --location --retry 2 https://github.com/astral-sh/uv/releases/download/0.12.12/uv-x86_64-unknown-linux-gnu.tar.gz -o "$base/tools/uv.tar.gz"
+  curl --proto "=https" --proto-redir "=https" --fail --location --retry 2 https://github.com/astral-sh/uv/releases/download/0.12.12/uv-x86_64-unknown-linux-gnu.tar.gz -o "$base/tools/uv.tar.gz"
   echo "ab9b309d4586403f024e100abaceb396616e178a553e2500c36087d180f09509  $base/tools/uv.tar.gz" | sha256sum -c -
   tar -xzf "$base/tools/uv.tar.gz" -C "$base/tools"
 fi

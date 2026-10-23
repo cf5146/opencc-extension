@@ -10,11 +10,12 @@ function runWithEvidence(mutate){
  const temp=fs.mkdtempSync(path.join(os.tmpdir(),'opencc-verifier-'));
  try{
   fs.mkdirSync(path.join(temp,'output'));
+  fs.cpSync(path.join(root,'dist'),path.join(temp,'dist'),{recursive:true});
   for(const f of ['verify.mjs','artifact-lock.json'])fs.copyFileSync(path.join(root,f),path.join(temp,f));
   const node=JSON.parse(fs.readFileSync(path.join(root,'output/node.json'))),edge=JSON.parse(fs.readFileSync(path.join(root,'output/edge.json')));
   mutate(node,edge);
   for(const [f,r] of [['node.json',node],['edge.json',edge]])fs.writeFileSync(path.join(temp,'output',f),JSON.stringify(r));
-  return spawnSync(process.execPath,[path.join(temp,'verify.mjs'),path.join(root,'dist')],{encoding:'utf8'});
+  return spawnSync(process.execPath,[path.join(temp,'verify.mjs')],{encoding:'utf8'});
  }finally{
   // Delete only the exact child directory created above in the system temp root.
   assert.equal(path.dirname(path.resolve(temp)),path.resolve(os.tmpdir()));

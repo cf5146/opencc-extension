@@ -39,7 +39,7 @@ const commonManifest = {
   },
   permissions: ["storage", "contextMenus", "scripting", "activeTab"],
   content_security_policy: { extension_pages: "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'" },
-  host_permissions: ["http://*/*", "https://*/*"],
+  host_permissions: ["http://*/*", "https://*/*"], // NOSONAR S5332: browser URL matching metadata; this performs no HTTP request.
 };
 
 export function createManifest(browser: TargetBrowser): ExtensionManifest {
