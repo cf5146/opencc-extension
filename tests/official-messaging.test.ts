@@ -103,3 +103,16 @@ it("content returns page results through a callback-only channel and ignores unr
     cleanup();
   }
 });
+it("accepts a bounded larger batch and rejects an oversized request", async () => {
+  fake.runEngine.mockImplementation(async (_config: string, texts: string[]) => texts.map((text) => text + "!"));
+  startOfficialBackground();
+  const listener = fake.addListener.mock.calls[0]![0];
+  for (const length of [1024, 1025]) {
+    const respond = vi.fn();
+    listener({ type: "official-convert", config: "s2twp", texts: Array(length).fill("汉") }, {}, respond);
+    await vi.waitFor(() => expect(respond).toHaveBeenCalledOnce());
+    expect(respond.mock.calls[0]![0]).toEqual(
+      length === 1024 ? { texts: Array(length).fill("汉!") } : { error: "無效的轉換要求。" },
+    );
+  }
+});

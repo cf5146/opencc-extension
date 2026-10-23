@@ -37,7 +37,7 @@ export function createPageController(
   };
   const mismatch = (options: ConversionOptions) =>
     !!service.appliedConfig && service.appliedConfig !== configName(options);
-  const run = async (root: Node, options: ConversionOptions) => {
+  const run = async (root: Node | Node[], options: ConversionOptions) => {
     if (mismatch(options)) throw new Error("轉換設定已變更，請重新載入頁面後再轉換。");
     const url = getUrl(),
       expected = revision;
@@ -66,9 +66,9 @@ export function createPageController(
         while (roots.size && !disposed && expected === revision && url === getUrl()) {
           const active = auto();
           if (!active || configName(active) !== configName(options)) break;
-          const root = roots.values().next().value!;
-          roots.delete(root);
-          await run(root, options); // NOSONAR S9382: serialize DOM roots and recheck settings after each conversion.
+          const pending = [...roots];
+          roots.clear();
+          await run(pending, options); // NOSONAR S9382: batch roots while preserving individual text boundaries and invalidation checks.
         }
       });
     queue = job;
@@ -154,6 +154,7 @@ export function createPageController(
     manual,
     dispose() {
       disposed = true;
+      service.clearCache();
       revision++;
       stop();
     },
