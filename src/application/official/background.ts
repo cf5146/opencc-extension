@@ -12,7 +12,7 @@ export function startOfficialBackground() {
     if (info.menuItemId === "convert-selection" && info.tabId !== undefined)
       void platform.tabs.send(info.tabId, { type: "convert-selection" }).catch(() => {});
   });
-  browser.runtime.onMessage.addListener((message: unknown, sender: { url?: string; tab?: { id?: number } }) => {
+  const handleMessage = (message: unknown, sender: { url?: string; tab?: { id?: number } }) => {
     if (!isRecord(message) || message.target === "opencc-offscreen") return false;
     if (message.type === "convert-active-tab") return convertActiveTab(platform);
     if (message.type === "official-convert") {
@@ -67,5 +67,16 @@ export function startOfficialBackground() {
       });
     writes = job;
     return job.catch((e) => ({ error: e.message }));
-  });
+  };
+  browser.runtime.onMessage.addListener(
+    (message: unknown, sender: { url?: string; tab?: { id?: number } }, sendResponse: (response: unknown) => void) => {
+      const response = handleMessage(message, sender);
+      if (response === false) return false;
+      // Callback responses also work on Chromium versions without Promise listeners.
+      void response.then(sendResponse, (e) =>
+        sendResponse({ error: e instanceof Error ? e.message : "轉換失敗；原文保留。" }),
+      );
+      return true;
+    },
+  );
 }

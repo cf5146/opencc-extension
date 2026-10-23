@@ -39,7 +39,7 @@ export default defineContentScript({
         return false;
       }
     };
-    const listener = (message: unknown) => {
+    const listener = (message: unknown, _sender: unknown, sendResponse: (response: unknown) => void) => {
       if (
         !message ||
         typeof message !== "object" ||
@@ -48,11 +48,14 @@ export default defineContentScript({
       )
         return false;
       const captured = message.type === "convert-selection" ? captureSelection(globalThis.getSelection()) : null;
-      return refresh().then((ok) =>
-        ok
-          ? controller.manual(message.type === "convert-selection", captured)
-          : { kind: "internal-failure", message: "無法讀取設定；原文保留，請重試。" },
-      );
+      void refresh()
+        .then((ok) =>
+          ok
+            ? controller.manual(message.type === "convert-selection", captured)
+            : { kind: "internal-failure", message: "無法讀取設定；原文保留，請重試。" },
+        )
+        .then(sendResponse, () => sendResponse({ kind: "internal-failure", message: "轉換失敗；原文保留，請重試。" }));
+      return true;
     };
     browser.runtime.onMessage.addListener(listener);
     const unsubscribe = subscribeSettings(() => {

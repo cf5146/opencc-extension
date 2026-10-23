@@ -15,7 +15,6 @@ export function createPageController(
 ) {
   const service = createDocumentConverter(convert);
   let settings = normalizeOfficialSettings(null),
-    used: string | undefined,
     disposed = false;
   let observer: MutationObserver | undefined,
     timer: ReturnType<typeof setTimeout> | undefined,
@@ -36,10 +35,10 @@ export function createPageController(
     roots.clear();
     service.cancel();
   };
-  const mismatch = (options: ConversionOptions) => !!used && used !== configName(options);
+  const mismatch = (options: ConversionOptions) =>
+    !!service.appliedConfig && service.appliedConfig !== configName(options);
   const run = async (root: Node, options: ConversionOptions) => {
     if (mismatch(options)) throw Error("轉換設定已變更，請重新載入頁面後再轉換。");
-    used = configName(options);
     const url = getUrl(),
       expected = revision;
     return service.convert(root, options, () => !disposed && expected === revision && url === getUrl());
@@ -123,7 +122,6 @@ export function createPageController(
           return { kind: "no-op", count: 0, time: 0 };
         if (mismatch(options)) return { kind: "reload-required" };
         const started = performance.now();
-        used = configName(options);
         try {
           let count = 0;
           const valid = () => !disposed && expected === revision && url === getUrl();
