@@ -13,7 +13,7 @@ try{
  const extensions=run(['run-code','async(page)=>await page.evaluate(()=>new Promise(resolve=>chrome.developerPrivate.getExtensionsInfo({includeDisabled:true,includeTerminated:true},resolve)))'],true);
  const ext=extensions.find(x=>x.name==='Official OpenCC source feasibility probe');if(!ext||ext.state!=='ENABLED')throw new Error('Probe extension did not load');
  run(['goto',`chrome-extension://${ext.id}/index.html`]);
- for(const [snippet,out] of [['edge-run.js','edge.json'],['edge-startup.js','edge-startup.json']]){
+ for(const [snippet,out] of [['edge-run.snippet','edge.json'],['edge-startup.snippet','edge-startup.snippeton']]){
   console.log(`Running ${snippet}`);
   const result=run(['run-code',`--filename=${snippet}`],true);
   fs.writeFileSync(path.join(root,'output',out),JSON.stringify(result,null,2));

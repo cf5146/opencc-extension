@@ -4,10 +4,14 @@ import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 const root=path.dirname(fileURLToPath(import.meta.url));
-const source=process.argv[2]||path.join(root,'source/OpenCC');
+const source=await fs.realpath(process.argv[2]||path.join(root,'source/OpenCC'));
+if(!(await fs.stat(source)).isDirectory())throw new Error('Official source must be a directory');
+// Developer-initiated build: git is resolved from the trusted local toolchain PATH.
+// Keep all subprocess arguments fixed; a selected source directory is only a cwd.
+const git=args=>execFileSync('git',args,{cwd:source}); // NOSONAR S4036: trusted build tool, never selected by page input.
 const commit='025f371dc76b598d77384fbdab90c937471844d8';
-if(execFileSync('git',['-C',source,'rev-parse','HEAD'],{encoding:'utf8'}).trim()!==commit)throw new Error('Unexpected source commit');
-if(execFileSync('git',['-C',source,'status','--porcelain'],{encoding:'utf8'}).trim())throw new Error('Modified official source');
+if(git(['rev-parse','HEAD']).toString('utf8').trim()!==commit)throw new Error('Unexpected source commit');
+if(git(['status','--porcelain']).toString('utf8').trim())throw new Error('Modified official source');
 const dist=path.join(root,'dist'),resources=[];
 const hash=b=>createHash('sha256').update(b).digest('hex');
 const names=new Set();
@@ -16,7 +20,7 @@ for(const name of ['s2t','s2tw','s2twp','s2hk','tw2sp'].flatMap(c=>[c,`${c}_jieb
   const relative=`resources/config/${name}.json`;
   const original=`${name.endsWith('_jieba')?'plugins/jieba/data/config':'data/config'}/${name}.json`;
   // Git blob bytes are stable across Windows autocrlf and Linux checkouts.
-  const bytes=execFileSync('git',['-C',source,'show',`${commit}:${original}`]);
+  const bytes=git(['show',`${commit}:${original}`]);
   await fs.writeFile(path.join(dist,relative),bytes);visit(JSON.parse(bytes));
 }
 for(const file of await fs.readdir(path.join(dist,'resources/dict')))if(!names.has(file))await fs.unlink(path.join(dist,'resources/dict',file));

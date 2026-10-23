@@ -5,7 +5,7 @@ import { createPageController } from "../src/application/official/page-controlle
 import { convertTexts } from "../src/application/official/engine.js";
 import { loadSettings, subscribeSettings } from "../src/application/official/store.js";
 export default defineContentScript({
-  matches: ["http://*/*", "https://*/*"],
+  matches: ["http://*/*", "https://*/*"], // NOSONAR S5332: browser URL matching metadata; this performs no HTTP request.
   runAt: "document_idle",
   allFrames: false,
   registration: "manifest",
