@@ -1,50 +1,22 @@
-import type { SettingsStore } from '../settings/settings-store.js';
-import { PlatformError, type ExtensionPlatform, type MessageSender } from '../../platform/types.js';
-import type { ConversionResponse, RuntimeResponse, SettingsRequest, SettingsResponse } from '../../runtime/messages.js';
-import { normalizeSiteHostname, type SettingsPatch } from '../settings/settings.js';
-import { isLocaleCode } from '../../domain/conversion/locales.js';
+import type { SettingsStore } from "../settings/settings-store.js";
+import { PlatformError, type ExtensionPlatform, type MessageSender } from "../../platform/types.js";
+import type { ConversionResponse, RuntimeResponse, SettingsRequest, SettingsResponse } from "../../runtime/messages.js";
+import { isSettingsPatch, normalizeSiteHostname, type SettingsPatch } from "../settings/settings.js";
 
-const selectionMenuId = 'convert-selection';
-const convertPageMessage = { type: 'convert-page' } as const;
+const selectionMenuId = "convert-selection";
+const convertPageMessage = { type: "convert-page" } as const;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
-
-function isSettingsPatch(value: unknown): value is SettingsPatch {
-  if (!isRecord(value)) return false;
-  return Object.entries(value).every(([key, entry]) => {
-    if (key === 'origin' || key === 'target') return isLocaleCode(entry);
-    if (key === 'auto') return typeof entry === 'boolean';
-    if (key === 'whitelist') return Array.isArray(entry) && entry.every((pattern) => typeof pattern === 'string');
-    if (key === 'siteRules')
-      return (
-        isRecord(entry) &&
-        Object.entries(entry).every(
-          ([host, rule]) => normalizeSiteHostname(host) !== undefined && (rule === 'always' || rule === 'never'),
-        )
-      );
-    if (key === 'textboxSize')
-      return (
-        entry === null ||
-        (isRecord(entry) &&
-          Object.entries(entry).every(
-            ([dimension, size]) =>
-              (dimension === 'width' || dimension === 'height') &&
-              (size === null || (typeof size === 'number' && Number.isFinite(size) && size > 0)),
-          ))
-      );
-    return false;
-  });
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 function isSettingsRequest(message: Record<string, unknown>): message is Record<string, unknown> & SettingsRequest {
-  if (message.type === 'settings-patch') return isSettingsPatch(message.patch);
+  if (message.type === "settings-patch") return isSettingsPatch(message.patch);
   return (
-    message.type === 'settings-site-rule' &&
-    typeof message.hostname === 'string' &&
+    message.type === "settings-site-rule" &&
+    typeof message.hostname === "string" &&
     normalizeSiteHostname(message.hostname) !== undefined &&
-    (message.rule === null || message.rule === 'always' || message.rule === 'never')
+    (message.rule === null || message.rule === "always" || message.rule === "never")
   );
 }
 
@@ -54,7 +26,7 @@ export interface BackgroundRuntime {
 }
 
 function hasUsableTabId(
-  tab: Awaited<ReturnType<ExtensionPlatform['tabs']['getActive']>>,
+  tab: Awaited<ReturnType<ExtensionPlatform["tabs"]["getActive"]>>,
 ): tab is NonNullable<typeof tab> {
   return tab !== undefined && Number.isFinite(tab.id);
 }
@@ -62,45 +34,45 @@ function hasUsableTabId(
 function supportsContentScriptUrl(url: string): boolean {
   try {
     const protocol = new URL(url).protocol;
-    return protocol === 'http:' || protocol === 'https:';
+    return protocol === "http:" || protocol === "https:";
   } catch {
     return false;
   }
 }
 
 function unavailable(
-  reason: 'no-active-tab' | 'unsupported-scheme' | 'injection-denied' | 'protected-page' | 'unsupported-capability',
+  reason: "no-active-tab" | "unsupported-scheme" | "injection-denied" | "protected-page" | "unsupported-capability",
 ): ConversionResponse {
-  return { kind: 'unavailable', reason };
+  return { kind: "unavailable", reason };
 }
 
 function mapInjectionFailure(error: unknown): ConversionResponse {
   if (error instanceof PlatformError) {
-    if (error.code === 'permission-denied') return unavailable('injection-denied');
-    if (error.code === 'unsupported-capability') return unavailable('unsupported-capability');
+    if (error.code === "permission-denied") return unavailable("injection-denied");
+    if (error.code === "unsupported-capability") return unavailable("unsupported-capability");
   }
-  return unavailable('protected-page');
+  return unavailable("protected-page");
 }
 
 export async function convertActiveTab(platform: ExtensionPlatform): Promise<ConversionResponse> {
-  let tab: Awaited<ReturnType<ExtensionPlatform['tabs']['getActive']>>;
+  let tab: Awaited<ReturnType<ExtensionPlatform["tabs"]["getActive"]>>;
   try {
     tab = await platform.tabs.getActive();
   } catch {
-    return { kind: 'internal-failure' };
+    return { kind: "internal-failure" };
   }
 
-  if (!hasUsableTabId(tab)) return unavailable('no-active-tab');
-  if (typeof tab.url !== 'string' || tab.url.length === 0) return unavailable('unsupported-capability');
+  if (!hasUsableTabId(tab)) return unavailable("no-active-tab");
+  if (typeof tab.url !== "string" || tab.url.length === 0) return unavailable("unsupported-capability");
   if (!supportsContentScriptUrl(tab.url)) {
-    return unavailable('unsupported-scheme');
+    return unavailable("unsupported-scheme");
   }
 
   try {
     return await platform.tabs.send(tab.id, convertPageMessage);
   } catch (error) {
-    if (!(error instanceof PlatformError) || error.code !== 'no-receiver') {
-      return unavailable('protected-page');
+    if (!(error instanceof PlatformError) || error.code !== "no-receiver") {
+      return unavailable("protected-page");
     }
   }
 
@@ -113,7 +85,7 @@ export async function convertActiveTab(platform: ExtensionPlatform): Promise<Con
   try {
     return await platform.tabs.send(tab.id, convertPageMessage);
   } catch {
-    return unavailable('protected-page');
+    return unavailable("protected-page");
   }
 }
 
@@ -131,7 +103,7 @@ export function createBackgroundRuntime(platform: ExtensionPlatform, settingsSto
       .catch(() => {})
       .then(async () => {
         if (!started || lifecycle !== expectedLifecycle || request !== badgeRequest) return;
-        await platform.action.setBadgeText(auto ? 'A' : '');
+        await platform.action.setBadgeText(auto ? "A" : "");
       })
       .catch(() => {});
   };
@@ -141,18 +113,18 @@ export function createBackgroundRuntime(platform: ExtensionPlatform, settingsSto
     sender: MessageSender,
   ): Promise<RuntimeResponse | undefined> => {
     if (!isRecord(message)) return undefined;
-    if (message.type === 'settings-patch' || message.type === 'settings-site-rule') {
+    if (message.type === "settings-patch" || message.type === "settings-site-rule") {
       if ((sender.tabId !== undefined || sender.url !== undefined) && !sender.isExtensionPage) {
-        return { kind: 'settings-failure', reason: 'forbidden' };
+        return { kind: "settings-failure", reason: "forbidden" };
       }
-      if (!isSettingsRequest(message)) return { kind: 'settings-failure', reason: 'invalid-request' };
+      if (!isSettingsRequest(message)) return { kind: "settings-failure", reason: "invalid-request" };
       const request = message;
       const result = settingsWrite
         .catch(() => {})
         .then(async (): Promise<SettingsResponse> => {
           try {
             let patch: SettingsPatch;
-            if (request.type === 'settings-patch') {
+            if (request.type === "settings-patch") {
               patch = request.patch;
             } else {
               const hostname = normalizeSiteHostname(request.hostname)!;
@@ -167,21 +139,21 @@ export function createBackgroundRuntime(platform: ExtensionPlatform, settingsSto
                 });
               patch = { siteRules };
             }
-            return { kind: 'settings-success', settings: await settingsStore.set(patch) };
+            return { kind: "settings-success", settings: await settingsStore.set(patch) };
           } catch {
-            return { kind: 'settings-failure', reason: 'write-failed' };
+            return { kind: "settings-failure", reason: "write-failed" };
           }
         });
       settingsWrite = result;
       return result;
     }
-    if (message.type !== 'convert-active-tab') return undefined;
+    if (message.type !== "convert-active-tab") return undefined;
     return convertActiveTab(platform);
   };
 
   const handleContextMenu = (info: { menuItemId: string | number; tabId?: number }) => {
-    if (info.menuItemId !== selectionMenuId || typeof info.tabId !== 'number' || !Number.isFinite(info.tabId)) return;
-    void platform.tabs.send(info.tabId, { type: 'convert-selection' }).catch(() => {});
+    if (info.menuItemId !== selectionMenuId || typeof info.tabId !== "number" || !Number.isFinite(info.tabId)) return;
+    void platform.tabs.send(info.tabId, { type: "convert-selection" }).catch(() => {});
   };
 
   const start = () => {
@@ -192,7 +164,7 @@ export function createBackgroundRuntime(platform: ExtensionPlatform, settingsSto
     const loadRevision = settingsRevision;
 
     void platform.contextMenus.ensureSelectionMenu().catch(() => {});
-    void platform.action.setBadgeBackgroundColor('white').catch(() => {});
+    void platform.action.setBadgeBackgroundColor("white").catch(() => {});
     void settingsStore.load().then(
       (settings) => {
         if (started && lifecycle === currentLifecycle && settingsRevision === loadRevision) {

@@ -1,6 +1,5 @@
 import type { LocaleCode } from "../../domain/conversion/locales.js";
-import { createOpenCCFactory } from "../../infrastructure/conversion/opencc-factory.js";
-import type { ConverterFactory } from "../../infrastructure/conversion/opencc-factory.js";
+import { createOpenCCFactory, type ConverterFactory } from "../../infrastructure/conversion/opencc-factory.js";
 
 const CJK_REGEX = /[\u4e00-\u9fff]/;
 
@@ -48,9 +47,7 @@ export function createConversionService(factory: ConverterFactory = createOpenCC
     return set;
   };
 
-  const getConverter = (from: LocaleCode, to: LocaleCode) => factory(from, to);
-
-  const convertText = (text: string, from: LocaleCode, to: LocaleCode) => getConverter(from, to)(text);
+  const convertText = (text: string, from: LocaleCode, to: LocaleCode) => factory(from, to)(text);
 
   const convertNode = (node: Text, from: LocaleCode, to: LocaleCode) => {
     const meta = nodeMeta.get(node);
