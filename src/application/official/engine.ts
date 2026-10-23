@@ -2,13 +2,13 @@ import { browser } from "wxt/browser";
 import { configName, type ConversionOptions } from "./settings.js";
 export async function convertTexts(texts: string[], options: ConversionOptions): Promise<string[]> {
   const response = await browser.runtime.sendMessage({ type: "official-convert", config: configName(options), texts });
-  if (response?.error) throw Error(response.error);
+  if (response?.error) throw new Error(response.error);
   if (
     !Array.isArray(response?.texts) ||
     response.texts.length !== texts.length ||
     response.texts.some((v: unknown) => typeof v !== "string")
   )
-    throw Error("轉換引擎回應無效；原文保留。");
+    throw new Error("轉換引擎回應無效；原文保留。");
   return response.texts;
 }
 interface Engine {
@@ -24,7 +24,7 @@ export async function runEngine(config: string, texts: string[]): Promise<string
     })();
     return (await direct).convert(config, texts);
   }
-  if (!browser.offscreen) throw Error("此瀏覽器無法建立離線轉換 Worker。");
+  if (!browser.offscreen) throw new Error("此瀏覽器無法建立離線轉換 Worker。");
   creating ??= (async () => {
     const contexts = await browser.runtime.getContexts({
       contextTypes: ["OFFSCREEN_DOCUMENT"],
@@ -41,7 +41,7 @@ export async function runEngine(config: string, texts: string[]): Promise<string
   });
   await creating;
   const r = await browser.runtime.sendMessage({ target: "opencc-offscreen", config, texts });
-  if (r?.error) throw Error(r.error);
-  if (!Array.isArray(r?.texts)) throw Error("離線轉換 Worker 無回應。");
+  if (r?.error) throw new Error(r.error);
+  if (!Array.isArray(r?.texts)) throw new Error("離線轉換 Worker 無回應。");
   return r.texts;
 }

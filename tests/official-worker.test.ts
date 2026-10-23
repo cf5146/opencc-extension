@@ -17,10 +17,10 @@ it("reuses only the active config and terminates on config changes", async () =>
   const e = createWorkerEngine(create);
   expect(await e.convert("s2t_jieba", ["汉"])).toEqual(["汉!"]);
   await e.convert("s2t_jieba", ["字"]);
-  expect(workers.length).toBe(1);
+  expect(workers).toHaveLength(1);
   await e.convert("s2t", ["汉"]);
   expect(workers[0].terminate).toHaveBeenCalledOnce();
-  expect(workers.length).toBe(2);
+  expect(workers).toHaveLength(2);
   e.dispose();
   expect(workers[1].terminate).toHaveBeenCalledOnce();
   await expect(e.convert("s2t", ["字"])).rejects.toThrow();

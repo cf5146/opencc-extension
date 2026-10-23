@@ -34,7 +34,7 @@
     },
     {
       "path": "adapter/build.sh",
-      "sha256": "d792b3aef182b78c18f3a70c9a76e7d4bb280b7cd2fe92f2421fcd7505837fa5"
+      "sha256": "03b2d0dfe70e2e9bfb6e6775a4a0430195b3db4ddfea4bdf98785a116b827937"
     },
     {
       "path": "adapter/plugin-static.cpp",
@@ -42,7 +42,7 @@
     },
     {
       "path": "adapter/runtime.mjs",
-      "sha256": "de9cc8312bf190643ba28bb6feacad3e4bd9345d2fad07ee5cd36b66052d8512"
+      "sha256": "3ad2e11ae3b642258c5fc39d2f44a40dcba4fa39686c716f3d6701f2c9ef1c6e"
     }
   ],
   "artifacts": [
@@ -58,8 +58,8 @@
     },
     {
       "path": "runtime.mjs",
-      "bytes": 2655,
-      "sha256": "de9cc8312bf190643ba28bb6feacad3e4bd9345d2fad07ee5cd36b66052d8512"
+      "bytes": 3094,
+      "sha256": "3ad2e11ae3b642258c5fc39d2f44a40dcba4fa39686c716f3d6701f2c9ef1c6e"
     }
   ],
   "resources": [

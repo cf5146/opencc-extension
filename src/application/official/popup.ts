@@ -179,7 +179,7 @@ export async function startPopup() {
         let pending;
         do {
           pending = saving;
-          await pending;
+          await pending; // NOSONAR S9382: newer writes can join the queue while waiting; use the latest persisted settings.
         } while (pending !== saving);
         const r = await browser.runtime.sendMessage({ type: "convert-active-tab" });
         if (r?.kind === "reload-required") say("設定已變更，請重新載入網頁後再轉換。");
@@ -216,6 +216,11 @@ export async function startPopup() {
     );
   });
   get("show-settings").addEventListener("click", () => void browser.runtime.openOptionsPage());
+  const recoverSaving = (valid: () => boolean) => {
+    saving = saving.catch(() => {
+      if (valid()) schedule();
+    });
+  };
   const refreshSettings = () => {
     const read = ++readRevision,
       write = writeRevision;
@@ -227,9 +232,7 @@ export async function startPopup() {
         const before = JSON.stringify(options());
         render(settings);
         // A fresh persisted snapshot also recovers a previously failed write.
-        saving = saving.catch(() => {
-          if (valid()) schedule();
-        });
+        recoverSaving(valid);
         if (before !== JSON.stringify(options())) schedule();
       },
       () => {

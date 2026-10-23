@@ -2,8 +2,31 @@ import { browser } from "wxt/browser";
 import { createBrowserPlatform } from "../../platform/browser-platform.js";
 import { convertActiveTab } from "../runtime/background-runtime.js";
 import { loadSettings } from "./store.js";
-import { SETTINGS_KEY, isRecord, isOptions, normalizeSiteHostname } from "./settings.js";
+import { SETTINGS_KEY, isRecord, isOptions, normalizeSiteHostname, type OfficialSettings } from "./settings.js";
 import { runEngine } from "./engine.js";
+function settingsHostname(value: unknown) {
+  const host = typeof value === "string" ? normalizeSiteHostname(value) : undefined;
+  if (!host) throw new Error("無效的網站名稱。");
+  return host;
+}
+function applySettingsChange(settings: OfficialSettings, message: Record<string, unknown>) {
+  if (message.action === "defaults") {
+    if (!isOptions(message.options)) throw new Error("無效的官方設定。");
+    settings.preset = message.options.preset;
+    settings.mode = message.options.mode;
+    if (message.hostname !== undefined) {
+      const host = settingsHostname(message.hostname);
+      settings.sites[host] = { preset: settings.preset, mode: settings.mode };
+    }
+  } else if (message.action === "site") {
+    const host = settingsHostname(message.hostname);
+    if (message.options === null) delete settings.sites[host];
+    else if (isOptions(message.options))
+      settings.sites[host] = { preset: message.options.preset, mode: message.options.mode };
+    else throw new Error("無效的網站設定。");
+  } else if (message.action === "dismiss") settings.migrationNotice = false;
+  else throw new Error("未知的設定要求。");
+}
 export function startOfficialBackground() {
   const platform = createBrowserPlatform();
   let writes: Promise<unknown> = Promise.resolve();
@@ -44,24 +67,7 @@ export function startOfficialBackground() {
       .catch(() => {})
       .then(async () => {
         const settings = await loadSettings();
-        if (message.action === "defaults") {
-          if (!isOptions(message.options)) throw Error("無效的官方設定。");
-          settings.preset = message.options.preset;
-          settings.mode = message.options.mode;
-          if (message.hostname !== undefined) {
-            const host = typeof message.hostname === "string" ? normalizeSiteHostname(message.hostname) : undefined;
-            if (!host) throw Error("無效的網站名稱。");
-            settings.sites[host] = { preset: settings.preset, mode: settings.mode };
-          }
-        } else if (message.action === "site") {
-          const host = typeof message.hostname === "string" ? normalizeSiteHostname(message.hostname) : undefined;
-          if (!host) throw Error("無效的網站名稱。");
-          if (message.options === null) delete settings.sites[host];
-          else if (isOptions(message.options))
-            settings.sites[host] = { preset: message.options.preset, mode: message.options.mode };
-          else throw Error("無效的網站設定。");
-        } else if (message.action === "dismiss") settings.migrationNotice = false;
-        else throw Error("未知的設定要求。");
+        applySettingsChange(settings, message);
         await browser.storage.local.set({ [SETTINGS_KEY]: settings });
         return { settings };
       });

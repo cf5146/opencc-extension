@@ -32,9 +32,14 @@ const fixtures = [
   ["official-jieba-testcases.json", "962babe39228b398f425b039c99255941a62c232815727da92c231159aee52f6"],
 ];
 try {
-  for (const [file, expectedHash] of fixtures) {
-    const bytes = await fs.readFile(path.join(poc, "fixtures", file));
-    assert.equal(createHash("sha256").update(bytes).digest("hex"), expectedHash);
+  const loaded = await Promise.all(
+    fixtures.map(async ([file, expectedHash]) => {
+      const bytes = await fs.readFile(path.join(poc, "fixtures", file));
+      assert.equal(createHash("sha256").update(bytes).digest("hex"), expectedHash);
+      return { file, bytes };
+    }),
+  );
+  for (const { file, bytes } of loaded) {
     for (const c of parse(bytes.toString()).cases)
       for (const config of Object.keys(c.expected)) {
         if (!bases.includes(config.replace("_jieba", ""))) continue;

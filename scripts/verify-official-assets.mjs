@@ -8,11 +8,13 @@ export async function verifyOfficialAssets(directory = path.join(root, "public/o
   const lock = JSON.parse(await fs.readFile(path.join(root, "scripts/opencc-feasibility/artifact-lock.json"), "utf8"));
   const actual = JSON.parse(await fs.readFile(path.join(directory, "manifest.json"), "utf8"));
   assert.deepEqual(actual, lock, "Official engine manifest differs from the reviewed lock");
-  for (const item of [...lock.resources, ...lock.artifacts]) {
-    const bytes = await fs.readFile(path.join(directory, item.path));
-    assert.equal(bytes.length, item.bytes, item.path + " size");
-    assert.equal(createHash("sha256").update(bytes).digest("hex"), item.sha256, item.path + " hash");
-  }
+  await Promise.all(
+    [...lock.resources, ...lock.artifacts].map(async (item) => {
+      const bytes = await fs.readFile(path.join(directory, item.path));
+      assert.equal(bytes.length, item.bytes, item.path + " size");
+      assert.equal(createHash("sha256").update(bytes).digest("hex"), item.sha256, item.path + " hash");
+    }),
+  );
   return lock;
 }
 if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {

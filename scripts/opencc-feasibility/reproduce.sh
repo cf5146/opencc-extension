@@ -6,15 +6,15 @@ root=$(cd "$(dirname "$0")" && pwd)
 export PATH="$base/tools/python/cpython-3.13.9-linux-x86_64-gnu/bin:$base/tools/pytools/bin:$PATH"
 export PYTHONPATH="$base/tools/pytools"
 source "$base/tools/emsdk/emsdk_env.sh" >/dev/null 2>&1
-test "$(python3 --version)" = 'Python 3.13.9'
-test "$(cmake --version | head -1)" = 'cmake version 3.31.10'
-test "$(ninja --version)" = '1.13.0.git.kitware.jobserver-pipe-1'
+[[ "$(python3 --version)" == 'Python 3.13.9' ]]
+[[ "$(cmake --version | head -1)" == 'cmake version 3.31.10' ]]
+[[ "$(ninja --version)" == '1.13.0.git.kitware.jobserver-pipe-1' ]]
 emcc --version | head -1 | grep -F '4.0.22'
 mkdir -p "$base/source"
 source_dir="$base/source/OpenCC"
-if test ! -d "$source_dir/.git"; then git clone --branch ver.1.4.2 --depth 1 https://github.com/BYVoid/OpenCC.git "$source_dir"; fi
-test "$(git -C "$source_dir" rev-parse HEAD)" = 025f371dc76b598d77384fbdab90c937471844d8
-test -z "$(git -C "$source_dir" status --porcelain)"
+if [[ ! -d "$source_dir/.git" ]]; then git clone --branch ver.1.4.2 --depth 1 https://github.com/BYVoid/OpenCC.git "$source_dir"; fi
+[[ "$(git -C "$source_dir" rev-parse HEAD)" == 025f371dc76b598d77384fbdab90c937471844d8 ]]
+[[ -z "$(git -C "$source_dir" status --porcelain)" ]]
 wasm_build=${OPENCC_BUILD_DIR:-"$base/build"}
 native_build=${OPENCC_NATIVE_BUILD_DIR:-"$base/native-build"}
 bash "$root/adapter/build.sh" "$source_dir" "$wasm_build"
