@@ -1,0 +1,51 @@
+async (page) => {
+  const samples = [];
+  const cdp = await page.context().browser().newBrowserCDPSession();
+  let commandId = 0;
+  const command = (sessionId, method) => new Promise((resolve, reject) => {
+    const id = ++commandId;
+    const timeout = setTimeout(() => { cdp.off("Target.receivedMessageFromTarget", onMessage); reject(new Error(method + " timeout")); }, 10000);
+    const onMessage = event => {
+      if (event.sessionId !== sessionId) return;
+      const response = JSON.parse(event.message);
+      if (response.id !== id) return;
+      clearTimeout(timeout); cdp.off("Target.receivedMessageFromTarget", onMessage);
+      response.error ? reject(new Error(JSON.stringify(response.error))) : resolve(response.result);
+    };
+    cdp.on("Target.receivedMessageFromTarget", onMessage);
+    cdp.send("Target.sendMessageToTarget", { sessionId, message: JSON.stringify({ id, method }) }).catch(reject);
+  });
+  const variants = ["legacy", "mmseg", "jieba"];
+  for (let trial = 0; trial < 5; trial++) {
+    const order = trial % 2 ? [...variants].reverse() : variants;
+    for (const variant of order) {
+      const sample = await page.evaluate(async ({ variant, trial }) => {
+        const worker = window.benchWorker = new Worker("./bench-worker.mjs", { type: "module" });
+        const started = performance.now();
+          return await new Promise((resolve, reject) => {
+            let coldRoundTripMs;
+            worker.onmessage = ({ data }) => {
+              if (data.phase === "cold") { coldRoundTripMs = performance.now() - started; return; }
+              data.error ? reject(new Error(data.error)) : resolve({ ...data, trial, coldRoundTripMs });
+            };
+            worker.onerror = e => reject(new Error(e.message));
+            worker.postMessage({ variant });
+          });
+      }, { variant, trial });
+      const { targetInfos } = await cdp.send("Target.getTargets");
+      const target = targetInfos.find(x => x.type === "worker" && x.url.endsWith("/bench-worker.mjs"));
+      if (!target) throw new Error("Benchmark Worker target missing");
+      const { sessionId } = await cdp.send("Target.attachToTarget", { targetId: target.targetId, flatten: false });
+      try {
+        await command(sessionId, "HeapProfiler.collectGarbage");
+        sample.retainedHeap = await command(sessionId, "Runtime.getHeapUsage");
+      } finally {
+        await cdp.send("Target.detachFromTarget", { sessionId });
+        await page.evaluate(() => { window.benchWorker.terminate(); window.benchWorker = null; });
+      }
+      samples.push(sample);
+    }
+  }
+  await cdp.detach();
+  return { edgeVersion: page.context().browser().version(), samples };
+}

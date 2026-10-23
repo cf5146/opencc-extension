@@ -1,0 +1,11 @@
+{
+  "cpu": "AMD Ryzen AI Max 490 w/ Radeon 8050S           ",
+  "logicalCPUs": 24,
+  "totalMemoryBytes": 51298455552,
+  "os": "Windows_NT 10.0.26200",
+  "node": "v26.12.1",
+  "measuredAt": "2026-10-23T20:43:52.984Z",
+  "baseline": "d0ac03266941667e94d0cdaf61eb2ea1fbc4547c",
+  "head": "9ba9550c2743dba84b623fb01e74f1e85eb2689a",
+  "manifestSha256": "38d69fe12c8045d0e431867e18044c0d3b1de68e4ea1609ecf465245959652f5"
+}
