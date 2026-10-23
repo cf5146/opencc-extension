@@ -83,14 +83,21 @@ export async function startPopup() {
     saving = saving
       .catch(() => {})
       .then(async () => {
-        await mutateSettings("defaults", { options: selected, hostname: enabled ? host : undefined });
-        if (write === writeRevision) dirty = false;
+        const next = await mutateSettings("defaults", { options: selected, hostname: enabled ? host : undefined });
+        if (!disposed && write === writeRevision) {
+          render(next);
+          dirty = false;
+        }
       });
     void saving.then(
       () => {
         if (!disposed && write === writeRevision) void preview();
       },
-      () => say("設定儲存失敗，請重試選擇。"),
+      () => {
+        if (disposed || write !== writeRevision) return;
+        dirty = false;
+        say("設定儲存失敗，請重試選擇。");
+      },
     );
   };
   preset.disabled = true;
@@ -154,8 +161,11 @@ export async function startPopup() {
         say(enabled ? "此網站已啟用自動轉換；設定改變後請重載已轉換頁面。" : "此網站已停用自動轉換。");
       },
       () => {
-        site.checked = !enabled;
+        if (disposed) return;
         site.disabled = false;
+        if (write !== writeRevision) return;
+        site.checked = !enabled;
+        dirty = false;
         say("網站設定儲存失敗。");
       },
     );
@@ -165,7 +175,11 @@ export async function startPopup() {
     say("初始化／轉換網頁中…");
     void (async () => {
       try {
-        await saving;
+        let pending;
+        do {
+          pending = saving;
+          await pending;
+        } while (pending !== saving);
         const r = await browser.runtime.sendMessage({ type: "convert-active-tab" });
         if (r?.kind === "reload-required") say("設定已變更，請重新載入網頁後再轉換。");
         else if (r?.kind === "success") say(`已轉換 ${r.count} 個文字節點。`);

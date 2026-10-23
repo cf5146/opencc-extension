@@ -153,3 +153,120 @@ it.each([
     window.dispatchEvent(new Event("pagehide"));
   }
 });
+
+it.each([false, true])(
+  "reconciles a failed site toggle followed by a successful defaults save (initial enabled=%s)",
+  async (enabled) => {
+    document.documentElement.innerHTML = fs.readFileSync("entrypoints/popup/index.html", "utf8");
+    let state: any = {
+      version: 2,
+      preset: "s2twp",
+      mode: "jieba",
+      sites: enabled ? { "example.com": { preset: "s2twp", mode: "jieba" } } : {},
+      migrationNotice: false,
+    };
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    let writes: Promise<unknown> = Promise.resolve();
+    fake.storage.local.get.mockImplementation(async () => ({ officialOpenCC: structuredClone(state) }));
+    fake.tabs.query.mockResolvedValue([{ url: "https://example.com" }]);
+    fake.storage.onChanged.addListener.mockClear();
+    fake.runtime.sendMessage.mockClear();
+    fake.runtime.sendMessage.mockImplementation((message: any) => {
+      if (message.type === "official-convert")
+        return Promise.resolve({ texts: [message.config + ":" + message.texts[0]] });
+      const job = writes.then(async () => {
+        if (message.action === "site") {
+          await gate;
+          return { error: "storage unavailable" };
+        }
+        state = { ...state, ...message.options, sites: { ...state.sites } };
+        if (message.hostname) state.sites[message.hostname] = { ...message.options };
+        for (const [notify] of fake.storage.onChanged.addListener.mock.calls) notify({ officialOpenCC: {} }, "local");
+        return { settings: structuredClone(state) };
+      });
+      writes = job;
+      return job;
+    });
+    await startPopup();
+    try {
+      const site = document.getElementById("site-auto") as HTMLInputElement,
+        preset = document.getElementById("preset") as HTMLSelectElement;
+      (document.getElementById("textbox") as HTMLTextAreaElement).value = "汉";
+      site.click();
+      preset.value = "s2hk";
+      preset.dispatchEvent(new Event("change"));
+      release();
+      await vi.waitFor(() => expect(state.preset).toBe("s2hk"));
+      const effective = state.sites["example.com"] ?? state;
+      await vi.waitFor(() =>
+        expect((document.getElementById("result") as HTMLTextAreaElement).value).toBe(effective.preset + "_jieba:汉"),
+      );
+      expect(site.checked).toBe(Object.hasOwn(state.sites, "example.com"));
+      expect(site.disabled).toBe(false);
+      expect(preset.value).toBe(effective.preset);
+    } finally {
+      release();
+      window.dispatchEvent(new Event("pagehide"));
+    }
+  },
+);
+it("manual page conversion waits for settings queued while an earlier save is pending", async () => {
+  document.documentElement.innerHTML = fs.readFileSync("entrypoints/popup/index.html", "utf8");
+  let state: any = { version: 2, preset: "s2twp", mode: "jieba", sites: {}, migrationNotice: false };
+  let firstRelease!: () => void,
+    secondRelease!: () => void,
+    count = 0,
+    secondStarted = false;
+  const firstGate = new Promise<void>((r) => {
+      firstRelease = r;
+    }),
+    secondGate = new Promise<void>((r) => {
+      secondRelease = r;
+    });
+  let writes: Promise<unknown> = Promise.resolve();
+  const pageConfigs: any[] = [];
+  fake.storage.local.get.mockImplementation(async () => ({ officialOpenCC: structuredClone(state) }));
+  fake.tabs.query.mockResolvedValue([{ url: "https://example.com" }]);
+  fake.storage.onChanged.addListener.mockClear();
+  fake.runtime.sendMessage.mockClear();
+  fake.runtime.sendMessage.mockImplementation((message: any) => {
+    if (message.type === "convert-active-tab") {
+      pageConfigs.push({ preset: state.preset, mode: state.mode });
+      return Promise.resolve({ kind: "success", count: 1 });
+    }
+    const job = writes.then(async () => {
+      if (++count === 1) await firstGate;
+      else {
+        secondStarted = true;
+        await secondGate;
+      }
+      state = { ...state, ...message.options };
+      for (const [notify] of fake.storage.onChanged.addListener.mock.calls) notify({ officialOpenCC: {} }, "local");
+      return { settings: structuredClone(state) };
+    });
+    writes = job;
+    return job;
+  });
+  await startPopup();
+  try {
+    const preset = document.getElementById("preset") as HTMLSelectElement,
+      mode = document.getElementById("mode") as HTMLSelectElement;
+    preset.value = "s2hk";
+    preset.dispatchEvent(new Event("change"));
+    document.getElementById("convert")!.click();
+    mode.value = "mmseg";
+    mode.dispatchEvent(new Event("change"));
+    firstRelease();
+    await vi.waitFor(() => expect(secondStarted).toBe(true));
+    expect(pageConfigs).toEqual([]);
+    secondRelease();
+    await vi.waitFor(() => expect(pageConfigs).toEqual([{ preset: "s2hk", mode: "mmseg" }]));
+  } finally {
+    firstRelease();
+    secondRelease();
+    window.dispatchEvent(new Event("pagehide"));
+  }
+});
