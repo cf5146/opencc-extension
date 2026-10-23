@@ -5,7 +5,6 @@ import {createHash} from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 const root=path.dirname(fileURLToPath(import.meta.url));
 const source=await fs.realpath(process.argv[2]||path.join(root,'source/OpenCC'));
-if(!(await fs.stat(source)).isDirectory())throw new Error('Official source must be a directory');
 // Developer-initiated build: git is resolved from the trusted local toolchain PATH.
 // Keep all subprocess arguments fixed; a selected source directory is only a cwd.
 const git=args=>execFileSync('git',args,{cwd:source}); // NOSONAR S4036: trusted build tool, never selected by page input.
