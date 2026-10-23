@@ -193,7 +193,12 @@ export async function startPopup() {
     say("文字已清除");
   });
   get("dismiss").addEventListener("click", () => {
-    void mutateSettings("dismiss").then(render, () => say("無法儲存提示狀態。"));
+    void mutateSettings("dismiss").then(
+      (settings) => {
+        if (!disposed) get("migration").hidden = !settings.migrationNotice;
+      },
+      () => say("無法儲存提示狀態。"),
+    );
   });
   get("show-settings").addEventListener("click", () => void browser.runtime.openOptionsPage());
   const unsubscribe = subscribeSettings(() => {
