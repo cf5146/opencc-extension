@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for your interest in contributing!
+Thanks for your interest in contributing to the independently maintained [cf5146/opencc-extension](https://github.com/cf5146/opencc-extension) fork! Original authorship and license notices are retained.
 
 ## GitHub Flow
 
@@ -12,7 +12,7 @@ Thanks for your interest in contributing!
 
 ## Development
 
-Requirements: Node >= 20.19, npm, and the `rtk` command used to keep local command output compact.
+Requirements: a Node version supported by `package.json`, npm, and the `rtk` command used to keep local command output compact.
 
 Install deps:
 
@@ -78,6 +78,8 @@ The `CI` workflow keeps one `verify` job for branch protection. It runs on pushe
 
 ## Release Process
 
+These workflows publish artifacts to this repository's GitHub Releases. Browser-store submission and Firefox signing are separate steps; the new Firefox ID `opencc-extension@cf5146` has not been submitted to AMO. See [maintainer and release identity](docs/maintainer-and-release-identity.md).
+
 ### Prepare and review
 
 1. Run **Prepare release** on `main`. Leave version blank for the next patch above the package version and existing tags, or supply a version without a leading v. Optional additional notes are included in the reviewed release notes.
@@ -110,11 +112,11 @@ After merging these workflows, confirm CI's `verify` check is recognized by exis
 
 ## Issue Reporting
 
-Provide reproduction steps & environment details. Screens/GIFs help.
+Use [this fork's issue tracker](https://github.com/cf5146/opencc-extension/issues). Provide reproduction steps & environment details. Screens/GIFs help.
 
 ## Security
 
-Do not open public issues for sensitive vulnerabilities. Email the author (see `package.json`).
+Use [GitHub private vulnerability reporting](https://github.com/cf5146/opencc-extension/security/advisories/new) to contact this fork's maintainer. Do not disclose sensitive vulnerability details in public issues.
 
 ## License
 

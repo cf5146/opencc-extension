@@ -1,8 +1,20 @@
 # opencc-extension
 
-A local browser extension built around official [BYVoid/OpenCC](https://github.com/BYVoid/OpenCC) **1.4.2**, with the official Jieba plugin compiled into WebAssembly.
+An independently maintained browser extension built around official [BYVoid/OpenCC](https://github.com/BYVoid/OpenCC) **1.4.2**, with the official Jieba plugin compiled into WebAssembly.
 
-This working-tree integration is not a published store release. Edge has been exercised end to end; Chrome and Firefox have separate build checks. Existing store versions and historical demo images may have different behavior.
+Maintained by [cf5146](https://github.com/cf5146) at [cf5146/opencc-extension](https://github.com/cf5146/opencc-extension), based on the original extension by [Tony Chan](https://github.com/tnychn/opencc-extension). The extension project and the BYVoid/OpenCC engine are separate upstreams.
+
+## Maintenance and distribution
+
+- [GitHub releases and build artifacts](https://github.com/cf5146/opencc-extension/releases)
+- [Bug reports and feature requests](https://github.com/cf5146/opencc-extension/issues)
+- [Private vulnerability reports](https://github.com/cf5146/opencc-extension/security/advisories/new)
+
+Firefox uses the new add-on ID `opencc-extension@cf5146`. It has **not been submitted to AMO or signed**. This is a separate add-on identity from the original author's extension; existing installations and settings do not automatically migrate across IDs. The ID is selected locally and its availability is checked by AMO on first submission/signing.
+
+No verified Chrome Web Store, Edge Add-ons or AMO listing for this independently maintained version is linked here. GitHub ZIP artifacts are not a claim of store publication or Firefox signing. Edge has been exercised end to end; Chrome and Firefox have separate build checks.
+
+See [maintainer and release identity](docs/maintainer-and-release-identity.md) for ownership, attribution and the remaining store setup.
 
 ## Conversion
 
@@ -84,4 +96,4 @@ Local Edge evidence also covers strict page CSP, selection element identity, dyn
 
 ## License and credits
 
-Application: [MIT](LICENSE). Official OpenCC and bundled components: [third-party notices](public/opencc/THIRD_PARTY_NOTICES.md). The source retains the original extension authorship and upstream attribution.
+Application: [MIT](LICENSE.txt), retaining the original copyright notice for Tony Chan. Independently maintained by cf5146; the original author is credited in package contributors and Git history. Official OpenCC and bundled components: [third-party notices](public/opencc/THIRD_PARTY_NOTICES.md).
