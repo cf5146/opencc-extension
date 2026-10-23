@@ -57,11 +57,13 @@ export function createPageController(
       stop();
       return;
     }
+    const expected = revision,
+      url = getUrl();
     busy = true;
     const job = queue
       .catch(() => {})
       .then(async () => {
-        while (roots.size && !disposed) {
+        while (roots.size && !disposed && expected === revision && url === getUrl()) {
           const active = auto();
           if (!active || configName(active) !== configName(options)) break;
           const root = roots.values().next().value!;
@@ -73,8 +75,10 @@ export function createPageController(
     try {
       await job;
     } catch (e) {
-      stop();
-      onError(e instanceof Error ? e.message : "自動轉換失敗；尚未處理的原文保留。");
+      if (!disposed && expected === revision && url === getUrl()) {
+        stop();
+        onError(e instanceof Error ? e.message : "自動轉換失敗；尚未處理的原文保留。");
+      }
     } finally {
       busy = false;
       if (roots.size && !disposed) timer = setTimeout(() => void flush(), 20);
@@ -134,6 +138,7 @@ export function createPageController(
           }
           return { kind: count ? "success" : "no-op", count, time: performance.now() - started };
         } catch (e) {
+          if (disposed || expected !== revision || url !== getUrl()) return { kind: "no-op", count: 0, time: 0 };
           stop();
           const message = e instanceof Error ? e.message : "轉換失敗；尚未處理的原文保留。";
           onError(message);

@@ -1,4 +1,4 @@
-import { it, expect } from "vitest";
+import { it, expect, vi } from "vitest";
 import { createPageController } from "../src/application/official/page-controller.js";
 import { normalizeOfficialSettings } from "../src/application/official/settings.js";
 it("stops a pending automatic conversion when a site is disabled", async () => {
@@ -145,6 +145,49 @@ it("retains reload protection when an earlier batch wrote before a later failure
     c.update({ ...initial, mode: "mmseg" });
     expect((await c.manual(false)).kind).toBe("reload-required");
     expect(calls).toBe(2);
+  } finally {
+    c.dispose();
+  }
+});
+
+it.each(["auto", "manual"])("a stale %s failure cannot stop newer automatic settings", async (source) => {
+  document.head.innerHTML = "";
+  document.documentElement.lang = "zh";
+  document.body.innerHTML = "<p>汉字</p>";
+  let rejectFirst!: (error: Error) => void;
+  const calls: string[] = [],
+    errors: string[] = [];
+  const c = createPageController(
+    document,
+    (texts, options) => {
+      calls.push(options.mode);
+      if (calls.length === 1)
+        return new Promise((_, reject) => {
+          rejectFirst = reject;
+        });
+      return Promise.resolve(texts.map((text) => text.replaceAll("汉", "漢")));
+    },
+    () => "https://example.com",
+    (message) => errors.push(message),
+  );
+  const initial = normalizeOfficialSettings({
+    version: 2,
+    sites: source === "auto" ? { "example.com": { preset: "s2twp", mode: "jieba" } } : {},
+  });
+  try {
+    c.update(initial);
+    const first = source === "manual" ? c.manual(false) : undefined;
+    await vi.waitFor(() => expect(calls).toEqual(["jieba"]));
+    c.update(normalizeOfficialSettings({ version: 2, sites: { "example.com": { preset: "s2twp", mode: "mmseg" } } }));
+    rejectFirst(Error("obsolete Jieba failure"));
+    await first;
+    await vi.waitFor(() => expect(document.querySelector("p")!.textContent).toBe("漢字"));
+    const added = document.createElement("p");
+    added.textContent = "汉新";
+    document.body.append(added);
+    await vi.waitFor(() => expect(added.textContent).toBe("漢新"));
+    expect(calls.slice(1)).toEqual(["mmseg", "mmseg"]);
+    expect(errors).toEqual([]);
   } finally {
     c.dispose();
   }
