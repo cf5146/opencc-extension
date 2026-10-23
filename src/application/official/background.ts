@@ -1,3 +1,4 @@
+import { MAX_BATCH_TEXTS } from "./protocol.js";
 import { browser } from "wxt/browser";
 import { createBrowserPlatform } from "../../platform/browser-platform.js";
 import { convertActiveTab } from "../runtime/background-runtime.js";
@@ -44,7 +45,7 @@ export function startOfficialBackground() {
       if (
         !isOptions({ preset, mode: typeof cfg === "string" && cfg.endsWith("_jieba") ? "jieba" : "mmseg" }) ||
         !Array.isArray(message.texts) ||
-        message.texts.length > 128 ||
+        message.texts.length > MAX_BATCH_TEXTS ||
         message.texts.some((v) => typeof v !== "string")
       )
         return Promise.resolve({ error: "無效的轉換要求。" });

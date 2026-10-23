@@ -130,7 +130,7 @@ it.each(["init-failure", "no-op", "stale-result"])(
 );
 it("retains reload protection when an earlier batch wrote before a later failure", async () => {
   document.head.innerHTML = "";
-  document.body.innerHTML = "<span>汉</span>".repeat(129);
+  document.body.innerHTML = Array.from({ length: 1025 }, (_, i) => `<span>汉${i}</span>`).join("");
   let calls = 0;
   const c = createPageController(document, async (xs) => {
     if (++calls === 2) throw Error("later batch failed");
@@ -140,8 +140,8 @@ it("retains reload protection when an earlier batch wrote before a later failure
   try {
     c.update(initial);
     expect((await c.manual(false)).kind).toBe("internal-failure");
-    expect(document.body.firstChild!.textContent).toBe("漢");
-    expect(document.body.lastChild!.textContent).toBe("汉");
+    expect(document.body.firstChild!.textContent).toBe("漢0");
+    expect(document.body.lastChild!.textContent).toBe("汉1024");
     c.update({ ...initial, mode: "mmseg" });
     expect((await c.manual(false)).kind).toBe("reload-required");
     expect(calls).toBe(2);
@@ -190,5 +190,73 @@ it.each(["auto", "manual"])("a stale %s failure cannot stop newer automatic sett
     expect(errors).toEqual([]);
   } finally {
     c.dispose();
+  }
+});
+it("batches independent automatically inserted roots without joining their text", async () => {
+  document.head.innerHTML = "";
+  document.body.innerHTML = "";
+  document.documentElement.lang = "zh";
+  const requests: string[][] = [];
+  const controller = createPageController(
+    document,
+    async (texts) => {
+      requests.push(texts);
+      return texts.map((text) => text.replaceAll("汉", "漢"));
+    },
+    () => "https://example.com",
+  );
+  try {
+    controller.update(
+      normalizeOfficialSettings({ version: 2, sites: { "example.com": { preset: "s2twp", mode: "jieba" } } }),
+    );
+    await new Promise((resolve) => setTimeout(resolve, 30));
+    const fragment = document.createDocumentFragment();
+    for (let i = 0; i < 100; i++) {
+      const p = document.createElement("p");
+      p.textContent = "汉" + i;
+      fragment.append(p);
+    }
+    document.body.append(fragment);
+    await vi.waitFor(() => expect(document.body.lastChild!.textContent).toBe("漢99"));
+    expect(requests).toHaveLength(1);
+    expect(requests[0]).toHaveLength(100);
+    expect(requests[0]![0]).toBe("汉0");
+  } finally {
+    controller.dispose();
+  }
+});
+it("retains nodes added while an automatic batch is in flight", async () => {
+  document.head.innerHTML = "";
+  document.body.innerHTML = "";
+  document.documentElement.lang = "zh";
+  let finish!: () => void;
+  let calls = 0;
+  const controller = createPageController(
+    document,
+    async (texts) => {
+      calls++;
+      if (calls === 1)
+        await new Promise<void>((resolve) => {
+          finish = resolve;
+        });
+      return texts.map((text) => text.replaceAll("汉", "漢"));
+    },
+    () => "https://example.com",
+  );
+  try {
+    controller.update(
+      normalizeOfficialSettings({ version: 2, sites: { "example.com": { preset: "s2twp", mode: "jieba" } } }),
+    );
+    document.body.innerHTML = "<p>汉甲</p>";
+    await vi.waitFor(() => expect(calls).toBe(1));
+    const added = document.createElement("p");
+    added.textContent = "汉乙";
+    document.body.append(added);
+    finish();
+    await vi.waitFor(() => expect(added.textContent).toBe("漢乙"));
+    expect(document.body.textContent).toBe("漢甲漢乙");
+    expect(calls).toBe(2);
+  } finally {
+    controller.dispose();
   }
 });

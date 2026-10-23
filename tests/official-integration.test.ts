@@ -86,7 +86,7 @@ describe("async DOM conversion", () => {
 });
 it("converts a selection spanning multiple batches without losing later selected nodes", async () => {
   document.body.innerHTML = Array.from(
-    { length: 130 },
+    { length: 1030 },
     (_, i) => "<span>" + (i === 0 ? "前汉" : "汉") + "</span>",
   ).join("");
   const range = document.createRange();
@@ -97,7 +97,7 @@ it("converts a selection spanning multiple batches without losing later selected
   selection.addRange(range);
   const c = createDocumentConverter(async (xs) => xs.map((x) => x.replaceAll("汉", "漢")));
   await c.selection(selection, { preset: "s2twp", mode: "jieba" });
-  expect(document.body.textContent).toBe("前" + "漢".repeat(130));
+  expect(document.body.textContent).toBe("前" + "漢".repeat(1030));
 });
 it.each(["move-out", "insert", "reorder"])(
   "discards a selection when its text membership changes by %s",
