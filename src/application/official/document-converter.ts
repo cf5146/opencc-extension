@@ -7,24 +7,24 @@ const excluded =
 function eligible(node: Text) {
   return !!node.isConnected && !node.parentElement?.closest(excluded) && /\p{Script=Han}/u.test(node.data);
 }
+function* snapshotBatches(snapshots: Snapshot[]) {
+  for (let i = 0; i < snapshots.length;) {
+    const batch: Snapshot[] = [];
+    let size = 0;
+    while (i < snapshots.length && (batch.length === 0 || (batch.length < 128 && size < 65536))) {
+      const s = snapshots[i++]!;
+      batch.push(s);
+      size += s.end - s.start;
+    }
+    yield { batch, more: i < snapshots.length };
+  }
+}
 export function createDocumentConverter(convertBatch: ConvertBatch) {
   let generation = 0;
   let appliedConfig: string | undefined;
   const meta = new WeakMap<Text, { key: string; value: string }>();
   const cancel = () => {
     generation++;
-  };
-  const batches = function* (snapshots: Snapshot[]) {
-    for (let i = 0; i < snapshots.length;) {
-      const batch: Snapshot[] = [];
-      let size = 0;
-      while (i < snapshots.length && (batch.length === 0 || (batch.length < 128 && size < 65536))) {
-        const s = snapshots[i++]!;
-        batch.push(s);
-        size += s.end - s.start;
-      }
-      yield { batch, more: i < snapshots.length };
-    }
   };
   const validateOutput = (output: string[], length: number) => {
     if (output.length !== length || output.some((s) => typeof s !== "string"))
@@ -56,7 +56,12 @@ export function createDocumentConverter(convertBatch: ConvertBatch) {
       }
       if (s.start === 0 && s.end === s.value.length) meta.set(s.node, { key, value: next });
     };
-    for (const { batch, more } of batches(snapshots)) {
+    const commitSelection = () => {
+      // Check every selected snapshot before the first synchronous write.
+      if (expected !== generation || !stillValid() || !pending.every((x) => unchanged(x.s))) return;
+      for (const { s, output } of pending) commit(s, output);
+    };
+    for (const { batch, more } of snapshotBatches(snapshots)) {
       if (expected !== generation || !stillValid()) return count;
       const output = await convertSnapshots(batch, options); // NOSONAR S9382: ordered batches bound memory and allow cancellation before writes.
       validateOutput(output, batch.length);
@@ -69,8 +74,7 @@ export function createDocumentConverter(convertBatch: ConvertBatch) {
       if (more) await new Promise<void>((r) => setTimeout(r, 0)); // NOSONAR S9382: yield between ordered batches so cancellation can run.
     }
     // Selection endpoints move on text writes; validate once, then commit without awaits.
-    if (atomic && expected === generation && stillValid() && pending.every((x) => unchanged(x.s)))
-      for (const { s, output } of pending) commit(s, output);
+    if (atomic) commitSelection();
     return count;
   }
   const snapshot = (node: Text, start = 0, end = node.length): Snapshot => ({
