@@ -94,15 +94,10 @@ function createDefaultTimer(document: Document): TimerPort {
   };
 }
 
-function hasSameLocalePair(left: Settings, right: Settings): boolean {
-  return left.origin === right.origin && left.target === right.target;
-}
+type LocalePair = Pick<Settings, "origin" | "target">;
 
-function hasSameProcessedPair(
-  processedPair: { origin: Settings["origin"]; target: Settings["target"] } | undefined,
-  settings: Settings,
-): boolean {
-  return processedPair?.origin === settings.origin && processedPair.target === settings.target;
+function hasSameLocalePair(left: LocalePair | undefined, right: LocalePair): boolean {
+  return left?.origin === right.origin && left.target === right.target;
 }
 
 export interface AutoConversionController {
@@ -126,10 +121,10 @@ export function createAutoConversionController(options: AutoConversionController
   let activeUrl: string | undefined;
   let hasFullScan = false;
   let hasProcessedDocument = false;
-  let processedPair: { origin: Settings["origin"]; target: Settings["target"] } | undefined;
+  let processedPair: LocalePair | undefined;
   let processedUrl: string | undefined;
   let hasSelectionConversion = false;
-  let selectionPair: { origin: Settings["origin"]; target: Settings["target"] } | undefined;
+  let selectionPair: LocalePair | undefined;
   let selectionUrl: string | undefined;
   let requiresReload = false;
   let reloadRequiredUrl: string | undefined;
@@ -244,7 +239,7 @@ export function createAutoConversionController(options: AutoConversionController
     activeUrl = url;
     try {
       hasFullScan = true;
-      const pairMatches = hasSameProcessedPair(processedPair, settings);
+      const pairMatches = hasSameLocalePair(processedPair, settings);
       status = requiresReload || !pairMatches ? "reload-required" : "active";
       if (status === "active") {
         observe();
@@ -308,8 +303,8 @@ export function createAutoConversionController(options: AutoConversionController
     }
 
     if (!requiresReload && hasOutputAtUrl(url)) {
-      const processedPairMatches = !hasProcessedDocument || hasSameProcessedPair(processedPair, settings);
-      const selectionPairMatches = !hasSelectionConversion || hasSameProcessedPair(selectionPair, settings);
+      const processedPairMatches = !hasProcessedDocument || hasSameLocalePair(processedPair, settings);
+      const selectionPairMatches = !hasSelectionConversion || hasSameLocalePair(selectionPair, settings);
       if (!processedPairMatches || !selectionPairMatches) {
         options.operations.resetCaches();
         requiresReload = true;
@@ -377,7 +372,7 @@ export function createAutoConversionController(options: AutoConversionController
   };
 
   const updateSettings = (settings: Settings) => {
-    const localePairChanged = !hasSameLocalePair(activeSettings!, settings);
+    const localePairChanged = !hasSameLocalePair(activeSettings, settings);
     activeSettings = settings;
     if (!localePairChanged) {
       if (requiresReload && reloadRequiredUrl === activeUrl) status = "reload-required";
@@ -430,10 +425,10 @@ export function createAutoConversionController(options: AutoConversionController
       const url = options.getUrl();
       prepareDocumentState(settings, url);
       if (requiresReload && reloadRequiredUrl === url) return "reload-required";
-      if (hasProcessedDocument && processedUrl === url && !hasSameProcessedPair(processedPair, settings)) {
+      if (hasProcessedDocument && processedUrl === url && !hasSameLocalePair(processedPair, settings)) {
         return "reload-required";
       }
-      if (hasSelectionConversion && selectionUrl === url && !hasSameProcessedPair(selectionPair, settings)) {
+      if (hasSelectionConversion && selectionUrl === url && !hasSameLocalePair(selectionPair, settings)) {
         return "reload-required";
       }
       if (!hasProcessedDocument || processedUrl !== url) return "unprocessed";

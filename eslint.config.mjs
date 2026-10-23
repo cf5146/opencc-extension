@@ -24,17 +24,13 @@ export default [
     },
   },
 
-  // Extension source and WXT entrypoints (browser + webextension globals).
+  // Shared TypeScript rules for extension source and build configuration.
   {
-    files: ["src/**/*.ts", "entrypoints/**/*.ts"],
+    files: ["src/**/*.ts", "entrypoints/**/*.ts", "wxt.config.ts"],
     languageOptions: {
       parser: tsParser,
       ecmaVersion: "latest",
       sourceType: "module",
-      globals: {
-        ...globals.browser,
-        ...globals.webextensions,
-      },
     },
     plugins: {
       "@typescript-eslint": tsPlugin,
@@ -44,22 +40,24 @@ export default [
     },
   },
 
+  // Extension source and WXT entrypoints run in the browser.
+  {
+    files: ["src/**/*.ts", "entrypoints/**/*.ts"],
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+        ...globals.webextensions,
+      },
+    },
+  },
+
   // WXT configuration runs in the Node-based build process.
   {
     files: ["wxt.config.ts"],
     languageOptions: {
-      parser: tsParser,
-      ecmaVersion: "latest",
-      sourceType: "module",
       globals: {
         ...globals.node,
       },
-    },
-    plugins: {
-      "@typescript-eslint": tsPlugin,
-    },
-    rules: {
-      ...tsPlugin.configs.recommended.rules,
     },
   },
 

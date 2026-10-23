@@ -1,4 +1,4 @@
-import { isLocaleCode, type LocaleCode } from '../../domain/conversion/locales.js';
+import { isLocaleCode, type LocaleCode } from "../../domain/conversion/locales.js";
 
 export interface TextboxSize {
   width: number | null;
@@ -14,20 +14,20 @@ export interface Settings {
   textboxSize: TextboxSize;
 }
 
-export type SiteRule = 'always' | 'never';
+export type SiteRule = "always" | "never";
 
 export function normalizeHostname(url: string): string | undefined {
   try {
     const parsed = new URL(url);
-    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return undefined;
-    return parsed.hostname.toLowerCase().replace(/\.+$/, '') || undefined;
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") return undefined;
+    return parsed.hostname.toLowerCase().replace(/\.+$/, "") || undefined;
   } catch {
     return undefined;
   }
 }
 
 export function normalizeSiteHostname(hostname: string): string | undefined {
-  if (!hostname || /[\s/?#@\\:]/.test(hostname.replace(/^\[[\da-f:]+\]$/i, 'ipv6'))) return undefined;
+  if (!hostname || /[\s/?#@\\:]/.test(hostname.replace(/^\[[\da-f:]+\]$/i, "ipv6"))) return undefined;
   return normalizeHostname(`https://${hostname}`);
 }
 
@@ -35,16 +35,16 @@ export function isAutoEnabled(settings: Settings, url: string): boolean {
   const hostname = normalizeHostname(url);
   if (!hostname) return false;
   const rule = Object.hasOwn(settings.siteRules, hostname) ? settings.siteRules[hostname] : undefined;
-  return rule === 'always' || (rule !== 'never' && settings.auto);
+  return rule === "always" || (rule !== "never" && settings.auto);
 }
 
-export type SettingsPatch = Partial<Omit<Settings, 'textboxSize'>> & {
+export type SettingsPatch = Partial<Omit<Settings, "textboxSize">> & {
   textboxSize?: Partial<TextboxSize> | null;
 };
 
 export const DEFAULT_SETTINGS: Settings = {
-  origin: 'cn',
-  target: 'hk',
+  origin: "cn",
+  target: "hk",
   auto: false,
   siteRules: {},
   whitelist: [],
@@ -52,24 +52,51 @@ export const DEFAULT_SETTINGS: Settings = {
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+export function isSettingsPatch(value: unknown): value is SettingsPatch {
+  if (!isRecord(value)) return false;
+  return Object.entries(value).every(([key, entry]) => {
+    if (key === "origin" || key === "target") return isLocaleCode(entry);
+    if (key === "auto") return typeof entry === "boolean";
+    if (key === "whitelist") return Array.isArray(entry) && entry.every((pattern) => typeof pattern === "string");
+    if (key === "siteRules")
+      return (
+        isRecord(entry) &&
+        Object.entries(entry).every(
+          ([host, rule]) => normalizeSiteHostname(host) !== undefined && (rule === "always" || rule === "never"),
+        )
+      );
+    if (key === "textboxSize")
+      return (
+        entry === null ||
+        (isRecord(entry) &&
+          Object.entries(entry).every(
+            ([dimension, size]) =>
+              (dimension === "width" || dimension === "height") &&
+              (size === null || (typeof size === "number" && Number.isFinite(size) && size > 0)),
+          ))
+      );
+    return false;
+  });
 }
 
 function normalizeDimension(value: unknown): number | null {
-  return typeof value === 'number' && Number.isFinite(value) && value > 0 ? value : null;
+  return typeof value === "number" && Number.isFinite(value) && value > 0 ? value : null;
 }
 
 export function normalizeSettings(raw: unknown): Settings {
   const source = isRecord(raw) ? raw : {};
   const textboxSize = isRecord(source.textboxSize) ? source.textboxSize : {};
   const whitelist = Array.isArray(source.whitelist)
-    ? source.whitelist.filter((value): value is string => typeof value === 'string')
+    ? source.whitelist.filter((value): value is string => typeof value === "string")
     : [];
   const siteRules: Record<string, SiteRule> = {};
   if (isRecord(source.siteRules)) {
     for (const [key, value] of Object.entries(source.siteRules)) {
       const hostname = normalizeSiteHostname(key);
-      if (hostname && (value === 'always' || value === 'never')) {
+      if (hostname && (value === "always" || value === "never")) {
         Object.defineProperty(siteRules, hostname, { value, enumerable: true, configurable: true, writable: true });
       }
     }
@@ -78,7 +105,7 @@ export function normalizeSettings(raw: unknown): Settings {
   return {
     origin: isLocaleCode(source.origin) ? source.origin : DEFAULT_SETTINGS.origin,
     target: isLocaleCode(source.target) ? source.target : DEFAULT_SETTINGS.target,
-    auto: typeof source.auto === 'boolean' ? source.auto : DEFAULT_SETTINGS.auto,
+    auto: typeof source.auto === "boolean" ? source.auto : DEFAULT_SETTINGS.auto,
     siteRules,
     whitelist,
     textboxSize: {
