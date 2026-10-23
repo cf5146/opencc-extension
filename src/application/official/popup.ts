@@ -19,7 +19,8 @@ export async function startPopup() {
     saving: Promise<unknown> = Promise.resolve(),
     dirty = false,
     composing = false,
-    writeRevision = 0;
+    writeRevision = 0,
+    readRevision = 0;
   const say = (s: string) => {
     if (!disposed) status.textContent = s;
   };
@@ -215,18 +216,30 @@ export async function startPopup() {
     );
   });
   get("show-settings").addEventListener("click", () => void browser.runtime.openOptionsPage());
-  const unsubscribe = subscribeSettings(() => {
+  const refreshSettings = () => {
+    const read = ++readRevision,
+      write = writeRevision;
     if (dirty || disposed) return;
+    const valid = () => !disposed && !dirty && read === readRevision && write === writeRevision;
     void loadSettings().then(
-      (s) => {
-        if (disposed || dirty) return;
+      (settings) => {
+        if (!valid()) return;
         const before = JSON.stringify(options());
-        render(s);
+        render(settings);
+        // A fresh persisted snapshot also recovers a previously failed write.
+        saving = saving.catch(() => {
+          if (valid()) schedule();
+        });
         if (before !== JSON.stringify(options())) schedule();
       },
-      () => say("設定更新失敗，請重新開啟視窗。"),
+      () => {
+        if (valid()) say("設定更新失敗，請重新開啟視窗。");
+      },
     );
-  });
+  };
+  const unsubscribe = subscribeSettings(refreshSettings);
+  // Close the gap between the initial read and listener registration.
+  refreshSettings();
   addEventListener(
     "pagehide",
     () => {
