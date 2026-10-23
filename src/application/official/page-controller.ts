@@ -38,7 +38,7 @@ export function createPageController(
   const mismatch = (options: ConversionOptions) =>
     !!service.appliedConfig && service.appliedConfig !== configName(options);
   const run = async (root: Node, options: ConversionOptions) => {
-    if (mismatch(options)) throw Error("轉換設定已變更，請重新載入頁面後再轉換。");
+    if (mismatch(options)) throw new Error("轉換設定已變更，請重新載入頁面後再轉換。");
     const url = getUrl(),
       expected = revision;
     return service.convert(root, options, () => !disposed && expected === revision && url === getUrl());
@@ -68,7 +68,7 @@ export function createPageController(
           if (!active || configName(active) !== configName(options)) break;
           const root = roots.values().next().value!;
           roots.delete(root);
-          await run(root, options);
+          await run(root, options); // NOSONAR S9382: serialize DOM roots and recheck settings after each conversion.
         }
       });
     queue = job;
@@ -111,6 +111,13 @@ export function createPageController(
     const title = doc.querySelector("title");
     if (title) enqueue(title);
   };
+  const convertPage = async (options: ConversionOptions, valid: () => boolean) => {
+    let count = 0;
+    const title = doc.querySelector("title");
+    if (title) count += await run(title, options);
+    if (doc.body && valid()) count += await run(doc.body, options);
+    return count;
+  };
   const manual = (
     selection: boolean,
     requestedSelection: CapturedSelection | null = selection ? captureSelection(doc.defaultView!.getSelection()) : null,
@@ -122,20 +129,14 @@ export function createPageController(
       .catch(() => {})
       .then(async () => {
         if (disposed || expected !== revision || url !== getUrl()) return { kind: "no-op", count: 0, time: 0 };
-        if (selection && (!requestedSelection || !requestedSelection.matches()))
-          return { kind: "no-op", count: 0, time: 0 };
+        if (selection && !requestedSelection?.matches()) return { kind: "no-op", count: 0, time: 0 };
         if (mismatch(options)) return { kind: "reload-required" };
         const started = performance.now();
         try {
-          let count = 0;
           const valid = () => !disposed && expected === revision && url === getUrl();
-          if (selection)
-            count = await service.selection(doc.defaultView!.getSelection(), options, valid, requestedSelection);
-          else {
-            const title = doc.querySelector("title");
-            if (title) count += await run(title, options);
-            if (doc.body && valid()) count += await run(doc.body, options);
-          }
+          const count = selection
+            ? await service.selection(doc.defaultView!.getSelection(), options, valid, requestedSelection)
+            : await convertPage(options, valid);
           return { kind: count ? "success" : "no-op", count, time: performance.now() - started };
         } catch (e) {
           if (disposed || expected !== revision || url !== getUrl()) return { kind: "no-op", count: 0, time: 0 };

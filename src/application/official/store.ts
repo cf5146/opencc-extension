@@ -6,7 +6,7 @@ export async function loadSettings(): Promise<OfficialSettings> {
 }
 export async function mutateSettings(action: string, values: Record<string, unknown> = {}): Promise<OfficialSettings> {
   const r = await browser.runtime.sendMessage({ type: "official-settings", action, ...values });
-  if (r?.error) throw Error(r.error);
+  if (r?.error) throw new Error(r.error);
   return normalizeOfficialSettings(r.settings);
 }
 export function subscribeSettings(listener: () => void) {

@@ -3,24 +3,24 @@
     "iteration": 0,
     "config": "s2twp",
     "init": {
-      "ms": 129.70000000298023,
+      "ms": 108.20000000298023,
       "memoryBytes": 67108864,
-      "manifestSha256": "ff32e3c19801b6fb561cda851960e08f035c89d37f1e11d672c63dc34c54e4a0"
+      "manifestSha256": "fc8b9cf1f1a1fa6de3fc14844b60e005c92dd13140dcee13066d9cc33a5f27eb"
     },
     "first": {
       "config": "s2twp",
       "output": "勇敢計程車兵漢字😀",
-      "ms": 117.6000000089407,
+      "ms": 249.20000000298023,
       "memoryBytes": 67108864
     },
     "warm": {
       "config": "s2twp",
       "timesMs": [
-        2.4000000059604645,
-        2.5999999940395355,
-        1.7000000029802322,
-        1.5999999940395355,
-        1.7999999970197678
+        4.5999999940395355,
+        5.100000008940697,
+        4.899999991059303,
+        3.800000011920929,
+        3.699999988079071
       ],
       "memoryBytes": 67108864
     },
@@ -30,78 +30,78 @@
     "iteration": 0,
     "config": "s2twp_jieba",
     "init": {
-      "ms": 144.09999999403954,
+      "ms": 138,
       "memoryBytes": 67108864,
-      "manifestSha256": "ff32e3c19801b6fb561cda851960e08f035c89d37f1e11d672c63dc34c54e4a0"
+      "manifestSha256": "fc8b9cf1f1a1fa6de3fc14844b60e005c92dd13140dcee13066d9cc33a5f27eb"
     },
     "first": {
       "config": "s2twp_jieba",
       "output": "勇敢的士兵漢字😀",
-      "ms": 1099.7000000029802,
+      "ms": 2758.0999999940395,
       "memoryBytes": 115998720
     },
     "warm": {
       "config": "s2twp_jieba",
       "timesMs": [
-        4.700000002980232,
-        3.199999988079071,
-        3.2000000029802322,
-        3,
-        3
-      ],
-      "memoryBytes": 115998720
-    },
-    "offline": true
-  },
-  {
-    "iteration": 1,
-    "config": "s2twp",
-    "init": {
-      "ms": 158.40000000596046,
-      "memoryBytes": 67108864,
-      "manifestSha256": "ff32e3c19801b6fb561cda851960e08f035c89d37f1e11d672c63dc34c54e4a0"
-    },
-    "first": {
-      "config": "s2twp",
-      "output": "勇敢計程車兵漢字😀",
-      "ms": 141.5,
-      "memoryBytes": 67108864
-    },
-    "warm": {
-      "config": "s2twp",
-      "timesMs": [
-        2.9000000059604645,
-        2.8999999910593033,
-        3.2000000029802322,
-        4.5,
-        5.100000008940697
-      ],
-      "memoryBytes": 67108864
-    },
-    "offline": true
-  },
-  {
-    "iteration": 1,
-    "config": "s2twp_jieba",
-    "init": {
-      "ms": 358.5,
-      "memoryBytes": 67108864,
-      "manifestSha256": "ff32e3c19801b6fb561cda851960e08f035c89d37f1e11d672c63dc34c54e4a0"
-    },
-    "first": {
-      "config": "s2twp_jieba",
-      "output": "勇敢的士兵漢字😀",
-      "ms": 2284.9000000059605,
-      "memoryBytes": 115998720
-    },
-    "warm": {
-      "config": "s2twp_jieba",
-      "timesMs": [
-        6.0999999940395355,
+        8.099999994039536,
+        5.200000002980232,
+        5.799999997019768,
         5.4000000059604645,
-        4.5999999940395355,
-        5.5,
-        4.300000011920929
+        4.799999997019768
+      ],
+      "memoryBytes": 115998720
+    },
+    "offline": true
+  },
+  {
+    "iteration": 1,
+    "config": "s2twp",
+    "init": {
+      "ms": 165.79999999701977,
+      "memoryBytes": 67108864,
+      "manifestSha256": "fc8b9cf1f1a1fa6de3fc14844b60e005c92dd13140dcee13066d9cc33a5f27eb"
+    },
+    "first": {
+      "config": "s2twp",
+      "output": "勇敢計程車兵漢字😀",
+      "ms": 271,
+      "memoryBytes": 67108864
+    },
+    "warm": {
+      "config": "s2twp",
+      "timesMs": [
+        4.600000008940697,
+        4.299999997019768,
+        3.8999999910593033,
+        4.5,
+        3.4000000059604645
+      ],
+      "memoryBytes": 67108864
+    },
+    "offline": true
+  },
+  {
+    "iteration": 1,
+    "config": "s2twp_jieba",
+    "init": {
+      "ms": 176.19999998807907,
+      "memoryBytes": 67108864,
+      "manifestSha256": "fc8b9cf1f1a1fa6de3fc14844b60e005c92dd13140dcee13066d9cc33a5f27eb"
+    },
+    "first": {
+      "config": "s2twp_jieba",
+      "output": "勇敢的士兵漢字😀",
+      "ms": 2215.3999999910593,
+      "memoryBytes": 115998720
+    },
+    "warm": {
+      "config": "s2twp_jieba",
+      "timesMs": [
+        7.5999999940395355,
+        5.4000000059604645,
+        7.0999999940395355,
+        6.200000002980232,
+        5.700000002980232
       ],
       "memoryBytes": 115998720
     },
@@ -111,24 +111,24 @@
     "iteration": 2,
     "config": "s2twp",
     "init": {
-      "ms": 169,
+      "ms": 183.59999999403954,
       "memoryBytes": 67108864,
-      "manifestSha256": "ff32e3c19801b6fb561cda851960e08f035c89d37f1e11d672c63dc34c54e4a0"
+      "manifestSha256": "fc8b9cf1f1a1fa6de3fc14844b60e005c92dd13140dcee13066d9cc33a5f27eb"
     },
     "first": {
       "config": "s2twp",
       "output": "勇敢計程車兵漢字😀",
-      "ms": 173.20000000298023,
+      "ms": 350.20000000298023,
       "memoryBytes": 67108864
     },
     "warm": {
       "config": "s2twp",
       "timesMs": [
-        3.8999999910593033,
-        2.7000000029802322,
-        2.2999999970197678,
-        2.6000000089406967,
-        2.5
+        10.100000008940697,
+        8.799999997019768,
+        8.400000005960464,
+        8.199999988079071,
+        7.9000000059604645
       ],
       "memoryBytes": 67108864
     },
@@ -138,24 +138,24 @@
     "iteration": 2,
     "config": "s2twp_jieba",
     "init": {
-      "ms": 168.80000001192093,
+      "ms": 201,
       "memoryBytes": 67108864,
-      "manifestSha256": "ff32e3c19801b6fb561cda851960e08f035c89d37f1e11d672c63dc34c54e4a0"
+      "manifestSha256": "fc8b9cf1f1a1fa6de3fc14844b60e005c92dd13140dcee13066d9cc33a5f27eb"
     },
     "first": {
       "config": "s2twp_jieba",
       "output": "勇敢的士兵漢字😀",
-      "ms": 2603.8999999910593,
+      "ms": 2933.5999999940395,
       "memoryBytes": 115998720
     },
     "warm": {
       "config": "s2twp_jieba",
       "timesMs": [
-        10.700000002980232,
-        9.700000002980232,
-        9.799999997019768,
-        9.700000002980232,
-        8
+        14.200000002980232,
+        11.099999994039536,
+        9.600000008940697,
+        7.0999999940395355,
+        6.700000002980232
       ],
       "memoryBytes": 115998720
     },

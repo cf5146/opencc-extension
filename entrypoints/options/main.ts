@@ -40,7 +40,6 @@ const render = async () => {
 };
 document.getElementById("retry")!.onclick = () => void render();
 const unsubscribe = subscribeSettings(() => void render());
-void render();
 addEventListener(
   "pagehide",
   () => {
@@ -49,3 +48,5 @@ addEventListener(
   },
   { once: true },
 );
+
+await render();

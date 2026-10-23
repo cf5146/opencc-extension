@@ -17,7 +17,7 @@ it("shows five presets, initializes Jieba and never replaces a newer preview wit
     m.type === "official-convert" ? new Promise((r) => (resolve = r)) : Promise.resolve({ settings: s }),
   );
   await startPopup();
-  expect(document.querySelectorAll("#preset option").length).toBe(5);
+  expect(document.querySelectorAll("#preset option")).toHaveLength(5);
   expect((document.getElementById("mode") as HTMLSelectElement).value).toBe("jieba");
   const input = document.getElementById("textbox") as HTMLTextAreaElement;
   input.value = "汉";

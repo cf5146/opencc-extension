@@ -19,7 +19,7 @@ export function createWorkerEngine(
     const job = queue
       .catch(() => {})
       .then(() => {
-        if (closed) throw Error("OpenCC engine closed");
+        if (closed) throw new Error("OpenCC engine closed");
         clearTimeout(idle);
         if (config !== next) {
           reset();
@@ -29,7 +29,7 @@ export function createWorkerEngine(
         return new Promise((resolve, reject) => {
           let settled = false;
           const key = ++id,
-            timer = setTimeout(() => fail(Error("轉換逾時；原文保留。")), 120000);
+            timer = setTimeout(() => fail(new Error("轉換逾時；原文保留。")), 120000);
           const fail = (e) => {
             if (settled) return;
             settled = true;
@@ -39,11 +39,11 @@ export function createWorkerEngine(
             reject(e);
           };
           waiting = fail;
-          worker.onerror = (e) => fail(Error(e.message || "Worker failed"));
+          worker.onerror = (e) => fail(new Error(e.message || "Worker failed"));
           worker.onmessage = ({ data }) => {
             if (settled || data.id !== key) return;
             if (data.error) {
-              fail(Error(data.error));
+              fail(new Error(data.error));
               return;
             }
             settled = true;
@@ -66,7 +66,7 @@ export function createWorkerEngine(
     convert,
     dispose() {
       closed = true;
-      waiting?.(Error("OpenCC engine closed"));
+      waiting?.(new Error("OpenCC engine closed"));
       reset();
     },
   };

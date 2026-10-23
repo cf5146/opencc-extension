@@ -27,7 +27,7 @@ function snapshotRange(range: Range): TextSnapshot[] {
     .filter((snapshot) => snapshot.end > snapshot.start);
 }
 export function captureSelection(sel: Selection | null): CapturedSelection | null {
-  if (!sel || !sel.rangeCount || sel.isCollapsed) return null;
+  if (!sel?.rangeCount || sel.isCollapsed) return null;
   const range = sel.getRangeAt(0).cloneRange();
   const start = range.startContainer,
     end = range.endContainer,
