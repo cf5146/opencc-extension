@@ -1,0 +1,995 @@
+{
+  "edgeVersion": "155.0.4283.62",
+  "samples": [
+    {
+      "variant": "legacy",
+      "initMs": 267.59999999403954,
+      "firstMs": 0.10000000894069672,
+      "firstOutput": "勇敢計程車兵漢字😀",
+      "firstWasmLinearBytes": null,
+      "wasmLinearBytes": null,
+      "rows": [
+        {
+          "size": 100,
+          "timesMs": [
+            0.09999999403953552,
+            0.10000000894069672,
+            0.09999999403953552,
+            0.10000000894069672,
+            0.09999999403953552
+          ],
+          "outputLength": 104,
+          "outputSha256": "e6d1c4ec61aada7d8386cf686aabe92f729a99aba1e18500f6363a0cfc63b848"
+        },
+        {
+          "size": 10000,
+          "timesMs": [
+            4.700000002980232,
+            4.9000000059604645,
+            4.5,
+            2.8999999910593033,
+            1
+          ],
+          "outputLength": 10400,
+          "outputSha256": "01d9127642f18118d80ad961428694cd87d1bf995bec347c6cc02d85b1ceeb19"
+        },
+        {
+          "size": 100000,
+          "timesMs": [
+            20.399999991059303,
+            9.600000008940697,
+            9.399999991059303,
+            8.400000005960464,
+            8.900000005960464
+          ],
+          "outputLength": 104000,
+          "outputSha256": "0a14bb49413ed074997f278e560bfa279bcb79040a348008152ee11d03d2211e"
+        },
+        {
+          "size": 1000000,
+          "timesMs": [
+            109.8999999910593,
+            126.90000000596046,
+            80.59999999403954,
+            123,
+            96.5
+          ],
+          "outputLength": 1040000,
+          "outputSha256": "e28f691cf7516e5d0a8820119881cb65cc28d35fa9195b476128197169d5afca"
+        }
+      ],
+      "trial": 0,
+      "coldRoundTripMs": 298,
+      "retainedHeap": {
+        "usedSize": 17029744,
+        "totalSize": 19324928,
+        "embedderHeapUsedSize": 25128,
+        "backingStorageSize": 2468174
+      }
+    },
+    {
+      "variant": "mmseg",
+      "initMs": 166.70000000298023,
+      "firstMs": 260.90000000596046,
+      "firstOutput": "勇敢計程車兵漢字😀",
+      "firstWasmLinearBytes": 67108864,
+      "wasmLinearBytes": 67108864,
+      "rows": [
+        {
+          "size": 100,
+          "timesMs": [
+            0.10000000894069672,
+            0,
+            0.09999999403953552,
+            0,
+            0
+          ],
+          "outputLength": 104,
+          "outputSha256": "e6d1c4ec61aada7d8386cf686aabe92f729a99aba1e18500f6363a0cfc63b848"
+        },
+        {
+          "size": 10000,
+          "timesMs": [
+            2.7999999970197678,
+            2.7999999970197678,
+            2.2999999970197678,
+            2.2000000029802322,
+            1.5999999940395355
+          ],
+          "outputLength": 10400,
+          "outputSha256": "01d9127642f18118d80ad961428694cd87d1bf995bec347c6cc02d85b1ceeb19"
+        },
+        {
+          "size": 100000,
+          "timesMs": [
+            16.299999997019768,
+            15.600000008940697,
+            17.69999998807907,
+            15.5,
+            14.800000011920929
+          ],
+          "outputLength": 104000,
+          "outputSha256": "0a14bb49413ed074997f278e560bfa279bcb79040a348008152ee11d03d2211e"
+        },
+        {
+          "size": 1000000,
+          "timesMs": [
+            272.80000001192093,
+            276.79999999701977,
+            336.09999999403954,
+            313.5,
+            336.09999999403954
+          ],
+          "outputLength": 1040000,
+          "outputSha256": "e28f691cf7516e5d0a8820119881cb65cc28d35fa9195b476128197169d5afca"
+        }
+      ],
+      "trial": 0,
+      "coldRoundTripMs": 447,
+      "retainedHeap": {
+        "usedSize": 860088,
+        "totalSize": 1310720,
+        "embedderHeapUsedSize": 39344,
+        "backingStorageSize": 15274363
+      }
+    },
+    {
+      "variant": "jieba",
+      "initMs": 212.19999998807907,
+      "firstMs": 2586.300000011921,
+      "firstOutput": "勇敢的士兵漢字😀",
+      "firstWasmLinearBytes": 115998720,
+      "wasmLinearBytes": 167051264,
+      "rows": [
+        {
+          "size": 100,
+          "timesMs": [
+            0.20000000298023224,
+            0,
+            0.09999999403953552,
+            0.10000000894069672,
+            0
+          ],
+          "outputLength": 100,
+          "outputSha256": "b1eb605e624ab23d8c2504d16eb4afd379ce0e41b7459f4b0cad3be82b590d23"
+        },
+        {
+          "size": 10000,
+          "timesMs": [
+            9.299999997019768,
+            6.299999997019768,
+            6.9000000059604645,
+            6.699999988079071,
+            5.800000011920929
+          ],
+          "outputLength": 10000,
+          "outputSha256": "cc626f8ab622fc08d3bc8bc6e7be71b76489fe648b321b37449da78977464497"
+        },
+        {
+          "size": 100000,
+          "timesMs": [
+            58.900000005960464,
+            73.20000000298023,
+            63.5,
+            55.5,
+            62.099999994039536
+          ],
+          "outputLength": 100000,
+          "outputSha256": "696885c71904a99d2a46ba5d0cd8f343d789d56ecf19de6d97a4959e160a8409"
+        },
+        {
+          "size": 1000000,
+          "timesMs": [
+            448.40000000596046,
+            422,
+            584.2999999970198,
+            689.7000000029802,
+            625.7000000029802
+          ],
+          "outputLength": 1000000,
+          "outputSha256": "6b5a10708d8d9632f740f44f0ee303d06c6a1c5c0e11e5fa4654a2b2d11dc4f9"
+        }
+      ],
+      "trial": 0,
+      "coldRoundTripMs": 2836.6000000089407,
+      "retainedHeap": {
+        "usedSize": 889060,
+        "totalSize": 1572864,
+        "embedderHeapUsedSize": 39040,
+        "backingStorageSize": 15274363
+      }
+    },
+    {
+      "variant": "jieba",
+      "initMs": 144.09999999403954,
+      "firstMs": 2112.7999999970198,
+      "firstOutput": "勇敢的士兵漢字😀",
+      "firstWasmLinearBytes": 115998720,
+      "wasmLinearBytes": 167051264,
+      "rows": [
+        {
+          "size": 100,
+          "timesMs": [
+            0.09999999403953552,
+            0,
+            0.09999999403953552,
+            0,
+            0.10000000894069672
+          ],
+          "outputLength": 100,
+          "outputSha256": "b1eb605e624ab23d8c2504d16eb4afd379ce0e41b7459f4b0cad3be82b590d23"
+        },
+        {
+          "size": 10000,
+          "timesMs": [
+            7.200000002980232,
+            6.700000002980232,
+            7.200000002980232,
+            7.5999999940395355,
+            7.100000008940697
+          ],
+          "outputLength": 10000,
+          "outputSha256": "cc626f8ab622fc08d3bc8bc6e7be71b76489fe648b321b37449da78977464497"
+        },
+        {
+          "size": 100000,
+          "timesMs": [
+            73.20000000298023,
+            62.5,
+            113.20000000298023,
+            97.90000000596046,
+            112.8999999910593
+          ],
+          "outputLength": 100000,
+          "outputSha256": "696885c71904a99d2a46ba5d0cd8f343d789d56ecf19de6d97a4959e160a8409"
+        },
+        {
+          "size": 1000000,
+          "timesMs": [
+            617.7000000029802,
+            544.1999999880791,
+            466,
+            611.6000000089407,
+            904
+          ],
+          "outputLength": 1000000,
+          "outputSha256": "6b5a10708d8d9632f740f44f0ee303d06c6a1c5c0e11e5fa4654a2b2d11dc4f9"
+        }
+      ],
+      "trial": 1,
+      "coldRoundTripMs": 2278.5999999940395,
+      "retainedHeap": {
+        "usedSize": 889100,
+        "totalSize": 1572864,
+        "embedderHeapUsedSize": 39064,
+        "backingStorageSize": 15274363
+      }
+    },
+    {
+      "variant": "mmseg",
+      "initMs": 188.79999999701977,
+      "firstMs": 304.3999999910593,
+      "firstOutput": "勇敢計程車兵漢字😀",
+      "firstWasmLinearBytes": 67108864,
+      "wasmLinearBytes": 67108864,
+      "rows": [
+        {
+          "size": 100,
+          "timesMs": [
+            0.09999999403953552,
+            0.09999999403953552,
+            0.10000000894069672,
+            0.09999999403953552,
+            0.10000000894069672
+          ],
+          "outputLength": 104,
+          "outputSha256": "e6d1c4ec61aada7d8386cf686aabe92f729a99aba1e18500f6363a0cfc63b848"
+        },
+        {
+          "size": 10000,
+          "timesMs": [
+            4.800000011920929,
+            4.0999999940395355,
+            3.5,
+            4.0999999940395355,
+            4
+          ],
+          "outputLength": 10400,
+          "outputSha256": "01d9127642f18118d80ad961428694cd87d1bf995bec347c6cc02d85b1ceeb19"
+        },
+        {
+          "size": 100000,
+          "timesMs": [
+            29.200000002980232,
+            27,
+            27.19999998807907,
+            24.600000008940697,
+            26.700000002980232
+          ],
+          "outputLength": 104000,
+          "outputSha256": "0a14bb49413ed074997f278e560bfa279bcb79040a348008152ee11d03d2211e"
+        },
+        {
+          "size": 1000000,
+          "timesMs": [
+            300.30000001192093,
+            281,
+            370.79999999701977,
+            376.70000000298023,
+            434.29999999701977
+          ],
+          "outputLength": 1040000,
+          "outputSha256": "e28f691cf7516e5d0a8820119881cb65cc28d35fa9195b476128197169d5afca"
+        }
+      ],
+      "trial": 1,
+      "coldRoundTripMs": 525.7000000029802,
+      "retainedHeap": {
+        "usedSize": 860180,
+        "totalSize": 1572864,
+        "embedderHeapUsedSize": 39064,
+        "backingStorageSize": 15274363
+      }
+    },
+    {
+      "variant": "legacy",
+      "initMs": 211,
+      "firstMs": 0.10000000894069672,
+      "firstOutput": "勇敢計程車兵漢字😀",
+      "firstWasmLinearBytes": null,
+      "wasmLinearBytes": null,
+      "rows": [
+        {
+          "size": 100,
+          "timesMs": [
+            0.09999999403953552,
+            0.10000000894069672,
+            0,
+            0.09999999403953552,
+            0.09999999403953552
+          ],
+          "outputLength": 104,
+          "outputSha256": "e6d1c4ec61aada7d8386cf686aabe92f729a99aba1e18500f6363a0cfc63b848"
+        },
+        {
+          "size": 10000,
+          "timesMs": [
+            2.4000000059604645,
+            2.5999999940395355,
+            2.6000000089406967,
+            2.2999999970197678,
+            3.5999999940395355
+          ],
+          "outputLength": 10400,
+          "outputSha256": "01d9127642f18118d80ad961428694cd87d1bf995bec347c6cc02d85b1ceeb19"
+        },
+        {
+          "size": 100000,
+          "timesMs": [
+            14.399999991059303,
+            7.9000000059604645,
+            5.299999997019768,
+            5.299999997019768,
+            6.100000008940697
+          ],
+          "outputLength": 104000,
+          "outputSha256": "0a14bb49413ed074997f278e560bfa279bcb79040a348008152ee11d03d2211e"
+        },
+        {
+          "size": 1000000,
+          "timesMs": [
+            81.80000001192093,
+            93.3999999910593,
+            92.20000000298023,
+            91.29999999701977,
+            101.6000000089407
+          ],
+          "outputLength": 1040000,
+          "outputSha256": "e28f691cf7516e5d0a8820119881cb65cc28d35fa9195b476128197169d5afca"
+        }
+      ],
+      "trial": 1,
+      "coldRoundTripMs": 233.09999999403954,
+      "retainedHeap": {
+        "usedSize": 17029744,
+        "totalSize": 19587072,
+        "embedderHeapUsedSize": 25128,
+        "backingStorageSize": 2468174
+      }
+    },
+    {
+      "variant": "legacy",
+      "initMs": 226.09999999403954,
+      "firstMs": 0.10000000894069672,
+      "firstOutput": "勇敢計程車兵漢字😀",
+      "firstWasmLinearBytes": null,
+      "wasmLinearBytes": null,
+      "rows": [
+        {
+          "size": 100,
+          "timesMs": [
+            0.20000000298023224,
+            0.09999999403953552,
+            0.10000000894069672,
+            0.09999999403953552,
+            0.09999999403953552
+          ],
+          "outputLength": 104,
+          "outputSha256": "e6d1c4ec61aada7d8386cf686aabe92f729a99aba1e18500f6363a0cfc63b848"
+        },
+        {
+          "size": 10000,
+          "timesMs": [
+            4.399999991059303,
+            5.4000000059604645,
+            4.4000000059604645,
+            1.199999988079071,
+            1.2000000029802322
+          ],
+          "outputLength": 10400,
+          "outputSha256": "01d9127642f18118d80ad961428694cd87d1bf995bec347c6cc02d85b1ceeb19"
+        },
+        {
+          "size": 100000,
+          "timesMs": [
+            19.30000001192093,
+            9.599999994039536,
+            9,
+            9.900000005960464,
+            10.099999994039536
+          ],
+          "outputLength": 104000,
+          "outputSha256": "0a14bb49413ed074997f278e560bfa279bcb79040a348008152ee11d03d2211e"
+        },
+        {
+          "size": 1000000,
+          "timesMs": [
+            121.20000000298023,
+            149.8999999910593,
+            113.6000000089407,
+            107.3999999910593,
+            95.90000000596046
+          ],
+          "outputLength": 1040000,
+          "outputSha256": "e28f691cf7516e5d0a8820119881cb65cc28d35fa9195b476128197169d5afca"
+        }
+      ],
+      "trial": 2,
+      "coldRoundTripMs": 248.09999999403954,
+      "retainedHeap": {
+        "usedSize": 17029744,
+        "totalSize": 19849216,
+        "embedderHeapUsedSize": 25128,
+        "backingStorageSize": 2468174
+      }
+    },
+    {
+      "variant": "mmseg",
+      "initMs": 196.30000001192093,
+      "firstMs": 348.19999998807907,
+      "firstOutput": "勇敢計程車兵漢字😀",
+      "firstWasmLinearBytes": 67108864,
+      "wasmLinearBytes": 67108864,
+      "rows": [
+        {
+          "size": 100,
+          "timesMs": [
+            0.10000000894069672,
+            0.09999999403953552,
+            0,
+            0.09999999403953552,
+            0.10000000894069672
+          ],
+          "outputLength": 104,
+          "outputSha256": "e6d1c4ec61aada7d8386cf686aabe92f729a99aba1e18500f6363a0cfc63b848"
+        },
+        {
+          "size": 10000,
+          "timesMs": [
+            4.5,
+            3.5999999940395355,
+            3.2999999970197678,
+            4.700000002980232,
+            4.4000000059604645
+          ],
+          "outputLength": 10400,
+          "outputSha256": "01d9127642f18118d80ad961428694cd87d1bf995bec347c6cc02d85b1ceeb19"
+        },
+        {
+          "size": 100000,
+          "timesMs": [
+            37.79999999701977,
+            36.70000000298023,
+            34.69999998807907,
+            34.5,
+            28.700000002980232
+          ],
+          "outputLength": 104000,
+          "outputSha256": "0a14bb49413ed074997f278e560bfa279bcb79040a348008152ee11d03d2211e"
+        },
+        {
+          "size": 1000000,
+          "timesMs": [
+            288.59999999403954,
+            301.20000000298023,
+            327.20000000298023,
+            409.59999999403954,
+            428.70000000298023
+          ],
+          "outputLength": 1040000,
+          "outputSha256": "e28f691cf7516e5d0a8820119881cb65cc28d35fa9195b476128197169d5afca"
+        }
+      ],
+      "trial": 2,
+      "coldRoundTripMs": 570.0999999940395,
+      "retainedHeap": {
+        "usedSize": 860252,
+        "totalSize": 1572864,
+        "embedderHeapUsedSize": 39064,
+        "backingStorageSize": 15274363
+      }
+    },
+    {
+      "variant": "jieba",
+      "initMs": 192.40000000596046,
+      "firstMs": 3006.7000000029802,
+      "firstOutput": "勇敢的士兵漢字😀",
+      "firstWasmLinearBytes": 115998720,
+      "wasmLinearBytes": 167051264,
+      "rows": [
+        {
+          "size": 100,
+          "timesMs": [
+            0.10000000894069672,
+            0.09999999403953552,
+            0.10000000894069672,
+            0,
+            0.09999999403953552
+          ],
+          "outputLength": 100,
+          "outputSha256": "b1eb605e624ab23d8c2504d16eb4afd379ce0e41b7459f4b0cad3be82b590d23"
+        },
+        {
+          "size": 10000,
+          "timesMs": [
+            7,
+            5.9000000059604645,
+            6.299999997019768,
+            6.799999997019768,
+            5.700000002980232
+          ],
+          "outputLength": 10000,
+          "outputSha256": "cc626f8ab622fc08d3bc8bc6e7be71b76489fe648b321b37449da78977464497"
+        },
+        {
+          "size": 100000,
+          "timesMs": [
+            63.79999999701977,
+            65.20000000298023,
+            50.69999998807907,
+            55.30000001192093,
+            49.3999999910593
+          ],
+          "outputLength": 100000,
+          "outputSha256": "696885c71904a99d2a46ba5d0cd8f343d789d56ecf19de6d97a4959e160a8409"
+        },
+        {
+          "size": 1000000,
+          "timesMs": [
+            670.7000000029802,
+            524.7999999970198,
+            502.79999999701977,
+            519.2000000029802,
+            550.2999999970198
+          ],
+          "outputLength": 1000000,
+          "outputSha256": "6b5a10708d8d9632f740f44f0ee303d06c6a1c5c0e11e5fa4654a2b2d11dc4f9"
+        }
+      ],
+      "trial": 2,
+      "coldRoundTripMs": 3225.9000000059605,
+      "retainedHeap": {
+        "usedSize": 889076,
+        "totalSize": 1572864,
+        "embedderHeapUsedSize": 39064,
+        "backingStorageSize": 15274363
+      }
+    },
+    {
+      "variant": "jieba",
+      "initMs": 181.29999999701977,
+      "firstMs": 2233.2000000029802,
+      "firstOutput": "勇敢的士兵漢字😀",
+      "firstWasmLinearBytes": 115998720,
+      "wasmLinearBytes": 167051264,
+      "rows": [
+        {
+          "size": 100,
+          "timesMs": [
+            0.29999999701976776,
+            0.20000000298023224,
+            0.29999999701976776,
+            0.20000000298023224,
+            0.19999998807907104
+          ],
+          "outputLength": 100,
+          "outputSha256": "b1eb605e624ab23d8c2504d16eb4afd379ce0e41b7459f4b0cad3be82b590d23"
+        },
+        {
+          "size": 10000,
+          "timesMs": [
+            13.699999988079071,
+            10.400000005960464,
+            10.099999994039536,
+            9.5,
+            9.100000008940697
+          ],
+          "outputLength": 10000,
+          "outputSha256": "cc626f8ab622fc08d3bc8bc6e7be71b76489fe648b321b37449da78977464497"
+        },
+        {
+          "size": 100000,
+          "timesMs": [
+            50.6000000089407,
+            51.29999999701977,
+            80.20000000298023,
+            66.20000000298023,
+            86.69999998807907
+          ],
+          "outputLength": 100000,
+          "outputSha256": "696885c71904a99d2a46ba5d0cd8f343d789d56ecf19de6d97a4959e160a8409"
+        },
+        {
+          "size": 1000000,
+          "timesMs": [
+            643,
+            570.0999999940395,
+            577.2999999970198,
+            928.1000000089407,
+            809.5999999940395
+          ],
+          "outputLength": 1000000,
+          "outputSha256": "6b5a10708d8d9632f740f44f0ee303d06c6a1c5c0e11e5fa4654a2b2d11dc4f9"
+        }
+      ],
+      "trial": 3,
+      "coldRoundTripMs": 2436.2999999970198,
+      "retainedHeap": {
+        "usedSize": 889100,
+        "totalSize": 1572864,
+        "embedderHeapUsedSize": 39064,
+        "backingStorageSize": 15274363
+      }
+    },
+    {
+      "variant": "mmseg",
+      "initMs": 189.5,
+      "firstMs": 280,
+      "firstOutput": "勇敢計程車兵漢字😀",
+      "firstWasmLinearBytes": 67108864,
+      "wasmLinearBytes": 67108864,
+      "rows": [
+        {
+          "size": 100,
+          "timesMs": [
+            0.09999999403953552,
+            0,
+            0.09999999403953552,
+            0.09999999403953552,
+            0.10000000894069672
+          ],
+          "outputLength": 104,
+          "outputSha256": "e6d1c4ec61aada7d8386cf686aabe92f729a99aba1e18500f6363a0cfc63b848"
+        },
+        {
+          "size": 10000,
+          "timesMs": [
+            3.4000000059604645,
+            4.200000002980232,
+            2.5999999940395355,
+            3.4000000059604645,
+            3.3999999910593033
+          ],
+          "outputLength": 10400,
+          "outputSha256": "01d9127642f18118d80ad961428694cd87d1bf995bec347c6cc02d85b1ceeb19"
+        },
+        {
+          "size": 100000,
+          "timesMs": [
+            28.5,
+            23.099999994039536,
+            30.799999997019768,
+            27.700000002980232,
+            26.400000005960464
+          ],
+          "outputLength": 104000,
+          "outputSha256": "0a14bb49413ed074997f278e560bfa279bcb79040a348008152ee11d03d2211e"
+        },
+        {
+          "size": 1000000,
+          "timesMs": [
+            269.80000001192093,
+            420.5,
+            442.29999999701977,
+            283.79999999701977,
+            249.90000000596046
+          ],
+          "outputLength": 1040000,
+          "outputSha256": "e28f691cf7516e5d0a8820119881cb65cc28d35fa9195b476128197169d5afca"
+        }
+      ],
+      "trial": 3,
+      "coldRoundTripMs": 500.79999999701977,
+      "retainedHeap": {
+        "usedSize": 860160,
+        "totalSize": 1572864,
+        "embedderHeapUsedSize": 39568,
+        "backingStorageSize": 15274363
+      }
+    },
+    {
+      "variant": "legacy",
+      "initMs": 162.09999999403954,
+      "firstMs": 0.10000000894069672,
+      "firstOutput": "勇敢計程車兵漢字😀",
+      "firstWasmLinearBytes": null,
+      "wasmLinearBytes": null,
+      "rows": [
+        {
+          "size": 100,
+          "timesMs": [
+            0.20000000298023224,
+            0,
+            0.09999999403953552,
+            0.10000000894069672,
+            0
+          ],
+          "outputLength": 104,
+          "outputSha256": "e6d1c4ec61aada7d8386cf686aabe92f729a99aba1e18500f6363a0cfc63b848"
+        },
+        {
+          "size": 10000,
+          "timesMs": [
+            2.9000000059604645,
+            3.5999999940395355,
+            2.1000000089406967,
+            1.5,
+            0.5
+          ],
+          "outputLength": 10400,
+          "outputSha256": "01d9127642f18118d80ad961428694cd87d1bf995bec347c6cc02d85b1ceeb19"
+        },
+        {
+          "size": 100000,
+          "timesMs": [
+            10,
+            7.5,
+            7.399999991059303,
+            7.5,
+            8.200000002980232
+          ],
+          "outputLength": 104000,
+          "outputSha256": "0a14bb49413ed074997f278e560bfa279bcb79040a348008152ee11d03d2211e"
+        },
+        {
+          "size": 1000000,
+          "timesMs": [
+            92.20000000298023,
+            82.90000000596046,
+            82.29999999701977,
+            84.20000000298023,
+            115.09999999403954
+          ],
+          "outputLength": 1040000,
+          "outputSha256": "e28f691cf7516e5d0a8820119881cb65cc28d35fa9195b476128197169d5afca"
+        }
+      ],
+      "trial": 3,
+      "coldRoundTripMs": 180,
+      "retainedHeap": {
+        "usedSize": 17029744,
+        "totalSize": 19587072,
+        "embedderHeapUsedSize": 25128,
+        "backingStorageSize": 2468174
+      }
+    },
+    {
+      "variant": "legacy",
+      "initMs": 323.69999998807907,
+      "firstMs": 0.20000000298023224,
+      "firstOutput": "勇敢計程車兵漢字😀",
+      "firstWasmLinearBytes": null,
+      "wasmLinearBytes": null,
+      "rows": [
+        {
+          "size": 100,
+          "timesMs": [
+            0.20000000298023224,
+            0.10000000894069672,
+            0.19999998807907104,
+            0.10000000894069672,
+            0.09999999403953552
+          ],
+          "outputLength": 104,
+          "outputSha256": "e6d1c4ec61aada7d8386cf686aabe92f729a99aba1e18500f6363a0cfc63b848"
+        },
+        {
+          "size": 10000,
+          "timesMs": [
+            6,
+            6.299999997019768,
+            5.9000000059604645,
+            4.5999999940395355,
+            1.5
+          ],
+          "outputLength": 10400,
+          "outputSha256": "01d9127642f18118d80ad961428694cd87d1bf995bec347c6cc02d85b1ceeb19"
+        },
+        {
+          "size": 100000,
+          "timesMs": [
+            26.400000005960464,
+            11.299999997019768,
+            12.700000002980232,
+            14.299999997019768,
+            13.900000005960464
+          ],
+          "outputLength": 104000,
+          "outputSha256": "0a14bb49413ed074997f278e560bfa279bcb79040a348008152ee11d03d2211e"
+        },
+        {
+          "size": 1000000,
+          "timesMs": [
+            102.40000000596046,
+            79.90000000596046,
+            77.59999999403954,
+            82.79999999701977,
+            79.6000000089407
+          ],
+          "outputLength": 1040000,
+          "outputSha256": "e28f691cf7516e5d0a8820119881cb65cc28d35fa9195b476128197169d5afca"
+        }
+      ],
+      "trial": 4,
+      "coldRoundTripMs": 352.59999999403954,
+      "retainedHeap": {
+        "usedSize": 17029744,
+        "totalSize": 19324928,
+        "embedderHeapUsedSize": 25128,
+        "backingStorageSize": 2468174
+      }
+    },
+    {
+      "variant": "mmseg",
+      "initMs": 114.29999999701977,
+      "firstMs": 255.1000000089407,
+      "firstOutput": "勇敢計程車兵漢字😀",
+      "firstWasmLinearBytes": 67108864,
+      "wasmLinearBytes": 67108864,
+      "rows": [
+        {
+          "size": 100,
+          "timesMs": [
+            0.09999999403953552,
+            0.10000000894069672,
+            0,
+            0.09999999403953552,
+            0
+          ],
+          "outputLength": 104,
+          "outputSha256": "e6d1c4ec61aada7d8386cf686aabe92f729a99aba1e18500f6363a0cfc63b848"
+        },
+        {
+          "size": 10000,
+          "timesMs": [
+            3.8999999910593033,
+            2.4000000059604645,
+            1.5999999940395355,
+            3.7000000029802322,
+            3.5999999940395355
+          ],
+          "outputLength": 10400,
+          "outputSha256": "01d9127642f18118d80ad961428694cd87d1bf995bec347c6cc02d85b1ceeb19"
+        },
+        {
+          "size": 100000,
+          "timesMs": [
+            32.70000000298023,
+            29.400000005960464,
+            26,
+            25.299999997019768,
+            27.100000008940697
+          ],
+          "outputLength": 104000,
+          "outputSha256": "0a14bb49413ed074997f278e560bfa279bcb79040a348008152ee11d03d2211e"
+        },
+        {
+          "size": 1000000,
+          "timesMs": [
+            482.20000000298023,
+            294.79999999701977,
+            275.70000000298023,
+            280.79999999701977,
+            322.30000001192093
+          ],
+          "outputLength": 1040000,
+          "outputSha256": "e28f691cf7516e5d0a8820119881cb65cc28d35fa9195b476128197169d5afca"
+        }
+      ],
+      "trial": 4,
+      "coldRoundTripMs": 384.79999999701977,
+      "retainedHeap": {
+        "usedSize": 860252,
+        "totalSize": 1572864,
+        "embedderHeapUsedSize": 39064,
+        "backingStorageSize": 15274363
+      }
+    },
+    {
+      "variant": "jieba",
+      "initMs": 225.70000000298023,
+      "firstMs": 2552.5999999940395,
+      "firstOutput": "勇敢的士兵漢字😀",
+      "firstWasmLinearBytes": 115998720,
+      "wasmLinearBytes": 167051264,
+      "rows": [
+        {
+          "size": 100,
+          "timesMs": [
+            0.09999999403953552,
+            0.20000000298023224,
+            0.09999999403953552,
+            0,
+            0.20000000298023224
+          ],
+          "outputLength": 100,
+          "outputSha256": "b1eb605e624ab23d8c2504d16eb4afd379ce0e41b7459f4b0cad3be82b590d23"
+        },
+        {
+          "size": 10000,
+          "timesMs": [
+            8,
+            7.700000002980232,
+            8.100000008940697,
+            10,
+            11.099999994039536
+          ],
+          "outputLength": 10000,
+          "outputSha256": "cc626f8ab622fc08d3bc8bc6e7be71b76489fe648b321b37449da78977464497"
+        },
+        {
+          "size": 100000,
+          "timesMs": [
+            102.29999999701977,
+            104.70000000298023,
+            100.29999999701977,
+            110.5,
+            105
+          ],
+          "outputLength": 100000,
+          "outputSha256": "696885c71904a99d2a46ba5d0cd8f343d789d56ecf19de6d97a4959e160a8409"
+        },
+        {
+          "size": 1000000,
+          "timesMs": [
+            520.6000000089407,
+            631.5,
+            681.0999999940395,
+            644.1000000089407,
+            606.7000000029802
+          ],
+          "outputLength": 1000000,
+          "outputSha256": "6b5a10708d8d9632f740f44f0ee303d06c6a1c5c0e11e5fa4654a2b2d11dc4f9"
+        }
+      ],
+      "trial": 4,
+      "coldRoundTripMs": 2811.5,
+      "retainedHeap": {
+        "usedSize": 889332,
+        "totalSize": 1572864,
+        "embedderHeapUsedSize": 40064,
+        "backingStorageSize": 15274019
+      }
+    }
+  ]
+}

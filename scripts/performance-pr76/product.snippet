@@ -1,0 +1,83 @@
+async (page) => {
+  const variant = VARIANT, trial = TRIAL;
+  const extensions = await page.evaluate(() => new Promise(resolve => chrome.developerPrivate.getExtensionsInfo({ includeDisabled: true }, resolve)));
+  const ext = extensions.find(x => x.name === "OpenCC" && x.state === "ENABLED");
+  if (!ext) throw new Error("Product extension not loaded");
+  const origin = `chrome-extension://${ext.id}`;
+  const opened = Date.now();
+  await page.goto(origin + "/popup.html");
+  await page.locator("#textbox:enabled").waitFor();
+  const popupReadyMs = Date.now() - opened;
+  await page.evaluate(async variant => {
+    if (variant === "legacy") await chrome.storage.local.set({ origin: "cn", target: "twp", auto: false, siteRules: {}, whitelist: [] });
+    else await chrome.runtime.sendMessage({ type: "official-settings", action: "defaults", options: { preset: "s2twp", mode: variant } });
+  }, variant);
+  await page.waitForFunction(variant => variant === "legacy" ? document.querySelector("#target").value === "twp" : document.querySelector("#mode").value === variant, variant);
+  const context = page.context(), url = "https://opencc-perf.test/";
+  await context.route(url + "**", route => route.fulfill({ contentType: "text/html", body: '<!doctype html><html lang="zh"><head><meta charset="utf-8"><title>Benchmark</title></head><body></body></html>' }));
+  const target = await context.newPage();
+  await target.goto(url);
+  const tabId = await page.evaluate(async () => (await chrome.tabs.query({ url: "https://opencc-perf.test/*" }))[0].id);
+  await target.waitForTimeout(200); // Allow document_idle registration; do not warm the engine.
+  const cases = [];
+  for (const [name, count] of [["cold-1000-nodes", 1000], ["warm-20000-new-nodes", 20000], ["unchanged-noop", 0]]) {
+    await target.evaluate(count => {
+      if (count) {
+        const fragment = document.createDocumentFragment();
+        for (let i = 0; i < count; i++) {
+          const p = document.createElement("p");
+          p.textContent = "勇敢的士兵在软件开发中心使用鼠标。" + i;
+          fragment.append(p);
+        }
+        document.body.append(fragment);
+      }
+    }, count);
+    await target.waitForTimeout(100);
+    await target.evaluate(() => {
+      window.perfTasks = [];
+      window.perfObserver = new PerformanceObserver(list => window.perfTasks.push(...list.getEntries().map(x => x.duration)));
+      window.perfObserver.observe({ type: "longtask", buffered: false });
+      window.perfGaps = [];
+      let last = performance.now();
+      window.perfTimer = setInterval(() => { const now = performance.now(); window.perfGaps.push(Math.max(0, now - last - 4)); last = now; }, 4);
+    });
+    const measured = await page.evaluate(async id => {
+      const start = performance.now();
+      const response = await chrome.tabs.sendMessage(id, { type: "convert-page" });
+      return { response, roundTripMs: performance.now() - start };
+    }, tabId);
+    if (!["success", "no-op"].includes(measured.response?.kind)) throw new Error(JSON.stringify(measured));
+    await target.waitForTimeout(80);
+    const observation = await target.evaluate(() => {
+      clearInterval(window.perfTimer); window.perfObserver.disconnect();
+      const texts = [...document.querySelectorAll("p")].map(x => x.textContent);
+      return { longTaskCount: window.perfTasks.length, maxLongTaskMs: Math.max(0, ...window.perfTasks), totalLongTaskMs: window.perfTasks.reduce((a,b) => a+b, 0), maxTimerDriftMs: Math.max(0, ...window.perfGaps), nodes: texts.length, converted: texts.every(x => !x.includes("软件") && !x.includes("鼠标")), firstOutput: texts[0] };
+    });
+    if (!observation.converted) throw new Error("Incomplete page conversion: " + JSON.stringify(observation));
+    cases.push({ name, count, ...measured, ...observation });
+  }
+  await target.close();
+  await page.bringToFront();
+  const previews = [];
+  for (const size of [100, 10000, 100000, 1000000]) {
+    const preview = await page.evaluate(async size => {
+      const pattern = "勇敢的士兵在软件开发中心使用鼠标。 OpenCC ";
+      const input = pattern.repeat(Math.ceil(size / pattern.length)).slice(0, size);
+      const text = document.querySelector("#textbox"), result = document.querySelector("#result");
+      result.value = ""; text.value = input;
+      const start = performance.now();
+      text.dispatchEvent(new Event("input", { bubbles: true }));
+      return await new Promise((resolve, reject) => {
+        const timer = setInterval(() => {
+          if (result.value) {
+            clearInterval(timer); clearTimeout(timeout);
+            resolve({ size, inputToResultMs: performance.now() - start, outputLength: result.value.length, outputPrefix: result.value.slice(0, 50) });
+          }
+        }, 4);
+        const timeout = setTimeout(() => { clearInterval(timer); reject(new Error("Preview timeout")); }, 120000);
+      });
+    }, size);
+    previews.push(preview);
+  }
+  return { variant, trial, edgeVersion: context.browser().version(), popupReadyMs, cases, previews };
+}
