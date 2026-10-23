@@ -18,7 +18,7 @@ async function createArtifactFixture(version = "1.0.0") {
   const manifest = {
     manifest_version: 3,
     version,
-    permissions: ["storage", "contextMenus", "scripting", "activeTab"],
+    permissions: ["storage", "contextMenus", "scripting", "activeTab", "offscreen"],
     host_permissions: ["http://*/*", "https://*/*"],
     icons: { 128: "icon.png" },
     action: { default_popup: "popup.html", default_icon: { 128: "icon.png" } },

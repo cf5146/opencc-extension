@@ -1,0 +1,288 @@
+{
+  "source": "public/opencc/engine",
+  "nativeVersion": "1.4.2",
+  "policy": "includeTofuRiskDictionaries=true",
+  "matched": 779,
+  "long": [
+    {
+      "config": "s2t",
+      "chars": 100000,
+      "pattern": "repeated-Han",
+      "sha256": "43889ef0ed4217f6fd67d6c0bff5dc3b890efc25101930c5f9b4a70c9b09134e",
+      "outputBytes": 300000
+    },
+    {
+      "config": "s2t",
+      "chars": 100000,
+      "pattern": "mixed",
+      "sha256": "5dbf87541128421a13207e49e822de112441237d0ab9c8053d5bdfc222592d83",
+      "outputBytes": 242860
+    },
+    {
+      "config": "s2t",
+      "chars": 1000000,
+      "pattern": "repeated-Han",
+      "sha256": "71af84501c120cd5d142df91baaf82ace7dab2ad3b3c57b9d298d40e34be9980",
+      "outputBytes": 3000000
+    },
+    {
+      "config": "s2t",
+      "chars": 1000000,
+      "pattern": "mixed",
+      "sha256": "462a4bbf69c6acb46fcf7d5ba344cd4346fa2724bdd7d343ff161a4dc8fec75e",
+      "outputBytes": 2428580
+    },
+    {
+      "config": "s2t_jieba",
+      "chars": 100000,
+      "pattern": "repeated-Han",
+      "sha256": "43889ef0ed4217f6fd67d6c0bff5dc3b890efc25101930c5f9b4a70c9b09134e",
+      "outputBytes": 300000
+    },
+    {
+      "config": "s2t_jieba",
+      "chars": 100000,
+      "pattern": "mixed",
+      "sha256": "5dbf87541128421a13207e49e822de112441237d0ab9c8053d5bdfc222592d83",
+      "outputBytes": 242860
+    },
+    {
+      "config": "s2t_jieba",
+      "chars": 1000000,
+      "pattern": "repeated-Han",
+      "sha256": "71af84501c120cd5d142df91baaf82ace7dab2ad3b3c57b9d298d40e34be9980",
+      "outputBytes": 3000000
+    },
+    {
+      "config": "s2t_jieba",
+      "chars": 1000000,
+      "pattern": "mixed",
+      "sha256": "462a4bbf69c6acb46fcf7d5ba344cd4346fa2724bdd7d343ff161a4dc8fec75e",
+      "outputBytes": 2428580
+    },
+    {
+      "config": "s2tw",
+      "chars": 100000,
+      "pattern": "repeated-Han",
+      "sha256": "43889ef0ed4217f6fd67d6c0bff5dc3b890efc25101930c5f9b4a70c9b09134e",
+      "outputBytes": 300000
+    },
+    {
+      "config": "s2tw",
+      "chars": 100000,
+      "pattern": "mixed",
+      "sha256": "5dbf87541128421a13207e49e822de112441237d0ab9c8053d5bdfc222592d83",
+      "outputBytes": 242860
+    },
+    {
+      "config": "s2tw",
+      "chars": 1000000,
+      "pattern": "repeated-Han",
+      "sha256": "71af84501c120cd5d142df91baaf82ace7dab2ad3b3c57b9d298d40e34be9980",
+      "outputBytes": 3000000
+    },
+    {
+      "config": "s2tw",
+      "chars": 1000000,
+      "pattern": "mixed",
+      "sha256": "462a4bbf69c6acb46fcf7d5ba344cd4346fa2724bdd7d343ff161a4dc8fec75e",
+      "outputBytes": 2428580
+    },
+    {
+      "config": "s2tw_jieba",
+      "chars": 100000,
+      "pattern": "repeated-Han",
+      "sha256": "43889ef0ed4217f6fd67d6c0bff5dc3b890efc25101930c5f9b4a70c9b09134e",
+      "outputBytes": 300000
+    },
+    {
+      "config": "s2tw_jieba",
+      "chars": 100000,
+      "pattern": "mixed",
+      "sha256": "5dbf87541128421a13207e49e822de112441237d0ab9c8053d5bdfc222592d83",
+      "outputBytes": 242860
+    },
+    {
+      "config": "s2tw_jieba",
+      "chars": 1000000,
+      "pattern": "repeated-Han",
+      "sha256": "71af84501c120cd5d142df91baaf82ace7dab2ad3b3c57b9d298d40e34be9980",
+      "outputBytes": 3000000
+    },
+    {
+      "config": "s2tw_jieba",
+      "chars": 1000000,
+      "pattern": "mixed",
+      "sha256": "462a4bbf69c6acb46fcf7d5ba344cd4346fa2724bdd7d343ff161a4dc8fec75e",
+      "outputBytes": 2428580
+    },
+    {
+      "config": "s2twp",
+      "chars": 100000,
+      "pattern": "repeated-Han",
+      "sha256": "43889ef0ed4217f6fd67d6c0bff5dc3b890efc25101930c5f9b4a70c9b09134e",
+      "outputBytes": 300000
+    },
+    {
+      "config": "s2twp",
+      "chars": 100000,
+      "pattern": "mixed",
+      "sha256": "895c2d852b01dd742ee486ff7c330c4ea5479702db160f4abbd5aa69aeef5540",
+      "outputBytes": 251434
+    },
+    {
+      "config": "s2twp",
+      "chars": 1000000,
+      "pattern": "repeated-Han",
+      "sha256": "71af84501c120cd5d142df91baaf82ace7dab2ad3b3c57b9d298d40e34be9980",
+      "outputBytes": 3000000
+    },
+    {
+      "config": "s2twp",
+      "chars": 1000000,
+      "pattern": "mixed",
+      "sha256": "f06626e1515d121f1a9519b8e6e70ca359cb7b2e34d811ec42ecb65164adefb5",
+      "outputBytes": 2514296
+    },
+    {
+      "config": "s2twp_jieba",
+      "chars": 100000,
+      "pattern": "repeated-Han",
+      "sha256": "43889ef0ed4217f6fd67d6c0bff5dc3b890efc25101930c5f9b4a70c9b09134e",
+      "outputBytes": 300000
+    },
+    {
+      "config": "s2twp_jieba",
+      "chars": 100000,
+      "pattern": "mixed",
+      "sha256": "d856a2bb867cf341f613dc7d813983e9f47d252b20ae25ea12dfb10056e3fce7",
+      "outputBytes": 242860
+    },
+    {
+      "config": "s2twp_jieba",
+      "chars": 1000000,
+      "pattern": "repeated-Han",
+      "sha256": "71af84501c120cd5d142df91baaf82ace7dab2ad3b3c57b9d298d40e34be9980",
+      "outputBytes": 3000000
+    },
+    {
+      "config": "s2twp_jieba",
+      "chars": 1000000,
+      "pattern": "mixed",
+      "sha256": "534321b43301ebb4f5128983351591b86279f4f5d40ed6d2e1069be389829151",
+      "outputBytes": 2428580
+    },
+    {
+      "config": "s2hk",
+      "chars": 100000,
+      "pattern": "repeated-Han",
+      "sha256": "43889ef0ed4217f6fd67d6c0bff5dc3b890efc25101930c5f9b4a70c9b09134e",
+      "outputBytes": 300000
+    },
+    {
+      "config": "s2hk",
+      "chars": 100000,
+      "pattern": "mixed",
+      "sha256": "5dbf87541128421a13207e49e822de112441237d0ab9c8053d5bdfc222592d83",
+      "outputBytes": 242860
+    },
+    {
+      "config": "s2hk",
+      "chars": 1000000,
+      "pattern": "repeated-Han",
+      "sha256": "71af84501c120cd5d142df91baaf82ace7dab2ad3b3c57b9d298d40e34be9980",
+      "outputBytes": 3000000
+    },
+    {
+      "config": "s2hk",
+      "chars": 1000000,
+      "pattern": "mixed",
+      "sha256": "462a4bbf69c6acb46fcf7d5ba344cd4346fa2724bdd7d343ff161a4dc8fec75e",
+      "outputBytes": 2428580
+    },
+    {
+      "config": "s2hk_jieba",
+      "chars": 100000,
+      "pattern": "repeated-Han",
+      "sha256": "43889ef0ed4217f6fd67d6c0bff5dc3b890efc25101930c5f9b4a70c9b09134e",
+      "outputBytes": 300000
+    },
+    {
+      "config": "s2hk_jieba",
+      "chars": 100000,
+      "pattern": "mixed",
+      "sha256": "5dbf87541128421a13207e49e822de112441237d0ab9c8053d5bdfc222592d83",
+      "outputBytes": 242860
+    },
+    {
+      "config": "s2hk_jieba",
+      "chars": 1000000,
+      "pattern": "repeated-Han",
+      "sha256": "71af84501c120cd5d142df91baaf82ace7dab2ad3b3c57b9d298d40e34be9980",
+      "outputBytes": 3000000
+    },
+    {
+      "config": "s2hk_jieba",
+      "chars": 1000000,
+      "pattern": "mixed",
+      "sha256": "462a4bbf69c6acb46fcf7d5ba344cd4346fa2724bdd7d343ff161a4dc8fec75e",
+      "outputBytes": 2428580
+    },
+    {
+      "config": "tw2sp",
+      "chars": 100000,
+      "pattern": "repeated-Han",
+      "sha256": "79d5711958a5bd943c396985afaf61563b362538b35eb3106f6b74ceee4c5320",
+      "outputBytes": 300000
+    },
+    {
+      "config": "tw2sp",
+      "chars": 100000,
+      "pattern": "mixed",
+      "sha256": "45039603e3f0dcea3cb45aafc221a90eea4c952e2b18b9f7892589abfcc88f6a",
+      "outputBytes": 242860
+    },
+    {
+      "config": "tw2sp",
+      "chars": 1000000,
+      "pattern": "repeated-Han",
+      "sha256": "0ba67970de9941c1bc33e97869b116a0e129c8a859e3b4c0087e20c51f6a404b",
+      "outputBytes": 3000000
+    },
+    {
+      "config": "tw2sp",
+      "chars": 1000000,
+      "pattern": "mixed",
+      "sha256": "04853f1e18a5c697a80cadf0d93c8b0e96a38e594a0a1d1bd330d8350f495fa5",
+      "outputBytes": 2428580
+    },
+    {
+      "config": "tw2sp_jieba",
+      "chars": 100000,
+      "pattern": "repeated-Han",
+      "sha256": "79d5711958a5bd943c396985afaf61563b362538b35eb3106f6b74ceee4c5320",
+      "outputBytes": 300000
+    },
+    {
+      "config": "tw2sp_jieba",
+      "chars": 100000,
+      "pattern": "mixed",
+      "sha256": "45039603e3f0dcea3cb45aafc221a90eea4c952e2b18b9f7892589abfcc88f6a",
+      "outputBytes": 242860
+    },
+    {
+      "config": "tw2sp_jieba",
+      "chars": 1000000,
+      "pattern": "repeated-Han",
+      "sha256": "0ba67970de9941c1bc33e97869b116a0e129c8a859e3b4c0087e20c51f6a404b",
+      "outputBytes": 3000000
+    },
+    {
+      "config": "tw2sp_jieba",
+      "chars": 1000000,
+      "pattern": "mixed",
+      "sha256": "04853f1e18a5c697a80cadf0d93c8b0e96a38e594a0a1d1bd330d8350f495fa5",
+      "outputBytes": 2428580
+    }
+  ]
+}

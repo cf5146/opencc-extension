@@ -32,10 +32,10 @@ it("keeps settings inside the Traditional Chinese popup", () => {
   const popup = new DOMParser().parseFromString(markup, "text/html");
   expect(popup.documentElement.lang).toBe("zh-Hant");
   expect(popup.querySelector('a[href="/options.html"]')).toBeNull();
-  expect(popup.querySelector("#whitelist")).not.toBeNull();
-  expect(popup.querySelector("#site-rules")).not.toBeNull();
-  expect(popup.querySelector("#show-settings")?.textContent).toBe("設定");
-  expect(popup.querySelector("#save-settings")?.textContent).toContain("儲存");
+  expect(popup.querySelector("#preset")).not.toBeNull();
+  expect(popup.querySelector("#site-auto")).not.toBeNull();
+  expect(popup.querySelector("#show-settings")?.textContent).toBe("網站設定");
+  expect(popup.querySelector("#mode")).not.toBeNull();
 });
 it("gates initialization, retries load failure, and ignores completion after disposal", async () => {
   const store = createFakeSettingsStore();

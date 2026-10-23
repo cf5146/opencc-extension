@@ -1,0 +1,441 @@
+{
+  "edgeVersion": "155.0.4283.62",
+  "init": {
+    "ms": 129,
+    "memoryBytes": 67108864,
+    "manifestSha256": "ff32e3c19801b6fb561cda851960e08f035c89d37f1e11d672c63dc34c54e4a0"
+  },
+  "corpus": {
+    "tested": 779,
+    "matched": 779,
+    "mismatches": [],
+    "ms": 4677.600000008941,
+    "memoryBytes": 415891456
+  },
+  "long": [
+    {
+      "config": "s2t",
+      "chars": 100000,
+      "pattern": "repeated-Han",
+      "inputUtf8Bytes": 300000,
+      "outputUtf8Bytes": 300000,
+      "sha256": "43889ef0ed4217f6fd67d6c0bff5dc3b890efc25101930c5f9b4a70c9b09134e",
+      "ms": 5.0999999940395355,
+      "memoryBytes": 415891456
+    },
+    {
+      "config": "s2t",
+      "chars": 100000,
+      "pattern": "mixed",
+      "inputUtf8Bytes": 242860,
+      "outputUtf8Bytes": 242860,
+      "sha256": "5dbf87541128421a13207e49e822de112441237d0ab9c8053d5bdfc222592d83",
+      "ms": 3.5,
+      "memoryBytes": 415891456
+    },
+    {
+      "config": "s2t",
+      "chars": 1000000,
+      "pattern": "repeated-Han",
+      "inputUtf8Bytes": 3000000,
+      "outputUtf8Bytes": 3000000,
+      "sha256": "71af84501c120cd5d142df91baaf82ace7dab2ad3b3c57b9d298d40e34be9980",
+      "ms": 42.70000000298023,
+      "memoryBytes": 415891456
+    },
+    {
+      "config": "s2t",
+      "chars": 1000000,
+      "pattern": "mixed",
+      "inputUtf8Bytes": 2428580,
+      "outputUtf8Bytes": 2428580,
+      "sha256": "462a4bbf69c6acb46fcf7d5ba344cd4346fa2724bdd7d343ff161a4dc8fec75e",
+      "ms": 35.400000005960464,
+      "memoryBytes": 415891456
+    },
+    {
+      "config": "s2t_jieba",
+      "chars": 100000,
+      "pattern": "repeated-Han",
+      "inputUtf8Bytes": 300000,
+      "outputUtf8Bytes": 300000,
+      "sha256": "43889ef0ed4217f6fd67d6c0bff5dc3b890efc25101930c5f9b4a70c9b09134e",
+      "ms": 11.799999997019768,
+      "memoryBytes": 415891456
+    },
+    {
+      "config": "s2t_jieba",
+      "chars": 100000,
+      "pattern": "mixed",
+      "inputUtf8Bytes": 242860,
+      "outputUtf8Bytes": 242860,
+      "sha256": "5dbf87541128421a13207e49e822de112441237d0ab9c8053d5bdfc222592d83",
+      "ms": 19.600000008940697,
+      "memoryBytes": 415891456
+    },
+    {
+      "config": "s2t_jieba",
+      "chars": 1000000,
+      "pattern": "repeated-Han",
+      "inputUtf8Bytes": 3000000,
+      "outputUtf8Bytes": 3000000,
+      "sha256": "71af84501c120cd5d142df91baaf82ace7dab2ad3b3c57b9d298d40e34be9980",
+      "ms": 120.40000000596046,
+      "memoryBytes": 499122176
+    },
+    {
+      "config": "s2t_jieba",
+      "chars": 1000000,
+      "pattern": "mixed",
+      "inputUtf8Bytes": 2428580,
+      "outputUtf8Bytes": 2428580,
+      "sha256": "462a4bbf69c6acb46fcf7d5ba344cd4346fa2724bdd7d343ff161a4dc8fec75e",
+      "ms": 187.3999999910593,
+      "memoryBytes": 499122176
+    },
+    {
+      "config": "s2tw",
+      "chars": 100000,
+      "pattern": "repeated-Han",
+      "inputUtf8Bytes": 300000,
+      "outputUtf8Bytes": 300000,
+      "sha256": "43889ef0ed4217f6fd67d6c0bff5dc3b890efc25101930c5f9b4a70c9b09134e",
+      "ms": 13.100000008940697,
+      "memoryBytes": 499122176
+    },
+    {
+      "config": "s2tw",
+      "chars": 100000,
+      "pattern": "mixed",
+      "inputUtf8Bytes": 242860,
+      "outputUtf8Bytes": 242860,
+      "sha256": "5dbf87541128421a13207e49e822de112441237d0ab9c8053d5bdfc222592d83",
+      "ms": 9.599999994039536,
+      "memoryBytes": 499122176
+    },
+    {
+      "config": "s2tw",
+      "chars": 1000000,
+      "pattern": "repeated-Han",
+      "inputUtf8Bytes": 3000000,
+      "outputUtf8Bytes": 3000000,
+      "sha256": "71af84501c120cd5d142df91baaf82ace7dab2ad3b3c57b9d298d40e34be9980",
+      "ms": 120.5,
+      "memoryBytes": 499122176
+    },
+    {
+      "config": "s2tw",
+      "chars": 1000000,
+      "pattern": "mixed",
+      "inputUtf8Bytes": 2428580,
+      "outputUtf8Bytes": 2428580,
+      "sha256": "462a4bbf69c6acb46fcf7d5ba344cd4346fa2724bdd7d343ff161a4dc8fec75e",
+      "ms": 97.90000000596046,
+      "memoryBytes": 499122176
+    },
+    {
+      "config": "s2tw_jieba",
+      "chars": 100000,
+      "pattern": "repeated-Han",
+      "inputUtf8Bytes": 300000,
+      "outputUtf8Bytes": 300000,
+      "sha256": "43889ef0ed4217f6fd67d6c0bff5dc3b890efc25101930c5f9b4a70c9b09134e",
+      "ms": 10.899999991059303,
+      "memoryBytes": 499122176
+    },
+    {
+      "config": "s2tw_jieba",
+      "chars": 100000,
+      "pattern": "mixed",
+      "inputUtf8Bytes": 242860,
+      "outputUtf8Bytes": 242860,
+      "sha256": "5dbf87541128421a13207e49e822de112441237d0ab9c8053d5bdfc222592d83",
+      "ms": 21.900000005960464,
+      "memoryBytes": 499122176
+    },
+    {
+      "config": "s2tw_jieba",
+      "chars": 1000000,
+      "pattern": "repeated-Han",
+      "inputUtf8Bytes": 3000000,
+      "outputUtf8Bytes": 3000000,
+      "sha256": "71af84501c120cd5d142df91baaf82ace7dab2ad3b3c57b9d298d40e34be9980",
+      "ms": 115.80000001192093,
+      "memoryBytes": 598999040
+    },
+    {
+      "config": "s2tw_jieba",
+      "chars": 1000000,
+      "pattern": "mixed",
+      "inputUtf8Bytes": 2428580,
+      "outputUtf8Bytes": 2428580,
+      "sha256": "462a4bbf69c6acb46fcf7d5ba344cd4346fa2724bdd7d343ff161a4dc8fec75e",
+      "ms": 227.1000000089407,
+      "memoryBytes": 598999040
+    },
+    {
+      "config": "s2twp",
+      "chars": 100000,
+      "pattern": "repeated-Han",
+      "inputUtf8Bytes": 300000,
+      "outputUtf8Bytes": 300000,
+      "sha256": "43889ef0ed4217f6fd67d6c0bff5dc3b890efc25101930c5f9b4a70c9b09134e",
+      "ms": 15.199999988079071,
+      "memoryBytes": 598999040
+    },
+    {
+      "config": "s2twp",
+      "chars": 100000,
+      "pattern": "mixed",
+      "inputUtf8Bytes": 242860,
+      "outputUtf8Bytes": 251434,
+      "sha256": "895c2d852b01dd742ee486ff7c330c4ea5479702db160f4abbd5aa69aeef5540",
+      "ms": 10.799999997019768,
+      "memoryBytes": 598999040
+    },
+    {
+      "config": "s2twp",
+      "chars": 1000000,
+      "pattern": "repeated-Han",
+      "inputUtf8Bytes": 3000000,
+      "outputUtf8Bytes": 3000000,
+      "sha256": "71af84501c120cd5d142df91baaf82ace7dab2ad3b3c57b9d298d40e34be9980",
+      "ms": 160.79999999701977,
+      "memoryBytes": 598999040
+    },
+    {
+      "config": "s2twp",
+      "chars": 1000000,
+      "pattern": "mixed",
+      "inputUtf8Bytes": 2428580,
+      "outputUtf8Bytes": 2514296,
+      "sha256": "f06626e1515d121f1a9519b8e6e70ca359cb7b2e34d811ec42ecb65164adefb5",
+      "ms": 112.09999999403954,
+      "memoryBytes": 598999040
+    },
+    {
+      "config": "s2twp_jieba",
+      "chars": 100000,
+      "pattern": "repeated-Han",
+      "inputUtf8Bytes": 300000,
+      "outputUtf8Bytes": 300000,
+      "sha256": "43889ef0ed4217f6fd67d6c0bff5dc3b890efc25101930c5f9b4a70c9b09134e",
+      "ms": 14.5,
+      "memoryBytes": 598999040
+    },
+    {
+      "config": "s2twp_jieba",
+      "chars": 100000,
+      "pattern": "mixed",
+      "inputUtf8Bytes": 242860,
+      "outputUtf8Bytes": 242860,
+      "sha256": "d856a2bb867cf341f613dc7d813983e9f47d252b20ae25ea12dfb10056e3fce7",
+      "ms": 24.099999994039536,
+      "memoryBytes": 598999040
+    },
+    {
+      "config": "s2twp_jieba",
+      "chars": 1000000,
+      "pattern": "repeated-Han",
+      "inputUtf8Bytes": 3000000,
+      "outputUtf8Bytes": 3000000,
+      "sha256": "71af84501c120cd5d142df91baaf82ace7dab2ad3b3c57b9d298d40e34be9980",
+      "ms": 156,
+      "memoryBytes": 598999040
+    },
+    {
+      "config": "s2twp_jieba",
+      "chars": 1000000,
+      "pattern": "mixed",
+      "inputUtf8Bytes": 2428580,
+      "outputUtf8Bytes": 2428580,
+      "sha256": "534321b43301ebb4f5128983351591b86279f4f5d40ed6d2e1069be389829151",
+      "ms": 247,
+      "memoryBytes": 598999040
+    },
+    {
+      "config": "s2hk",
+      "chars": 100000,
+      "pattern": "repeated-Han",
+      "inputUtf8Bytes": 300000,
+      "outputUtf8Bytes": 300000,
+      "sha256": "43889ef0ed4217f6fd67d6c0bff5dc3b890efc25101930c5f9b4a70c9b09134e",
+      "ms": 11.799999997019768,
+      "memoryBytes": 598999040
+    },
+    {
+      "config": "s2hk",
+      "chars": 100000,
+      "pattern": "mixed",
+      "inputUtf8Bytes": 242860,
+      "outputUtf8Bytes": 242860,
+      "sha256": "5dbf87541128421a13207e49e822de112441237d0ab9c8053d5bdfc222592d83",
+      "ms": 9.5,
+      "memoryBytes": 598999040
+    },
+    {
+      "config": "s2hk",
+      "chars": 1000000,
+      "pattern": "repeated-Han",
+      "inputUtf8Bytes": 3000000,
+      "outputUtf8Bytes": 3000000,
+      "sha256": "71af84501c120cd5d142df91baaf82ace7dab2ad3b3c57b9d298d40e34be9980",
+      "ms": 122.1000000089407,
+      "memoryBytes": 598999040
+    },
+    {
+      "config": "s2hk",
+      "chars": 1000000,
+      "pattern": "mixed",
+      "inputUtf8Bytes": 2428580,
+      "outputUtf8Bytes": 2428580,
+      "sha256": "462a4bbf69c6acb46fcf7d5ba344cd4346fa2724bdd7d343ff161a4dc8fec75e",
+      "ms": 97,
+      "memoryBytes": 598999040
+    },
+    {
+      "config": "s2hk_jieba",
+      "chars": 100000,
+      "pattern": "repeated-Han",
+      "inputUtf8Bytes": 300000,
+      "outputUtf8Bytes": 300000,
+      "sha256": "43889ef0ed4217f6fd67d6c0bff5dc3b890efc25101930c5f9b4a70c9b09134e",
+      "ms": 10.900000005960464,
+      "memoryBytes": 598999040
+    },
+    {
+      "config": "s2hk_jieba",
+      "chars": 100000,
+      "pattern": "mixed",
+      "inputUtf8Bytes": 242860,
+      "outputUtf8Bytes": 242860,
+      "sha256": "5dbf87541128421a13207e49e822de112441237d0ab9c8053d5bdfc222592d83",
+      "ms": 22.099999994039536,
+      "memoryBytes": 598999040
+    },
+    {
+      "config": "s2hk_jieba",
+      "chars": 1000000,
+      "pattern": "repeated-Han",
+      "inputUtf8Bytes": 3000000,
+      "outputUtf8Bytes": 3000000,
+      "sha256": "71af84501c120cd5d142df91baaf82ace7dab2ad3b3c57b9d298d40e34be9980",
+      "ms": 113.5,
+      "memoryBytes": 598999040
+    },
+    {
+      "config": "s2hk_jieba",
+      "chars": 1000000,
+      "pattern": "mixed",
+      "inputUtf8Bytes": 2428580,
+      "outputUtf8Bytes": 2428580,
+      "sha256": "462a4bbf69c6acb46fcf7d5ba344cd4346fa2724bdd7d343ff161a4dc8fec75e",
+      "ms": 234.90000000596046,
+      "memoryBytes": 598999040
+    },
+    {
+      "config": "tw2sp",
+      "chars": 100000,
+      "pattern": "repeated-Han",
+      "inputUtf8Bytes": 300000,
+      "outputUtf8Bytes": 300000,
+      "sha256": "79d5711958a5bd943c396985afaf61563b362538b35eb3106f6b74ceee4c5320",
+      "ms": 1.2000000029802322,
+      "memoryBytes": 598999040
+    },
+    {
+      "config": "tw2sp",
+      "chars": 100000,
+      "pattern": "mixed",
+      "inputUtf8Bytes": 242860,
+      "outputUtf8Bytes": 242860,
+      "sha256": "45039603e3f0dcea3cb45aafc221a90eea4c952e2b18b9f7892589abfcc88f6a",
+      "ms": 2.2000000029802322,
+      "memoryBytes": 598999040
+    },
+    {
+      "config": "tw2sp",
+      "chars": 1000000,
+      "pattern": "repeated-Han",
+      "inputUtf8Bytes": 3000000,
+      "outputUtf8Bytes": 3000000,
+      "sha256": "0ba67970de9941c1bc33e97869b116a0e129c8a859e3b4c0087e20c51f6a404b",
+      "ms": 14.200000002980232,
+      "memoryBytes": 598999040
+    },
+    {
+      "config": "tw2sp",
+      "chars": 1000000,
+      "pattern": "mixed",
+      "inputUtf8Bytes": 2428580,
+      "outputUtf8Bytes": 2428580,
+      "sha256": "04853f1e18a5c697a80cadf0d93c8b0e96a38e594a0a1d1bd330d8350f495fa5",
+      "ms": 24.69999998807907,
+      "memoryBytes": 598999040
+    },
+    {
+      "config": "tw2sp_jieba",
+      "chars": 100000,
+      "pattern": "repeated-Han",
+      "inputUtf8Bytes": 300000,
+      "outputUtf8Bytes": 300000,
+      "sha256": "79d5711958a5bd943c396985afaf61563b362538b35eb3106f6b74ceee4c5320",
+      "ms": 7.700000002980232,
+      "memoryBytes": 598999040
+    },
+    {
+      "config": "tw2sp_jieba",
+      "chars": 100000,
+      "pattern": "mixed",
+      "inputUtf8Bytes": 242860,
+      "outputUtf8Bytes": 242860,
+      "sha256": "45039603e3f0dcea3cb45aafc221a90eea4c952e2b18b9f7892589abfcc88f6a",
+      "ms": 23.80000001192093,
+      "memoryBytes": 598999040
+    },
+    {
+      "config": "tw2sp_jieba",
+      "chars": 1000000,
+      "pattern": "repeated-Han",
+      "inputUtf8Bytes": 3000000,
+      "outputUtf8Bytes": 3000000,
+      "sha256": "0ba67970de9941c1bc33e97869b116a0e129c8a859e3b4c0087e20c51f6a404b",
+      "ms": 85.20000000298023,
+      "memoryBytes": 598999040
+    },
+    {
+      "config": "tw2sp_jieba",
+      "chars": 1000000,
+      "pattern": "mixed",
+      "inputUtf8Bytes": 2428580,
+      "outputUtf8Bytes": 2428580,
+      "sha256": "04853f1e18a5c697a80cadf0d93c8b0e96a38e594a0a1d1bd330d8350f495fa5",
+      "ms": 230.8999999910593,
+      "memoryBytes": 598999040
+    }
+  ],
+  "warm": [
+    {
+      "config": "s2twp",
+      "timesMs": [
+        1.6000000089406967,
+        2.0999999940395355,
+        1.7000000029802322,
+        1.5999999940395355,
+        1.6000000089406967
+      ],
+      "memoryBytes": 598999040
+    },
+    {
+      "config": "s2twp_jieba",
+      "timesMs": [
+        2.2999999970197678,
+        2.2999999970197678,
+        2.2000000029802322,
+        2.2999999970197678,
+        2.0999999940395355
+      ],
+      "memoryBytes": 598999040
+    }
+  ]
+}

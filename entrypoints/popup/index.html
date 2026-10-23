@@ -8,83 +8,43 @@
     <link rel="stylesheet" href="./style.css" />
   </head>
   <body>
-    <header>
-      <div><strong>OpenCC</strong> <span id="subtitle"></span></div>
-      <button id="show-settings" type="button" aria-controls="settings">設定</button>
-    </header>
+    <header><strong>OpenCC 1.4.2</strong><button id="show-settings" type="button">網站設定</button></header>
     <main>
-      <section aria-labelledby="direction-title">
-        <h1 id="direction-title">中文轉換</h1>
-        <p class="hint">網頁與文字共用以下轉換方向。</p>
-        <div class="direction-row">
-          <label
-            >來源<select id="origin">
-              <option value="cn">簡體中文</option>
-              <option value="hk">繁體中文（香港）</option>
-              <option value="tw">繁體中文（臺灣）</option>
-              <option value="twp">繁體中文（臺灣詞彙）</option>
-            </select></label
-          >
-          <button id="swap" type="button" aria-label="交換來源與目標" title="交換來源與目標">⇄</button>
-          <label
-            >目標<select id="target">
-              <option value="hk">繁體中文（香港）</option>
-              <option value="cn">簡體中文</option>
-              <option value="tw">繁體中文（臺灣）</option>
-              <option value="twp">繁體中文（臺灣詞彙）</option>
-            </select></label
-          >
-        </div>
-      </section>
-      <section aria-labelledby="site-title">
-        <h2 id="site-title">目前網站 <span id="hostname"></span></h2>
-        <label for="site-rule">此網站的自動轉換規則</label>
-        <select id="site-rule">
-          <option value="default">使用預設設定</option>
-          <option value="always">一律自動轉換</option>
-          <option value="never">不要自動轉換</option>
+      <section>
+        <h1>中文轉換</h1>
+        <label for="preset">官方轉換設定</label
+        ><select id="preset"></select
+        ><label for="mode">分詞方式</label
+        ><select id="mode">
+          <option value="jieba">Jieba</option>
+          <option value="mmseg">mmseg</option>
         </select>
-        <label class="checkbox"><input id="auto" type="checkbox" /> 預設自動轉換網頁</label>
-        <p id="policy" class="hint"></p>
+        <p class="hint">引擎與詞典皆在本機執行。Jieba 首次初始化可能需要數秒。</p>
       </section>
-      <section aria-labelledby="text-title">
-        <h2 id="text-title">文字轉換</h2>
-        <p class="hint">文字僅保留於此視窗，關閉後即清除。</p>
-        <label for="textbox">原文</label>
-        <textarea id="textbox" placeholder="輸入或貼上中文…" spellcheck="false"></textarea>
-        <label for="result">轉換結果</label>
-        <textarea id="result" readonly placeholder="轉換後的文字會顯示在這裡" spellcheck="false"></textarea>
+      <section id="migration" hidden>
+        <p>已更新為官方轉換設定。舊版全域自動轉換與正規表示式規則已停用；舊資料仍保留，請逐站重新啟用。</p>
+        <button id="dismiss" type="button">知道了</button>
+      </section>
+      <section>
+        <h2>目前網站</h2>
+        <p id="hostname"></p>
+        <label class="checkbox"><input id="site-auto" type="checkbox" />對此主機名稱自動轉換</label>
+        <p class="hint">只套用於完全相同的主機名稱，並儲存此站的轉換設定與分詞方式。</p>
+      </section>
+      <section>
+        <h2>文字轉換</h2>
+        <label for="textbox">原文</label
+        ><textarea id="textbox" placeholder="輸入或貼上中文…" spellcheck="false"></textarea
+        ><label for="result">轉換結果</label><textarea id="result" readonly spellcheck="false"></textarea>
         <div class="tools">
-          <button id="copy" type="button">複製結果</button><button id="reset" type="button">清除文字</button>
+          <button id="copy" type="button" disabled>複製結果</button><button id="reset" type="button">清除文字</button>
         </div>
-      </section>
-      <section aria-label="設定">
-        <details id="settings">
-          <summary>網站規則與進階設定</summary>
-          <p class="hint">設定可直接在此修改，不需另開擴充功能設定頁面。</p>
-          <h2>已儲存的網站規則</h2>
-          <ul id="site-rules"></ul>
-          <label for="whitelist">排除的網址規則</label>
-          <p id="whitelist-description" class="hint">
-            每行一個 JavaScript 正規表示式，比對完整網址；不支援萬用字元格式。符合的網頁不會自動轉換。
-          </p>
-          <textarea
-            id="whitelist"
-            aria-describedby="whitelist-description"
-            spellcheck="false"
-            placeholder="^https://example\.com/private/"
-          ></textarea>
-          <div class="tools">
-            <button id="save-settings" type="button">儲存排除規則</button>
-            <button id="retry-settings" type="button" hidden>重新載入設定</button>
-          </div>
-          <output id="settings-status" aria-live="polite"></output>
-        </details>
+        <p class="hint">文字不會儲存，關閉視窗後清除。</p>
       </section>
     </main>
     <footer>
-      <button id="convert" class="primary" type="button">轉換目前網頁</button>
-      <output id="status" aria-live="polite"></output><button id="retry" type="button" hidden>重試</button>
+      <button id="convert" class="primary" type="button">轉換目前網頁</button
+      ><output id="status" role="status" aria-live="polite"></output>
     </footer>
     <script type="module" src="./main.ts"></script>
   </body>

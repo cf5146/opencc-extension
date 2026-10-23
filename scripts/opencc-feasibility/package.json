@@ -1,0 +1,1 @@
+{"name":"official-opencc-source-feasibility","private":true,"type":"module","scripts":{"acceptance":"node --test acceptance.test.mjs","evaluate":"node evaluate.mjs","verify":"node verify.mjs"},"devDependencies":{"opencc":"1.4.2","opencc-jieba":"1.4.2","jsonc-parser":"3.3.1"}}

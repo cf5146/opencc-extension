@@ -1,0 +1,16 @@
+{
+  "host": "popup-fixture.test",
+  "before": {
+    "preset": "s2hk",
+    "mode": "mmseg"
+  },
+  "after": {
+    "preset": "s2twp",
+    "mode": "jieba",
+    "result": "勇敢的士兵"
+  },
+  "mmseg": "勇敢計程車兵",
+  "jieba": "勇敢的士兵",
+  "siteOverrideRemoval": true,
+  "popupOverflow": false
+}

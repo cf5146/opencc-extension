@@ -12,7 +12,7 @@ export async function artifactFixture() {
     const manifest = {
       manifest_version: 3,
       version: "1.2.3",
-      permissions: ["storage", "contextMenus", "scripting", "activeTab"],
+      permissions: ["storage", "contextMenus", "scripting", "activeTab", ...(browser === "firefox" ? [] : ["offscreen"])],
       host_permissions: [...webMatches],
       icons: { 128: "icon.png" },
       action: { default_popup: "popup.html", default_icon: { 128: "icon.png" } },

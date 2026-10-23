@@ -1,0 +1,241 @@
+{
+  "schema": 1,
+  "official": {
+    "repository": "https://github.com/BYVoid/OpenCC",
+    "tag": "ver.1.4.2",
+    "commit": "025f371dc76b598d77384fbdab90c937471844d8",
+    "sourceUnmodified": true
+  },
+  "toolchain": {
+    "emsdk": "4.0.22",
+    "emsdkCommit": "15915cad554b707837024dc2758b6a1c5b94b036",
+    "emscriptenSdkHash": "bebaf7e50e31865b0724f17eaa52e161e2dfef5a",
+    "python": "3.13.9",
+    "cmake": "3.31.10",
+    "ninja": "1.13.0",
+    "hostCompiler": "GCC 14 (Debian 13.6 x86_64)"
+  },
+  "policy": {
+    "includeTofuRiskDictionaries": true,
+    "segmentation": [
+      "mmseg",
+      "jieba"
+    ],
+    "input": "complete UTF-8 heap buffer; explicit byte length; no chunks or fallback"
+  },
+  "adapter": [
+    {
+      "path": "adapter/CMakeLists.txt",
+      "sha256": "c06889403977d5cbbc2e91f0cc1eccd5bcf55b88ad05fec09c0282ded8ad0ca5"
+    },
+    {
+      "path": "adapter/binding.cpp",
+      "sha256": "4357e317950549a45b249e0199460b3fe5e8481f6c348c96cf650a444f8389b6"
+    },
+    {
+      "path": "adapter/build.sh",
+      "sha256": "d792b3aef182b78c18f3a70c9a76e7d4bb280b7cd2fe92f2421fcd7505837fa5"
+    },
+    {
+      "path": "adapter/plugin-static.cpp",
+      "sha256": "64b9ef18d7eaa55c938c8d9a4aa20aed46d2ea5c98c3766b36fb9307bac97868"
+    },
+    {
+      "path": "adapter/runtime.mjs",
+      "sha256": "de9cc8312bf190643ba28bb6feacad3e4bd9345d2fad07ee5cd36b66052d8512"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "opencc.mjs",
+      "bytes": 73274,
+      "sha256": "36fb7cc8301e3f6b30ebcf5e52b344232d40fbd44a3810d7c80b237bb6f99b80"
+    },
+    {
+      "path": "opencc.wasm",
+      "bytes": 673054,
+      "sha256": "2536ced30dd10df458dbf0ce73906ff5e114efe2b14b4521982604cd6681d64e"
+    },
+    {
+      "path": "runtime.mjs",
+      "bytes": 2655,
+      "sha256": "de9cc8312bf190643ba28bb6feacad3e4bd9345d2fad07ee5cd36b66052d8512"
+    }
+  ],
+  "resources": [
+    {
+      "path": "resources/config/s2hk.json",
+      "virtualPath": "/data/config/s2hk.json",
+      "bytes": 1211,
+      "sha256": "b3a4b6c7f5fdd61c4f7e6eaa292d9a0e29eece584c35fe04fc124b1d9796051b"
+    },
+    {
+      "path": "resources/config/s2hk_jieba.json",
+      "virtualPath": "/data/config/s2hk_jieba.json",
+      "bytes": 1361,
+      "sha256": "a05f8ccb661ed2eaa858ee19eccdaebb7ee489fd69b8b4402a19dca0c53f9fd0"
+    },
+    {
+      "path": "resources/config/s2t.json",
+      "virtualPath": "/data/config/s2t.json",
+      "bytes": 676,
+      "sha256": "a188392af5ca23e1d602c5a93651f1d852fccdaa24c2b29abed7a0c8ac359048"
+    },
+    {
+      "path": "resources/config/s2t_jieba.json",
+      "virtualPath": "/data/config/s2t_jieba.json",
+      "bytes": 1022,
+      "sha256": "ef761b4d933f5d232cd1fd627c250a1b81be742fc3d7f787c28d6fdc9bd8dd79"
+    },
+    {
+      "path": "resources/config/s2tw.json",
+      "virtualPath": "/data/config/s2tw.json",
+      "bytes": 1209,
+      "sha256": "5830ee3440ba3dc6bf1e197205b4248e2d860b8a3680475db4419b0dbf96ac39"
+    },
+    {
+      "path": "resources/config/s2tw_jieba.json",
+      "virtualPath": "/data/config/s2tw_jieba.json",
+      "bytes": 1359,
+      "sha256": "a9bc1527b1d1439ae556ff551f087b1ae8b31d91d9adcd499743d3ad4a600b59"
+    },
+    {
+      "path": "resources/config/s2twp.json",
+      "virtualPath": "/data/config/s2twp.json",
+      "bytes": 1286,
+      "sha256": "681dd1ff5f3a1efe93a6f56006ee7f58f767fa0366fd3a2ec6165c983e39415d"
+    },
+    {
+      "path": "resources/config/s2twp_jieba.json",
+      "virtualPath": "/data/config/s2twp_jieba.json",
+      "bytes": 1463,
+      "sha256": "93d0497eb360e0c941f9196fda193f4fa1a0a0917af2d1625d163af0d3d99f8b"
+    },
+    {
+      "path": "resources/config/tw2sp.json",
+      "virtualPath": "/data/config/tw2sp.json",
+      "bytes": 1034,
+      "sha256": "f8cf900c1b456a7d2e8477f5bf146814071d28ad64ef37fbc0ae757930c167d5"
+    },
+    {
+      "path": "resources/config/tw2sp_jieba.json",
+      "virtualPath": "/data/config/tw2sp_jieba.json",
+      "bytes": 1328,
+      "sha256": "67ba541557bba60e7272bce01ee38d2422557e84999413183a352d9c0cc3385c"
+    },
+    {
+      "path": "resources/dict/CJK_Compatibility_Ideographs.ocd2",
+      "virtualPath": "/data/dict/CJK_Compatibility_Ideographs.ocd2",
+      "bytes": 13843,
+      "sha256": "4b1faa6649012f524068ec18c0fb520ead343c11cbe0a8e4c8853ca61369d666"
+    },
+    {
+      "path": "resources/dict/HKVariants.ocd2",
+      "virtualPath": "/data/dict/HKVariants.ocd2",
+      "bytes": 4957,
+      "sha256": "b4be56685bddda964977bbd271f976df939d1f46a75332b8f9e793d0f06e6c7c"
+    },
+    {
+      "path": "resources/dict/HKVariantsPhrases.ocd2",
+      "virtualPath": "/data/dict/HKVariantsPhrases.ocd2",
+      "bytes": 10522,
+      "sha256": "80c215b6bef0f324a71340bc21164d063c5540af6f50c07fd1c703af9c1207da"
+    },
+    {
+      "path": "resources/dict/STCharacters.ocd2",
+      "virtualPath": "/data/dict/STCharacters.ocd2",
+      "bytes": 45879,
+      "sha256": "94639fe1d2bbeb3dcb4f29a297cda70ecfd26425b8a935f4b6bac0746c3987f2"
+    },
+    {
+      "path": "resources/dict/STPhrases.ocd2",
+      "virtualPath": "/data/dict/STPhrases.ocd2",
+      "bytes": 927077,
+      "sha256": "c472f936ab624e8887ed48c2572d0af68b904f0be72d98e237a6b8c1f5de024d"
+    },
+    {
+      "path": "resources/dict/STPhrases_GeneratedFromRegionalPhrases.ocd2",
+      "virtualPath": "/data/dict/STPhrases_GeneratedFromRegionalPhrases.ocd2",
+      "bytes": 19885,
+      "sha256": "815bbb98c644095fb0bfd76dbf259b9da4350a19d4927b2342e7928fb26b20e2"
+    },
+    {
+      "path": "resources/dict/TSCharacters.ocd2",
+      "virtualPath": "/data/dict/TSCharacters.ocd2",
+      "bytes": 52410,
+      "sha256": "7a994de7900707925fac9c68728a6bb9cf3059870426f661cf31b601efbf5f2f"
+    },
+    {
+      "path": "resources/dict/TSCharactersExt.ocd2",
+      "virtualPath": "/data/dict/TSCharactersExt.ocd2",
+      "bytes": 14362,
+      "sha256": "e2b0286801dcd1d26119d19ba8b8a35cde021ec173468255d117c4c0951b2906"
+    },
+    {
+      "path": "resources/dict/TSPhrases.ocd2",
+      "virtualPath": "/data/dict/TSPhrases.ocd2",
+      "bytes": 13496,
+      "sha256": "2b722237cc00a4ac985790deb6a68c99f34de10e980a0029ac82c72b0f7ae22b"
+    },
+    {
+      "path": "resources/dict/TWPhrases.ocd2",
+      "virtualPath": "/data/dict/TWPhrases.ocd2",
+      "bytes": 24015,
+      "sha256": "4298bc78f8ff472eed0afd31996cb35f6e56cd4ace5ef8a6d27a35a5374b9476"
+    },
+    {
+      "path": "resources/dict/TWPhrasesRev.ocd2",
+      "virtualPath": "/data/dict/TWPhrasesRev.ocd2",
+      "bytes": 23947,
+      "sha256": "839f5a71c1f02f594f23a54815d9bca4656ca661a7e32805504c67420496da47"
+    },
+    {
+      "path": "resources/dict/TWVariants.ocd2",
+      "virtualPath": "/data/dict/TWVariants.ocd2",
+      "bytes": 4623,
+      "sha256": "ed89fe928857500a77cbb601be4a1769da34ce863875eaae18d1d50bd036db5e"
+    },
+    {
+      "path": "resources/dict/TWVariantsPhrases.ocd2",
+      "virtualPath": "/data/dict/TWVariantsPhrases.ocd2",
+      "bytes": 4407,
+      "sha256": "a9c356943779f1d9af8b38751fe9222a02dc211a56c83f83871cfc8558afe178"
+    },
+    {
+      "path": "resources/dict/TWVariantsRev.ocd2",
+      "virtualPath": "/data/dict/TWVariantsRev.ocd2",
+      "bytes": 4655,
+      "sha256": "fc043bdf0224666921983f2badcac8faa5e59d8a681a5525c527c9926f66775d"
+    },
+    {
+      "path": "resources/dict/TWVariantsRevPhrases.ocd2",
+      "virtualPath": "/data/dict/TWVariantsRevPhrases.ocd2",
+      "bytes": 27059,
+      "sha256": "ae91cb45c12f737bde2b9e340c38efaa7e1868cf55e59a62cc8199de020113e2"
+    },
+    {
+      "path": "resources/jieba_dict/hmm_model.utf8",
+      "virtualPath": "/data/config/jieba_dict/hmm_model.utf8",
+      "bytes": 519739,
+      "sha256": "f17790586ac86dd048c8adffed052c4bd2b28ed0682972c1275e59040c0589a7"
+    },
+    {
+      "path": "resources/jieba_dict/idf.utf8",
+      "virtualPath": "/data/config/jieba_dict/idf.utf8",
+      "bytes": 5998717,
+      "sha256": "dbd1e03d72b2263cc8d84a4304ed77677eed9e7deaf43a1a5133bbba9733b535"
+    },
+    {
+      "path": "resources/jieba_dict/jieba_merged.ocd2",
+      "virtualPath": "/data/config/jieba_dict/jieba_merged.ocd2",
+      "bytes": 7463331,
+      "sha256": "3d6e9e6614a95cae37ddf6d4995c8c9d338df9d26de377d6e61ccd18f81e9b78"
+    },
+    {
+      "path": "resources/jieba_dict/stop_words.utf8",
+      "virtualPath": "/data/config/jieba_dict/stop_words.utf8",
+      "bytes": 8974,
+      "sha256": "b788b8a939d2e2fe079abd579ea98f12f9fb84370bfd0dddd81bb9381f7ab42c"
+    }
+  ]
+}
