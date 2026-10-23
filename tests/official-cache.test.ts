@@ -33,9 +33,10 @@ describe("page-local conversion reuse", () => {
     render(["汉"]);
     await converter.convert(document.body, options);
     expect(requests).toEqual([["汉"]]);
+    render(["汉"]);
     const other = fixture();
     await other.converter.convert(document.body, options);
-    expect(other.requests).toEqual([["漢"]]);
+    expect(other.requests).toEqual([["汉"]]);
   });
   it("partitions results by preset and segmentation mode", async () => {
     const { converter, requests, render } = fixture();

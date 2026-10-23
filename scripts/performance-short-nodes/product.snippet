@@ -1,0 +1,30 @@
+async(page)=>{
+ const p=PARAMETERS;
+ const list=await page.evaluate(()=>new Promise(r=>chrome.developerPrivate.getExtensionsInfo({includeDisabled:true},r)));
+ const ext=list.find(x=>x.name==='OpenCC'&&x.state==='ENABLED');if(!ext)throw Error('Missing extension');
+ await page.goto(`chrome-extension://${ext.id}/popup.html`);
+ await page.locator('#textbox:enabled').waitFor();
+ const options={preset:'s2twp',mode:p.mode};
+ await page.evaluate(async options=>await chrome.runtime.sendMessage({type:'official-settings',action:'defaults',options}),options);
+ const ctx=page.context(),url='https://short-node.test/';
+ await ctx.route(url+'**',r=>r.fulfill({contentType:'text/html',body:'<!doctype html><html lang="zh"><head><meta charset="utf-8"><title>Benchmark</title></head><body></body></html>'}));
+ const target=await ctx.newPage();await target.goto(url);await target.waitForTimeout(200);
+ const tabId=await page.evaluate(async()=> (await chrome.tabs.query({url:'https://short-node.test/*'}))[0].id);
+ const cases=[];
+ const setup=async(count,append=false)=>await target.evaluate(({count,append,base,kind})=>{if(!append)document.body.replaceChildren();const f=document.createDocumentFragment();for(let i=0;i<count;i++){const n=document.createElement('p');n.textContent=base+(kind==='unique'?i:'');f.append(n);}document.body.append(f);},{count,append,base:p.base,kind:p.kind});
+ const start=async()=>await target.evaluate(()=>{window.gaps=[];window.tasks=[];window.started=performance.now();let last=performance.now();window.timer=setInterval(()=>{const t=performance.now();window.gaps.push(Math.max(0,t-last-4));last=t;},4);window.observer=new PerformanceObserver(l=>window.tasks.push(...l.getEntries().map(x=>x.duration)));window.observer.observe({type:'longtask',buffered:false});});
+ const finish=async(name,elapsedMs,expectedHash,response=null)=>{await target.waitForTimeout(80);const observed=await target.evaluate(async()=>{clearInterval(window.timer);window.observer.disconnect();const values=[...document.querySelectorAll('p')].map(n=>n.textContent);const bytes=new TextEncoder().encode(JSON.stringify(values));const hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),b=>b.toString(16).padStart(2,'0')).join('');return {nodeCount:values.length,outputSha256:hash,first:values[0],maxTimerDriftMs:Math.max(0,...window.gaps),longTaskCount:window.tasks.length,maxLongTaskMs:Math.max(0,...window.tasks),note:'Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking.'};});const complete=observed.outputSha256===expectedHash;cases.push({name,elapsedMs,expectedHash,response,complete,...observed});if(!complete)throw Error('Output mismatch '+JSON.stringify(cases.at(-1)));};
+ for(const [name,count]of[['manual-cold-1000',1000],['manual-warm-20000',20000]]){
+  await setup(count);await start();const measured=await page.evaluate(async id=>{const t=performance.now(),response=await chrome.tabs.sendMessage(id,{type:'convert-page'});return {response,ms:performance.now()-t};},tabId);
+  await finish(name,measured.ms,count===1000?p.expected.hash1000:p.expected.hash20000,measured.response);
+ }
+ // Configure automatic conversion only after removing the prior manual fixture.
+ await setup(0);await page.evaluate(async options=>await chrome.runtime.sendMessage({type:'official-settings',action:'site',hostname:'short-node.test',options}),options);await target.waitForTimeout(100);
+ // Each p is a distinct inserted root; this exposes root scheduling rather than a single wrapper subtree.
+ await start();await setup(1000,true);let timeout=false;
+ try{await target.waitForFunction(()=>[...document.querySelectorAll('p')].length===1000&&[...document.querySelectorAll('p')].every(n=>!n.textContent.includes('软件')&&!n.textContent.includes('鼠标')),null,{timeout:120000,polling:20});}catch{timeout=true;}
+ const elapsed=await target.evaluate(()=>performance.now()-window.started);
+ if(timeout){const partial=await target.evaluate(()=>({total:document.querySelectorAll('p').length,converted:[...document.querySelectorAll('p')].filter(n=>!n.textContent.includes('软件')&&!n.textContent.includes('鼠标')).length}));cases.push({name:'auto-dynamic-1000-roots',timeout:true,complete:false,elapsedMs:elapsed,...partial});}
+ else await finish('auto-dynamic-1000-roots',elapsed,p.expected.hash1000);
+ await target.close();return {trial:p.trial,mode:p.mode,kind:p.kind,edgeVersion:ctx.browser().version(),cases};
+}

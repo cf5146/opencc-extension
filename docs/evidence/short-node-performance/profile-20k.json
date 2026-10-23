@@ -1,0 +1,426 @@
+[
+  {
+    "trial": 0,
+    "mode": "mmseg",
+    "kind": "unique",
+    "edgeVersion": "155.0.4283.62",
+    "cases": [
+      {
+        "name": "manual-cold-1000",
+        "elapsedMs": 273.5,
+        "expectedHash": "d2243c37f7695186cbd1dda48a19459cc50ab728b03fc7037c2da85a6882eb91",
+        "response": {
+          "kind": "success",
+          "count": 1000,
+          "time": 272.30000001192093
+        },
+        "complete": true,
+        "profile": {
+          "background": {
+            "officialRequestTexts": {
+              "count": 8,
+              "totalMs": 1000,
+              "maxMs": 128
+            },
+            "getContexts": {
+              "count": 8,
+              "totalMs": 2.500000014901161,
+              "maxMs": 0.9000000059604645
+            },
+            "officialRequestDuration": {
+              "count": 8,
+              "totalMs": 255.30000001192093,
+              "maxMs": 238.40000000596046
+            }
+          },
+          "content": {
+            "collect": {
+              "count": 2,
+              "totalMs": 2.199999988079071,
+              "maxMs": 1.8999999910593033
+            },
+            "snapshotCount": {
+              "count": 2,
+              "totalMs": 1000,
+              "maxMs": 1000
+            },
+            "contentIPC": {
+              "count": 8,
+              "totalMs": 263.8999999910593,
+              "maxMs": 239.59999999403954
+            },
+            "commit": {
+              "count": 1000,
+              "totalMs": 2,
+              "maxMs": 0.10000000894069672
+            },
+            "yieldWait": {
+              "count": 7,
+              "totalMs": 3.2999999970197678,
+              "maxMs": 3.2000000029802322
+            }
+          },
+          "offscreen": {
+            "workerConvert": {
+              "count": 8,
+              "totalMs": 124.49999998509884,
+              "maxMs": 116.69999998807907
+            }
+          }
+        },
+        "nodeCount": 1000,
+        "outputSha256": "d2243c37f7695186cbd1dda48a19459cc50ab728b03fc7037c2da85a6882eb91",
+        "first": "勇敢計程車兵在軟體開發中心使用滑鼠。0",
+        "maxTimerDriftMs": 3,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "manual-warm-20000",
+        "elapsedMs": 3156.800000011921,
+        "expectedHash": "dfcebc062ee2ce4794ac4c1271fe9dd2221d3339c50604a512b0f3e5e633ee2f",
+        "response": {
+          "kind": "success",
+          "count": 20000,
+          "time": 3153.5
+        },
+        "complete": true,
+        "profile": {
+          "background": {
+            "officialRequestTexts": {
+              "count": 157,
+              "totalMs": 20000,
+              "maxMs": 128
+            },
+            "getContexts": {
+              "count": 157,
+              "totalMs": 114.8999999910593,
+              "maxMs": 8.299999997019768
+            },
+            "officialRequestDuration": {
+              "count": 157,
+              "totalMs": 695.0999998599291,
+              "maxMs": 14.600000008940697
+            }
+          },
+          "content": {
+            "collect": {
+              "count": 2,
+              "totalMs": 25.099999994039536,
+              "maxMs": 25.099999994039536
+            },
+            "snapshotCount": {
+              "count": 2,
+              "totalMs": 20000,
+              "maxMs": 20000
+            },
+            "contentIPC": {
+              "count": 157,
+              "totalMs": 1491.100000038743,
+              "maxMs": 30.400000005960464
+            },
+            "commit": {
+              "count": 20000,
+              "totalMs": 65.39999988675117,
+              "maxMs": 0.4000000059604645
+            },
+            "yieldWait": {
+              "count": 156,
+              "totalMs": 1556.9000000059605,
+              "maxMs": 30.899999991059303
+            }
+          },
+          "offscreen": {
+            "workerConvert": {
+              "count": 157,
+              "totalMs": 265.80000008642673,
+              "maxMs": 7
+            }
+          }
+        },
+        "nodeCount": 20000,
+        "outputSha256": "dfcebc062ee2ce4794ac4c1271fe9dd2221d3339c50604a512b0f3e5e633ee2f",
+        "first": "勇敢計程車兵在軟體開發中心使用滑鼠。0",
+        "maxTimerDriftMs": 31,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "auto-dynamic-1000-roots",
+        "elapsedMs": 3006.7000000029802,
+        "expectedHash": "d2243c37f7695186cbd1dda48a19459cc50ab728b03fc7037c2da85a6882eb91",
+        "response": null,
+        "complete": true,
+        "profile": {
+          "background": {
+            "officialRequestTexts": {
+              "count": 1000,
+              "totalMs": 1000,
+              "maxMs": 1
+            },
+            "getContexts": {
+              "count": 1000,
+              "totalMs": 395.0999998152256,
+              "maxMs": 3.699999988079071
+            },
+            "officialRequestDuration": {
+              "count": 1000,
+              "totalMs": 1746.2999998629093,
+              "maxMs": 6.799999997019768
+            }
+          },
+          "content": {
+            "collect": {
+              "count": 1000,
+              "totalMs": 11.200000017881393,
+              "maxMs": 0.10000000894069672
+            },
+            "snapshotCount": {
+              "count": 1000,
+              "totalMs": 1000,
+              "maxMs": 1
+            },
+            "contentIPC": {
+              "count": 1000,
+              "totalMs": 2878.599999949336,
+              "maxMs": 9.899999991059303
+            },
+            "commit": {
+              "count": 1000,
+              "totalMs": 22.299999997019768,
+              "maxMs": 0.20000000298023224
+            }
+          },
+          "offscreen": {
+            "workerConvert": {
+              "count": 1000,
+              "totalMs": 72.4000003784895,
+              "maxMs": 0.6000000089406967
+            }
+          }
+        },
+        "nodeCount": 1000,
+        "outputSha256": "d2243c37f7695186cbd1dda48a19459cc50ab728b03fc7037c2da85a6882eb91",
+        "first": "勇敢計程車兵在軟體開發中心使用滑鼠。0",
+        "maxTimerDriftMs": 12.099999994039536,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      }
+    ]
+  },
+  {
+    "trial": 0,
+    "mode": "jieba",
+    "kind": "unique",
+    "edgeVersion": "155.0.4283.62",
+    "cases": [
+      {
+        "name": "manual-cold-1000",
+        "elapsedMs": 2028.7000000029802,
+        "expectedHash": "e596afb2693daca760552a9c59d26d6507f60dcc0968ec8bb3164a7ec2afd04b",
+        "response": {
+          "kind": "success",
+          "count": 1000,
+          "time": 2027
+        },
+        "complete": true,
+        "profile": {
+          "background": {
+            "officialRequestTexts": {
+              "count": 8,
+              "totalMs": 1000,
+              "maxMs": 128
+            },
+            "getContexts": {
+              "count": 8,
+              "totalMs": 4.200000002980232,
+              "maxMs": 1.0999999940395355
+            },
+            "officialRequestDuration": {
+              "count": 8,
+              "totalMs": 1987.5,
+              "maxMs": 1936.2999999970198
+            }
+          },
+          "content": {
+            "collect": {
+              "count": 2,
+              "totalMs": 2.5,
+              "maxMs": 2.2000000029802322
+            },
+            "snapshotCount": {
+              "count": 2,
+              "totalMs": 1000,
+              "maxMs": 1000
+            },
+            "contentIPC": {
+              "count": 8,
+              "totalMs": 2004.5,
+              "maxMs": 1939.7999999970198
+            },
+            "commit": {
+              "count": 1000,
+              "totalMs": 3.7999999970197678,
+              "maxMs": 0.20000000298023224
+            },
+            "yieldWait": {
+              "count": 7,
+              "totalMs": 14.099999979138374,
+              "maxMs": 4
+            }
+          },
+          "offscreen": {
+            "workerConvert": {
+              "count": 8,
+              "totalMs": 1841.2000000029802,
+              "maxMs": 1810.9000000059605
+            }
+          }
+        },
+        "nodeCount": 1000,
+        "outputSha256": "e596afb2693daca760552a9c59d26d6507f60dcc0968ec8bb3164a7ec2afd04b",
+        "first": "勇敢的士兵在軟體開發中心使用滑鼠。0",
+        "maxTimerDriftMs": 5.700000002980232,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "manual-warm-20000",
+        "elapsedMs": 4438.20000000298,
+        "expectedHash": "e951a3b279496338b1d4e826a3b8ecd79209c3b15317770eccb5e584087ff955",
+        "response": {
+          "kind": "success",
+          "count": 20000,
+          "time": 4436.100000008941
+        },
+        "complete": true,
+        "profile": {
+          "background": {
+            "officialRequestTexts": {
+              "count": 157,
+              "totalMs": 20000,
+              "maxMs": 128
+            },
+            "getContexts": {
+              "count": 157,
+              "totalMs": 166.10000002384186,
+              "maxMs": 21.200000002980232
+            },
+            "officialRequestDuration": {
+              "count": 157,
+              "totalMs": 1322.800000026822,
+              "maxMs": 38.900000005960464
+            }
+          },
+          "content": {
+            "collect": {
+              "count": 2,
+              "totalMs": 52.80000001192093,
+              "maxMs": 52.80000001192093
+            },
+            "snapshotCount": {
+              "count": 2,
+              "totalMs": 20000,
+              "maxMs": 20000
+            },
+            "contentIPC": {
+              "count": 157,
+              "totalMs": 1877.5000000149012,
+              "maxMs": 48.099999994039536
+            },
+            "commit": {
+              "count": 20000,
+              "totalMs": 79.2000000178814,
+              "maxMs": 1.800000011920929
+            },
+            "yieldWait": {
+              "count": 156,
+              "totalMs": 2407.7999999672174,
+              "maxMs": 32.900000005960464
+            }
+          },
+          "offscreen": {
+            "workerConvert": {
+              "count": 157,
+              "totalMs": 663.5999998599291,
+              "maxMs": 36.29999999701977
+            }
+          }
+        },
+        "nodeCount": 20000,
+        "outputSha256": "e951a3b279496338b1d4e826a3b8ecd79209c3b15317770eccb5e584087ff955",
+        "first": "勇敢的士兵在軟體開發中心使用滑鼠。0",
+        "maxTimerDriftMs": 52.69999998807907,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "auto-dynamic-1000-roots",
+        "elapsedMs": 3503.8999999910593,
+        "expectedHash": "e596afb2693daca760552a9c59d26d6507f60dcc0968ec8bb3164a7ec2afd04b",
+        "response": null,
+        "complete": true,
+        "profile": {
+          "background": {
+            "officialRequestTexts": {
+              "count": 1000,
+              "totalMs": 1000,
+              "maxMs": 1
+            },
+            "getContexts": {
+              "count": 1000,
+              "totalMs": 545.2999999374151,
+              "maxMs": 13.899999991059303
+            },
+            "officialRequestDuration": {
+              "count": 1000,
+              "totalMs": 2053.299999728799,
+              "maxMs": 18.899999991059303
+            }
+          },
+          "content": {
+            "collect": {
+              "count": 1000,
+              "totalMs": 13.800000101327896,
+              "maxMs": 0.4000000059604645
+            },
+            "snapshotCount": {
+              "count": 1000,
+              "totalMs": 1000,
+              "maxMs": 1
+            },
+            "contentIPC": {
+              "count": 1000,
+              "totalMs": 3372.7000000327826,
+              "maxMs": 39.5
+            },
+            "commit": {
+              "count": 1000,
+              "totalMs": 27.499999821186066,
+              "maxMs": 0.5
+            }
+          },
+          "offscreen": {
+            "workerConvert": {
+              "count": 1000,
+              "totalMs": 89.29999987781048,
+              "maxMs": 2
+            }
+          }
+        },
+        "nodeCount": 1000,
+        "outputSha256": "e596afb2693daca760552a9c59d26d6507f60dcc0968ec8bb3164a7ec2afd04b",
+        "first": "勇敢的士兵在軟體開發中心使用滑鼠。0",
+        "maxTimerDriftMs": 43.8999999910593,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      }
+    ]
+  }
+]

@@ -1,0 +1,2442 @@
+[
+  {
+    "trial": 0,
+    "mode": "mmseg",
+    "kind": "unique",
+    "edgeVersion": "155.0.4283.62",
+    "cases": [
+      {
+        "name": "manual-cold-1000",
+        "elapsedMs": 437.79999999701977,
+        "expectedHash": "d2243c37f7695186cbd1dda48a19459cc50ab728b03fc7037c2da85a6882eb91",
+        "response": {
+          "kind": "success",
+          "count": 1000,
+          "time": 435.59999999403954
+        },
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "d2243c37f7695186cbd1dda48a19459cc50ab728b03fc7037c2da85a6882eb91",
+        "first": "勇敢計程車兵在軟體開發中心使用滑鼠。0",
+        "maxTimerDriftMs": 4.100000008940697,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "manual-warm-20000",
+        "elapsedMs": 3603.2999999970198,
+        "expectedHash": "dfcebc062ee2ce4794ac4c1271fe9dd2221d3339c50604a512b0f3e5e633ee2f",
+        "response": {
+          "kind": "success",
+          "count": 20000,
+          "time": 3598.5
+        },
+        "complete": true,
+        "nodeCount": 20000,
+        "outputSha256": "dfcebc062ee2ce4794ac4c1271fe9dd2221d3339c50604a512b0f3e5e633ee2f",
+        "first": "勇敢計程車兵在軟體開發中心使用滑鼠。0",
+        "maxTimerDriftMs": 43.400000005960464,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "auto-dynamic-1000-roots",
+        "elapsedMs": 2729.5999999940395,
+        "expectedHash": "d2243c37f7695186cbd1dda48a19459cc50ab728b03fc7037c2da85a6882eb91",
+        "response": null,
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "d2243c37f7695186cbd1dda48a19459cc50ab728b03fc7037c2da85a6882eb91",
+        "first": "勇敢計程車兵在軟體開發中心使用滑鼠。0",
+        "maxTimerDriftMs": 42.599999994039536,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      }
+    ],
+    "variant": "baseline",
+    "identity": "0-mmseg-unique-baseline",
+    "recordedAt": "2026-10-23T22:10:33.975Z"
+  },
+  {
+    "trial": 0,
+    "mode": "mmseg",
+    "kind": "unique",
+    "edgeVersion": "155.0.4283.62",
+    "cases": [
+      {
+        "name": "manual-cold-1000",
+        "elapsedMs": 253,
+        "expectedHash": "d2243c37f7695186cbd1dda48a19459cc50ab728b03fc7037c2da85a6882eb91",
+        "response": {
+          "kind": "success",
+          "count": 1000,
+          "time": 251.69999998807907
+        },
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "d2243c37f7695186cbd1dda48a19459cc50ab728b03fc7037c2da85a6882eb91",
+        "first": "勇敢計程車兵在軟體開發中心使用滑鼠。0",
+        "maxTimerDriftMs": 8.200000002980232,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "manual-warm-20000",
+        "elapsedMs": 561.7999999970198,
+        "expectedHash": "dfcebc062ee2ce4794ac4c1271fe9dd2221d3339c50604a512b0f3e5e633ee2f",
+        "response": {
+          "kind": "success",
+          "count": 20000,
+          "time": 558.8999999910593
+        },
+        "complete": true,
+        "nodeCount": 20000,
+        "outputSha256": "dfcebc062ee2ce4794ac4c1271fe9dd2221d3339c50604a512b0f3e5e633ee2f",
+        "first": "勇敢計程車兵在軟體開發中心使用滑鼠。0",
+        "maxTimerDriftMs": 28.799999997019768,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "auto-dynamic-1000-roots",
+        "elapsedMs": 61.70000000298023,
+        "expectedHash": "d2243c37f7695186cbd1dda48a19459cc50ab728b03fc7037c2da85a6882eb91",
+        "response": null,
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "d2243c37f7695186cbd1dda48a19459cc50ab728b03fc7037c2da85a6882eb91",
+        "first": "勇敢計程車兵在軟體開發中心使用滑鼠。0",
+        "maxTimerDriftMs": 5.799999997019768,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      }
+    ],
+    "variant": "candidate",
+    "identity": "0-mmseg-unique-candidate",
+    "recordedAt": "2026-10-23T22:10:43.303Z"
+  },
+  {
+    "trial": 0,
+    "mode": "mmseg",
+    "kind": "repeated",
+    "edgeVersion": "155.0.4283.62",
+    "cases": [
+      {
+        "name": "manual-cold-1000",
+        "elapsedMs": 334.90000000596046,
+        "expectedHash": "1d2f8f0e8a387fa45f4a74a1e3e85b49d41053b8f346924374f7ec5be5829f0c",
+        "response": {
+          "kind": "success",
+          "count": 1000,
+          "time": 333.20000000298023
+        },
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "1d2f8f0e8a387fa45f4a74a1e3e85b49d41053b8f346924374f7ec5be5829f0c",
+        "first": "勇敢計程車兵在軟體開發中心使用滑鼠。",
+        "maxTimerDriftMs": 2.5,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "manual-warm-20000",
+        "elapsedMs": 4148.70000000298,
+        "expectedHash": "183d331fee196c0d521ad4246e5cccc22b1479c07f130f48a1c9d70729fce88f",
+        "response": {
+          "kind": "success",
+          "count": 20000,
+          "time": 4144.899999991059
+        },
+        "complete": true,
+        "nodeCount": 20000,
+        "outputSha256": "183d331fee196c0d521ad4246e5cccc22b1479c07f130f48a1c9d70729fce88f",
+        "first": "勇敢計程車兵在軟體開發中心使用滑鼠。",
+        "maxTimerDriftMs": 104.5,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "auto-dynamic-1000-roots",
+        "elapsedMs": 3695.699999988079,
+        "expectedHash": "1d2f8f0e8a387fa45f4a74a1e3e85b49d41053b8f346924374f7ec5be5829f0c",
+        "response": null,
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "1d2f8f0e8a387fa45f4a74a1e3e85b49d41053b8f346924374f7ec5be5829f0c",
+        "first": "勇敢計程車兵在軟體開發中心使用滑鼠。",
+        "maxTimerDriftMs": 32.5,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      }
+    ],
+    "variant": "baseline",
+    "identity": "0-mmseg-repeated-baseline",
+    "recordedAt": "2026-10-23T22:10:59.255Z"
+  },
+  {
+    "trial": 0,
+    "mode": "mmseg",
+    "kind": "repeated",
+    "edgeVersion": "155.0.4283.62",
+    "cases": [
+      {
+        "name": "manual-cold-1000",
+        "elapsedMs": 234.90000000596046,
+        "expectedHash": "1d2f8f0e8a387fa45f4a74a1e3e85b49d41053b8f346924374f7ec5be5829f0c",
+        "response": {
+          "kind": "success",
+          "count": 1000,
+          "time": 233.70000000298023
+        },
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "1d2f8f0e8a387fa45f4a74a1e3e85b49d41053b8f346924374f7ec5be5829f0c",
+        "first": "勇敢計程車兵在軟體開發中心使用滑鼠。",
+        "maxTimerDriftMs": 10.299999997019768,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "manual-warm-20000",
+        "elapsedMs": 255.5,
+        "expectedHash": "183d331fee196c0d521ad4246e5cccc22b1479c07f130f48a1c9d70729fce88f",
+        "response": {
+          "kind": "success",
+          "count": 20000,
+          "time": 253.70000000298023
+        },
+        "complete": true,
+        "nodeCount": 20000,
+        "outputSha256": "183d331fee196c0d521ad4246e5cccc22b1479c07f130f48a1c9d70729fce88f",
+        "first": "勇敢計程車兵在軟體開發中心使用滑鼠。",
+        "maxTimerDriftMs": 35.099999994039536,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "auto-dynamic-1000-roots",
+        "elapsedMs": 43.80000001192093,
+        "expectedHash": "1d2f8f0e8a387fa45f4a74a1e3e85b49d41053b8f346924374f7ec5be5829f0c",
+        "response": null,
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "1d2f8f0e8a387fa45f4a74a1e3e85b49d41053b8f346924374f7ec5be5829f0c",
+        "first": "勇敢計程車兵在軟體開發中心使用滑鼠。",
+        "maxTimerDriftMs": 14.900000005960464,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      }
+    ],
+    "variant": "candidate",
+    "identity": "0-mmseg-repeated-candidate",
+    "recordedAt": "2026-10-23T22:11:10.078Z"
+  },
+  {
+    "trial": 0,
+    "mode": "jieba",
+    "kind": "unique",
+    "edgeVersion": "155.0.4283.62",
+    "cases": [
+      {
+        "name": "manual-cold-1000",
+        "elapsedMs": 3055.5999999940395,
+        "expectedHash": "e596afb2693daca760552a9c59d26d6507f60dcc0968ec8bb3164a7ec2afd04b",
+        "response": {
+          "kind": "success",
+          "count": 1000,
+          "time": 3052.5999999940395
+        },
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "e596afb2693daca760552a9c59d26d6507f60dcc0968ec8bb3164a7ec2afd04b",
+        "first": "勇敢的士兵在軟體開發中心使用滑鼠。0",
+        "maxTimerDriftMs": 6.200000002980232,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "manual-warm-20000",
+        "elapsedMs": 4840.199999988079,
+        "expectedHash": "e951a3b279496338b1d4e826a3b8ecd79209c3b15317770eccb5e584087ff955",
+        "response": {
+          "kind": "success",
+          "count": 20000,
+          "time": 4837.300000011921
+        },
+        "complete": true,
+        "nodeCount": 20000,
+        "outputSha256": "e951a3b279496338b1d4e826a3b8ecd79209c3b15317770eccb5e584087ff955",
+        "first": "勇敢的士兵在軟體開發中心使用滑鼠。0",
+        "maxTimerDriftMs": 109,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "auto-dynamic-1000-roots",
+        "elapsedMs": 2837.0999999940395,
+        "expectedHash": "e596afb2693daca760552a9c59d26d6507f60dcc0968ec8bb3164a7ec2afd04b",
+        "response": null,
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "e596afb2693daca760552a9c59d26d6507f60dcc0968ec8bb3164a7ec2afd04b",
+        "first": "勇敢的士兵在軟體開發中心使用滑鼠。0",
+        "maxTimerDriftMs": 35.5,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      }
+    ],
+    "variant": "baseline",
+    "identity": "0-jieba-unique-baseline",
+    "recordedAt": "2026-10-23T22:11:31.875Z"
+  },
+  {
+    "trial": 0,
+    "mode": "jieba",
+    "kind": "unique",
+    "edgeVersion": "155.0.4283.62",
+    "cases": [
+      {
+        "name": "manual-cold-1000",
+        "elapsedMs": 1099.2000000029802,
+        "expectedHash": "e596afb2693daca760552a9c59d26d6507f60dcc0968ec8bb3164a7ec2afd04b",
+        "response": {
+          "kind": "success",
+          "count": 1000,
+          "time": 1097.5999999940395
+        },
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "e596afb2693daca760552a9c59d26d6507f60dcc0968ec8bb3164a7ec2afd04b",
+        "first": "勇敢的士兵在軟體開發中心使用滑鼠。0",
+        "maxTimerDriftMs": 7.9000000059604645,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "manual-warm-20000",
+        "elapsedMs": 951.5,
+        "expectedHash": "e951a3b279496338b1d4e826a3b8ecd79209c3b15317770eccb5e584087ff955",
+        "response": {
+          "kind": "success",
+          "count": 20000,
+          "time": 949.3999999910593
+        },
+        "complete": true,
+        "nodeCount": 20000,
+        "outputSha256": "e951a3b279496338b1d4e826a3b8ecd79209c3b15317770eccb5e584087ff955",
+        "first": "勇敢的士兵在軟體開發中心使用滑鼠。0",
+        "maxTimerDriftMs": 36.1000000089407,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "auto-dynamic-1000-roots",
+        "elapsedMs": 68.59999999403954,
+        "expectedHash": "e596afb2693daca760552a9c59d26d6507f60dcc0968ec8bb3164a7ec2afd04b",
+        "response": null,
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "e596afb2693daca760552a9c59d26d6507f60dcc0968ec8bb3164a7ec2afd04b",
+        "first": "勇敢的士兵在軟體開發中心使用滑鼠。0",
+        "maxTimerDriftMs": 15.899999991059303,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      }
+    ],
+    "variant": "candidate",
+    "identity": "0-jieba-unique-candidate",
+    "recordedAt": "2026-10-23T22:11:41.593Z"
+  },
+  {
+    "trial": 0,
+    "mode": "jieba",
+    "kind": "repeated",
+    "edgeVersion": "155.0.4283.62",
+    "cases": [
+      {
+        "name": "manual-cold-1000",
+        "elapsedMs": 3405.7000000029802,
+        "expectedHash": "790a1f04f72040a695db754a830df970e2ce8aa2a0563686fa457024a59bfe1a",
+        "response": {
+          "kind": "success",
+          "count": 1000,
+          "time": 3401
+        },
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "790a1f04f72040a695db754a830df970e2ce8aa2a0563686fa457024a59bfe1a",
+        "first": "勇敢的士兵在軟體開發中心使用滑鼠。",
+        "maxTimerDriftMs": 15.700000002980232,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "manual-warm-20000",
+        "elapsedMs": 4277.9000000059605,
+        "expectedHash": "e011d884ba9ec52c635e981d9adbe778e7766d0a918c68e8ea4a97870733f5e6",
+        "response": {
+          "kind": "success",
+          "count": 20000,
+          "time": 4272.79999999702
+        },
+        "complete": true,
+        "nodeCount": 20000,
+        "outputSha256": "e011d884ba9ec52c635e981d9adbe778e7766d0a918c68e8ea4a97870733f5e6",
+        "first": "勇敢的士兵在軟體開發中心使用滑鼠。",
+        "maxTimerDriftMs": 36,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "auto-dynamic-1000-roots",
+        "elapsedMs": 3269.2999999970198,
+        "expectedHash": "790a1f04f72040a695db754a830df970e2ce8aa2a0563686fa457024a59bfe1a",
+        "response": null,
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "790a1f04f72040a695db754a830df970e2ce8aa2a0563686fa457024a59bfe1a",
+        "first": "勇敢的士兵在軟體開發中心使用滑鼠。",
+        "maxTimerDriftMs": 36.400000005960464,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      }
+    ],
+    "variant": "baseline",
+    "identity": "0-jieba-repeated-baseline",
+    "recordedAt": "2026-10-23T22:12:01.871Z"
+  },
+  {
+    "trial": 0,
+    "mode": "jieba",
+    "kind": "repeated",
+    "edgeVersion": "155.0.4283.62",
+    "cases": [
+      {
+        "name": "manual-cold-1000",
+        "elapsedMs": 1210.3999999910593,
+        "expectedHash": "790a1f04f72040a695db754a830df970e2ce8aa2a0563686fa457024a59bfe1a",
+        "response": {
+          "kind": "success",
+          "count": 1000,
+          "time": 1208.7000000029802
+        },
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "790a1f04f72040a695db754a830df970e2ce8aa2a0563686fa457024a59bfe1a",
+        "first": "勇敢的士兵在軟體開發中心使用滑鼠。",
+        "maxTimerDriftMs": 5.200000002980232,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "manual-warm-20000",
+        "elapsedMs": 345.09999999403954,
+        "expectedHash": "e011d884ba9ec52c635e981d9adbe778e7766d0a918c68e8ea4a97870733f5e6",
+        "response": {
+          "kind": "success",
+          "count": 20000,
+          "time": 340.8999999910593
+        },
+        "complete": true,
+        "nodeCount": 20000,
+        "outputSha256": "e011d884ba9ec52c635e981d9adbe778e7766d0a918c68e8ea4a97870733f5e6",
+        "first": "勇敢的士兵在軟體開發中心使用滑鼠。",
+        "maxTimerDriftMs": 34.099999994039536,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "auto-dynamic-1000-roots",
+        "elapsedMs": 47.30000001192093,
+        "expectedHash": "790a1f04f72040a695db754a830df970e2ce8aa2a0563686fa457024a59bfe1a",
+        "response": null,
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "790a1f04f72040a695db754a830df970e2ce8aa2a0563686fa457024a59bfe1a",
+        "first": "勇敢的士兵在軟體開發中心使用滑鼠。",
+        "maxTimerDriftMs": 10.599999994039536,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      }
+    ],
+    "variant": "candidate",
+    "identity": "0-jieba-repeated-candidate",
+    "recordedAt": "2026-10-23T22:12:13.187Z"
+  },
+  {
+    "trial": 1,
+    "mode": "jieba",
+    "kind": "repeated",
+    "edgeVersion": "155.0.4283.62",
+    "cases": [
+      {
+        "name": "manual-cold-1000",
+        "elapsedMs": 2777.300000011921,
+        "expectedHash": "790a1f04f72040a695db754a830df970e2ce8aa2a0563686fa457024a59bfe1a",
+        "response": {
+          "kind": "success",
+          "count": 1000,
+          "time": 2775.3999999910593
+        },
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "790a1f04f72040a695db754a830df970e2ce8aa2a0563686fa457024a59bfe1a",
+        "first": "勇敢的士兵在軟體開發中心使用滑鼠。",
+        "maxTimerDriftMs": 21.099999994039536,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "manual-warm-20000",
+        "elapsedMs": 449.90000000596046,
+        "expectedHash": "e011d884ba9ec52c635e981d9adbe778e7766d0a918c68e8ea4a97870733f5e6",
+        "response": {
+          "kind": "success",
+          "count": 20000,
+          "time": 444
+        },
+        "complete": true,
+        "nodeCount": 20000,
+        "outputSha256": "e011d884ba9ec52c635e981d9adbe778e7766d0a918c68e8ea4a97870733f5e6",
+        "first": "勇敢的士兵在軟體開發中心使用滑鼠。",
+        "maxTimerDriftMs": 77.59999999403954,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "auto-dynamic-1000-roots",
+        "elapsedMs": 35.099999994039536,
+        "expectedHash": "790a1f04f72040a695db754a830df970e2ce8aa2a0563686fa457024a59bfe1a",
+        "response": null,
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "790a1f04f72040a695db754a830df970e2ce8aa2a0563686fa457024a59bfe1a",
+        "first": "勇敢的士兵在軟體開發中心使用滑鼠。",
+        "maxTimerDriftMs": 7.200000002980232,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      }
+    ],
+    "variant": "candidate",
+    "identity": "1-jieba-repeated-candidate",
+    "recordedAt": "2026-10-23T22:12:25.071Z"
+  },
+  {
+    "trial": 1,
+    "mode": "jieba",
+    "kind": "repeated",
+    "edgeVersion": "155.0.4283.62",
+    "cases": [
+      {
+        "name": "manual-cold-1000",
+        "elapsedMs": 3332.199999988079,
+        "expectedHash": "790a1f04f72040a695db754a830df970e2ce8aa2a0563686fa457024a59bfe1a",
+        "response": {
+          "kind": "success",
+          "count": 1000,
+          "time": 3327.3999999910593
+        },
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "790a1f04f72040a695db754a830df970e2ce8aa2a0563686fa457024a59bfe1a",
+        "first": "勇敢的士兵在軟體開發中心使用滑鼠。",
+        "maxTimerDriftMs": 7.399999991059303,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "manual-warm-20000",
+        "elapsedMs": 4351.0999999940395,
+        "expectedHash": "e011d884ba9ec52c635e981d9adbe778e7766d0a918c68e8ea4a97870733f5e6",
+        "response": {
+          "kind": "success",
+          "count": 20000,
+          "time": 4348.399999991059
+        },
+        "complete": true,
+        "nodeCount": 20000,
+        "outputSha256": "e011d884ba9ec52c635e981d9adbe778e7766d0a918c68e8ea4a97870733f5e6",
+        "first": "勇敢的士兵在軟體開發中心使用滑鼠。",
+        "maxTimerDriftMs": 66.20000000298023,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "auto-dynamic-1000-roots",
+        "elapsedMs": 3461.8999999910593,
+        "expectedHash": "790a1f04f72040a695db754a830df970e2ce8aa2a0563686fa457024a59bfe1a",
+        "response": null,
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "790a1f04f72040a695db754a830df970e2ce8aa2a0563686fa457024a59bfe1a",
+        "first": "勇敢的士兵在軟體開發中心使用滑鼠。",
+        "maxTimerDriftMs": 25.900000005960464,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      }
+    ],
+    "variant": "baseline",
+    "identity": "1-jieba-repeated-baseline",
+    "recordedAt": "2026-10-23T22:12:44.233Z"
+  },
+  {
+    "trial": 1,
+    "mode": "jieba",
+    "kind": "unique",
+    "edgeVersion": "155.0.4283.62",
+    "cases": [
+      {
+        "name": "manual-cold-1000",
+        "elapsedMs": 2382.5999999940395,
+        "expectedHash": "e596afb2693daca760552a9c59d26d6507f60dcc0968ec8bb3164a7ec2afd04b",
+        "response": {
+          "kind": "success",
+          "count": 1000,
+          "time": 2380.5
+        },
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "e596afb2693daca760552a9c59d26d6507f60dcc0968ec8bb3164a7ec2afd04b",
+        "first": "勇敢的士兵在軟體開發中心使用滑鼠。0",
+        "maxTimerDriftMs": 17.400000005960464,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "manual-warm-20000",
+        "elapsedMs": 941.7999999970198,
+        "expectedHash": "e951a3b279496338b1d4e826a3b8ecd79209c3b15317770eccb5e584087ff955",
+        "response": {
+          "kind": "success",
+          "count": 20000,
+          "time": 939.8999999910593
+        },
+        "complete": true,
+        "nodeCount": 20000,
+        "outputSha256": "e951a3b279496338b1d4e826a3b8ecd79209c3b15317770eccb5e584087ff955",
+        "first": "勇敢的士兵在軟體開發中心使用滑鼠。0",
+        "maxTimerDriftMs": 59.099999994039536,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "auto-dynamic-1000-roots",
+        "elapsedMs": 67.90000000596046,
+        "expectedHash": "e596afb2693daca760552a9c59d26d6507f60dcc0968ec8bb3164a7ec2afd04b",
+        "response": null,
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "e596afb2693daca760552a9c59d26d6507f60dcc0968ec8bb3164a7ec2afd04b",
+        "first": "勇敢的士兵在軟體開發中心使用滑鼠。0",
+        "maxTimerDriftMs": 11.400000005960464,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      }
+    ],
+    "variant": "candidate",
+    "identity": "1-jieba-unique-candidate",
+    "recordedAt": "2026-10-23T22:12:57.107Z"
+  },
+  {
+    "trial": 1,
+    "mode": "jieba",
+    "kind": "unique",
+    "edgeVersion": "155.0.4283.62",
+    "cases": [
+      {
+        "name": "manual-cold-1000",
+        "elapsedMs": 3026.5999999940395,
+        "expectedHash": "e596afb2693daca760552a9c59d26d6507f60dcc0968ec8bb3164a7ec2afd04b",
+        "response": {
+          "kind": "success",
+          "count": 1000,
+          "time": 3023
+        },
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "e596afb2693daca760552a9c59d26d6507f60dcc0968ec8bb3164a7ec2afd04b",
+        "first": "勇敢的士兵在軟體開發中心使用滑鼠。0",
+        "maxTimerDriftMs": 6.5,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "manual-warm-20000",
+        "elapsedMs": 5652.4000000059605,
+        "expectedHash": "e951a3b279496338b1d4e826a3b8ecd79209c3b15317770eccb5e584087ff955",
+        "response": {
+          "kind": "success",
+          "count": 20000,
+          "time": 5649.29999999702
+        },
+        "complete": true,
+        "nodeCount": 20000,
+        "outputSha256": "e951a3b279496338b1d4e826a3b8ecd79209c3b15317770eccb5e584087ff955",
+        "first": "勇敢的士兵在軟體開發中心使用滑鼠。0",
+        "maxTimerDriftMs": 103.19999998807907,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "auto-dynamic-1000-roots",
+        "elapsedMs": 3396.6000000089407,
+        "expectedHash": "e596afb2693daca760552a9c59d26d6507f60dcc0968ec8bb3164a7ec2afd04b",
+        "response": null,
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "e596afb2693daca760552a9c59d26d6507f60dcc0968ec8bb3164a7ec2afd04b",
+        "first": "勇敢的士兵在軟體開發中心使用滑鼠。0",
+        "maxTimerDriftMs": 21.600000008940697,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      }
+    ],
+    "variant": "baseline",
+    "identity": "1-jieba-unique-baseline",
+    "recordedAt": "2026-10-23T22:13:19.623Z"
+  },
+  {
+    "trial": 1,
+    "mode": "mmseg",
+    "kind": "repeated",
+    "edgeVersion": "155.0.4283.62",
+    "cases": [
+      {
+        "name": "manual-cold-1000",
+        "elapsedMs": 558.7999999970198,
+        "expectedHash": "1d2f8f0e8a387fa45f4a74a1e3e85b49d41053b8f346924374f7ec5be5829f0c",
+        "response": {
+          "kind": "success",
+          "count": 1000,
+          "time": 556.7000000029802
+        },
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "1d2f8f0e8a387fa45f4a74a1e3e85b49d41053b8f346924374f7ec5be5829f0c",
+        "first": "勇敢計程車兵在軟體開發中心使用滑鼠。",
+        "maxTimerDriftMs": 16.799999997019768,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "manual-warm-20000",
+        "elapsedMs": 479.1000000089407,
+        "expectedHash": "183d331fee196c0d521ad4246e5cccc22b1479c07f130f48a1c9d70729fce88f",
+        "response": {
+          "kind": "success",
+          "count": 20000,
+          "time": 473.29999999701977
+        },
+        "complete": true,
+        "nodeCount": 20000,
+        "outputSha256": "183d331fee196c0d521ad4246e5cccc22b1479c07f130f48a1c9d70729fce88f",
+        "first": "勇敢計程車兵在軟體開發中心使用滑鼠。",
+        "maxTimerDriftMs": 101.90000000596046,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "auto-dynamic-1000-roots",
+        "elapsedMs": 41,
+        "expectedHash": "1d2f8f0e8a387fa45f4a74a1e3e85b49d41053b8f346924374f7ec5be5829f0c",
+        "response": null,
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "1d2f8f0e8a387fa45f4a74a1e3e85b49d41053b8f346924374f7ec5be5829f0c",
+        "first": "勇敢計程車兵在軟體開發中心使用滑鼠。",
+        "maxTimerDriftMs": 4.4000000059604645,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      }
+    ],
+    "variant": "candidate",
+    "identity": "1-mmseg-repeated-candidate",
+    "recordedAt": "2026-10-23T22:13:31.256Z"
+  },
+  {
+    "trial": 1,
+    "mode": "mmseg",
+    "kind": "repeated",
+    "edgeVersion": "155.0.4283.62",
+    "cases": [
+      {
+        "name": "manual-cold-1000",
+        "elapsedMs": 1093.7999999970198,
+        "expectedHash": "1d2f8f0e8a387fa45f4a74a1e3e85b49d41053b8f346924374f7ec5be5829f0c",
+        "response": {
+          "kind": "success",
+          "count": 1000,
+          "time": 1089.9000000059605
+        },
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "1d2f8f0e8a387fa45f4a74a1e3e85b49d41053b8f346924374f7ec5be5829f0c",
+        "first": "勇敢計程車兵在軟體開發中心使用滑鼠。",
+        "maxTimerDriftMs": 9.199999988079071,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "manual-warm-20000",
+        "elapsedMs": 4050.0999999940395,
+        "expectedHash": "183d331fee196c0d521ad4246e5cccc22b1479c07f130f48a1c9d70729fce88f",
+        "response": {
+          "kind": "success",
+          "count": 20000,
+          "time": 4037.9000000059605
+        },
+        "complete": true,
+        "nodeCount": 20000,
+        "outputSha256": "183d331fee196c0d521ad4246e5cccc22b1479c07f130f48a1c9d70729fce88f",
+        "first": "勇敢計程車兵在軟體開發中心使用滑鼠。",
+        "maxTimerDriftMs": 107.59999999403954,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "auto-dynamic-1000-roots",
+        "elapsedMs": 2296,
+        "expectedHash": "1d2f8f0e8a387fa45f4a74a1e3e85b49d41053b8f346924374f7ec5be5829f0c",
+        "response": null,
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "1d2f8f0e8a387fa45f4a74a1e3e85b49d41053b8f346924374f7ec5be5829f0c",
+        "first": "勇敢計程車兵在軟體開發中心使用滑鼠。",
+        "maxTimerDriftMs": 9.400000005960464,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      }
+    ],
+    "variant": "baseline",
+    "identity": "1-mmseg-repeated-baseline",
+    "recordedAt": "2026-10-23T22:13:48.050Z"
+  },
+  {
+    "trial": 1,
+    "mode": "mmseg",
+    "kind": "unique",
+    "edgeVersion": "155.0.4283.62",
+    "cases": [
+      {
+        "name": "manual-cold-1000",
+        "elapsedMs": 288.5,
+        "expectedHash": "d2243c37f7695186cbd1dda48a19459cc50ab728b03fc7037c2da85a6882eb91",
+        "response": {
+          "kind": "success",
+          "count": 1000,
+          "time": 286.19999998807907
+        },
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "d2243c37f7695186cbd1dda48a19459cc50ab728b03fc7037c2da85a6882eb91",
+        "first": "勇敢計程車兵在軟體開發中心使用滑鼠。0",
+        "maxTimerDriftMs": 8.700000002980232,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "manual-warm-20000",
+        "elapsedMs": 896.7999999970198,
+        "expectedHash": "dfcebc062ee2ce4794ac4c1271fe9dd2221d3339c50604a512b0f3e5e633ee2f",
+        "response": {
+          "kind": "success",
+          "count": 20000,
+          "time": 892.5
+        },
+        "complete": true,
+        "nodeCount": 20000,
+        "outputSha256": "dfcebc062ee2ce4794ac4c1271fe9dd2221d3339c50604a512b0f3e5e633ee2f",
+        "first": "勇敢計程車兵在軟體開發中心使用滑鼠。0",
+        "maxTimerDriftMs": 43,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "auto-dynamic-1000-roots",
+        "elapsedMs": 74.20000000298023,
+        "expectedHash": "d2243c37f7695186cbd1dda48a19459cc50ab728b03fc7037c2da85a6882eb91",
+        "response": null,
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "d2243c37f7695186cbd1dda48a19459cc50ab728b03fc7037c2da85a6882eb91",
+        "first": "勇敢計程車兵在軟體開發中心使用滑鼠。0",
+        "maxTimerDriftMs": 17.600000008940697,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      }
+    ],
+    "variant": "candidate",
+    "identity": "1-mmseg-unique-candidate",
+    "recordedAt": "2026-10-23T22:14:00.041Z"
+  },
+  {
+    "trial": 1,
+    "mode": "mmseg",
+    "kind": "unique",
+    "edgeVersion": "155.0.4283.62",
+    "cases": [
+      {
+        "name": "manual-cold-1000",
+        "elapsedMs": 319.79999999701977,
+        "expectedHash": "d2243c37f7695186cbd1dda48a19459cc50ab728b03fc7037c2da85a6882eb91",
+        "response": {
+          "kind": "success",
+          "count": 1000,
+          "time": 318.09999999403954
+        },
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "d2243c37f7695186cbd1dda48a19459cc50ab728b03fc7037c2da85a6882eb91",
+        "first": "勇敢計程車兵在軟體開發中心使用滑鼠。0",
+        "maxTimerDriftMs": 5,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "manual-warm-20000",
+        "elapsedMs": 3527.5999999940395,
+        "expectedHash": "dfcebc062ee2ce4794ac4c1271fe9dd2221d3339c50604a512b0f3e5e633ee2f",
+        "response": {
+          "kind": "success",
+          "count": 20000,
+          "time": 3526.4000000059605
+        },
+        "complete": true,
+        "nodeCount": 20000,
+        "outputSha256": "dfcebc062ee2ce4794ac4c1271fe9dd2221d3339c50604a512b0f3e5e633ee2f",
+        "first": "勇敢計程車兵在軟體開發中心使用滑鼠。0",
+        "maxTimerDriftMs": 67.5,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "auto-dynamic-1000-roots",
+        "elapsedMs": 3097.199999988079,
+        "expectedHash": "d2243c37f7695186cbd1dda48a19459cc50ab728b03fc7037c2da85a6882eb91",
+        "response": null,
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "d2243c37f7695186cbd1dda48a19459cc50ab728b03fc7037c2da85a6882eb91",
+        "first": "勇敢計程車兵在軟體開發中心使用滑鼠。0",
+        "maxTimerDriftMs": 17.099999994039536,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      }
+    ],
+    "variant": "baseline",
+    "identity": "1-mmseg-unique-baseline",
+    "recordedAt": "2026-10-23T22:14:17.094Z"
+  },
+  {
+    "trial": 2,
+    "mode": "mmseg",
+    "kind": "unique",
+    "edgeVersion": "155.0.4283.62",
+    "cases": [
+      {
+        "name": "manual-cold-1000",
+        "elapsedMs": 318.6000000089407,
+        "expectedHash": "d2243c37f7695186cbd1dda48a19459cc50ab728b03fc7037c2da85a6882eb91",
+        "response": {
+          "kind": "success",
+          "count": 1000,
+          "time": 316.29999999701977
+        },
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "d2243c37f7695186cbd1dda48a19459cc50ab728b03fc7037c2da85a6882eb91",
+        "first": "勇敢計程車兵在軟體開發中心使用滑鼠。0",
+        "maxTimerDriftMs": 3.6000000089406967,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "manual-warm-20000",
+        "elapsedMs": 4233.899999991059,
+        "expectedHash": "dfcebc062ee2ce4794ac4c1271fe9dd2221d3339c50604a512b0f3e5e633ee2f",
+        "response": {
+          "kind": "success",
+          "count": 20000,
+          "time": 4231
+        },
+        "complete": true,
+        "nodeCount": 20000,
+        "outputSha256": "dfcebc062ee2ce4794ac4c1271fe9dd2221d3339c50604a512b0f3e5e633ee2f",
+        "first": "勇敢計程車兵在軟體開發中心使用滑鼠。0",
+        "maxTimerDriftMs": 97.79999999701977,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "auto-dynamic-1000-roots",
+        "elapsedMs": 2176.7000000029802,
+        "expectedHash": "d2243c37f7695186cbd1dda48a19459cc50ab728b03fc7037c2da85a6882eb91",
+        "response": null,
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "d2243c37f7695186cbd1dda48a19459cc50ab728b03fc7037c2da85a6882eb91",
+        "first": "勇敢計程車兵在軟體開發中心使用滑鼠。0",
+        "maxTimerDriftMs": 19.200000002980232,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      }
+    ],
+    "variant": "baseline",
+    "identity": "2-mmseg-unique-baseline",
+    "recordedAt": "2026-10-23T22:14:33.545Z"
+  },
+  {
+    "trial": 2,
+    "mode": "mmseg",
+    "kind": "unique",
+    "edgeVersion": "155.0.4283.62",
+    "cases": [
+      {
+        "name": "manual-cold-1000",
+        "elapsedMs": 429.70000000298023,
+        "expectedHash": "d2243c37f7695186cbd1dda48a19459cc50ab728b03fc7037c2da85a6882eb91",
+        "response": {
+          "kind": "success",
+          "count": 1000,
+          "time": 427.20000000298023
+        },
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "d2243c37f7695186cbd1dda48a19459cc50ab728b03fc7037c2da85a6882eb91",
+        "first": "勇敢計程車兵在軟體開發中心使用滑鼠。0",
+        "maxTimerDriftMs": 16.099999994039536,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "manual-warm-20000",
+        "elapsedMs": 986.7000000029802,
+        "expectedHash": "dfcebc062ee2ce4794ac4c1271fe9dd2221d3339c50604a512b0f3e5e633ee2f",
+        "response": {
+          "kind": "success",
+          "count": 20000,
+          "time": 982.5
+        },
+        "complete": true,
+        "nodeCount": 20000,
+        "outputSha256": "dfcebc062ee2ce4794ac4c1271fe9dd2221d3339c50604a512b0f3e5e633ee2f",
+        "first": "勇敢計程車兵在軟體開發中心使用滑鼠。0",
+        "maxTimerDriftMs": 47.20000000298023,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "auto-dynamic-1000-roots",
+        "elapsedMs": 83.30000001192093,
+        "expectedHash": "d2243c37f7695186cbd1dda48a19459cc50ab728b03fc7037c2da85a6882eb91",
+        "response": null,
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "d2243c37f7695186cbd1dda48a19459cc50ab728b03fc7037c2da85a6882eb91",
+        "first": "勇敢計程車兵在軟體開發中心使用滑鼠。0",
+        "maxTimerDriftMs": 22.400000005960464,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      }
+    ],
+    "variant": "candidate",
+    "identity": "2-mmseg-unique-candidate",
+    "recordedAt": "2026-10-23T22:14:45.509Z"
+  },
+  {
+    "trial": 2,
+    "mode": "mmseg",
+    "kind": "repeated",
+    "edgeVersion": "155.0.4283.62",
+    "cases": [
+      {
+        "name": "manual-cold-1000",
+        "elapsedMs": 491.29999999701977,
+        "expectedHash": "1d2f8f0e8a387fa45f4a74a1e3e85b49d41053b8f346924374f7ec5be5829f0c",
+        "response": {
+          "kind": "success",
+          "count": 1000,
+          "time": 489.29999999701977
+        },
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "1d2f8f0e8a387fa45f4a74a1e3e85b49d41053b8f346924374f7ec5be5829f0c",
+        "first": "勇敢計程車兵在軟體開發中心使用滑鼠。",
+        "maxTimerDriftMs": 5.9000000059604645,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "manual-warm-20000",
+        "elapsedMs": 4679.5,
+        "expectedHash": "183d331fee196c0d521ad4246e5cccc22b1479c07f130f48a1c9d70729fce88f",
+        "response": {
+          "kind": "success",
+          "count": 20000,
+          "time": 4675.600000008941
+        },
+        "complete": true,
+        "nodeCount": 20000,
+        "outputSha256": "183d331fee196c0d521ad4246e5cccc22b1479c07f130f48a1c9d70729fce88f",
+        "first": "勇敢計程車兵在軟體開發中心使用滑鼠。",
+        "maxTimerDriftMs": 61.599999994039536,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "auto-dynamic-1000-roots",
+        "elapsedMs": 3413.7000000029802,
+        "expectedHash": "1d2f8f0e8a387fa45f4a74a1e3e85b49d41053b8f346924374f7ec5be5829f0c",
+        "response": null,
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "1d2f8f0e8a387fa45f4a74a1e3e85b49d41053b8f346924374f7ec5be5829f0c",
+        "first": "勇敢計程車兵在軟體開發中心使用滑鼠。",
+        "maxTimerDriftMs": 8.399999991059303,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      }
+    ],
+    "variant": "baseline",
+    "identity": "2-mmseg-repeated-baseline",
+    "recordedAt": "2026-10-23T22:15:04.540Z"
+  },
+  {
+    "trial": 2,
+    "mode": "mmseg",
+    "kind": "repeated",
+    "edgeVersion": "155.0.4283.62",
+    "cases": [
+      {
+        "name": "manual-cold-1000",
+        "elapsedMs": 303.20000000298023,
+        "expectedHash": "1d2f8f0e8a387fa45f4a74a1e3e85b49d41053b8f346924374f7ec5be5829f0c",
+        "response": {
+          "kind": "success",
+          "count": 1000,
+          "time": 301.3999999910593
+        },
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "1d2f8f0e8a387fa45f4a74a1e3e85b49d41053b8f346924374f7ec5be5829f0c",
+        "first": "勇敢計程車兵在軟體開發中心使用滑鼠。",
+        "maxTimerDriftMs": 7,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "manual-warm-20000",
+        "elapsedMs": 525.5,
+        "expectedHash": "183d331fee196c0d521ad4246e5cccc22b1479c07f130f48a1c9d70729fce88f",
+        "response": {
+          "kind": "success",
+          "count": 20000,
+          "time": 521.3000000119209
+        },
+        "complete": true,
+        "nodeCount": 20000,
+        "outputSha256": "183d331fee196c0d521ad4246e5cccc22b1479c07f130f48a1c9d70729fce88f",
+        "first": "勇敢計程車兵在軟體開發中心使用滑鼠。",
+        "maxTimerDriftMs": 43.5,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "auto-dynamic-1000-roots",
+        "elapsedMs": 44.70000000298023,
+        "expectedHash": "1d2f8f0e8a387fa45f4a74a1e3e85b49d41053b8f346924374f7ec5be5829f0c",
+        "response": null,
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "1d2f8f0e8a387fa45f4a74a1e3e85b49d41053b8f346924374f7ec5be5829f0c",
+        "first": "勇敢計程車兵在軟體開發中心使用滑鼠。",
+        "maxTimerDriftMs": 12.5,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      }
+    ],
+    "variant": "candidate",
+    "identity": "2-mmseg-repeated-candidate",
+    "recordedAt": "2026-10-23T22:15:16.176Z"
+  },
+  {
+    "trial": 2,
+    "mode": "jieba",
+    "kind": "unique",
+    "edgeVersion": "155.0.4283.62",
+    "cases": [
+      {
+        "name": "manual-cold-1000",
+        "elapsedMs": 3087.7999999970198,
+        "expectedHash": "e596afb2693daca760552a9c59d26d6507f60dcc0968ec8bb3164a7ec2afd04b",
+        "response": {
+          "kind": "success",
+          "count": 1000,
+          "time": 3085.0999999940395
+        },
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "e596afb2693daca760552a9c59d26d6507f60dcc0968ec8bb3164a7ec2afd04b",
+        "first": "勇敢的士兵在軟體開發中心使用滑鼠。0",
+        "maxTimerDriftMs": 3,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "manual-warm-20000",
+        "elapsedMs": 4621.70000000298,
+        "expectedHash": "e951a3b279496338b1d4e826a3b8ecd79209c3b15317770eccb5e584087ff955",
+        "response": {
+          "kind": "success",
+          "count": 20000,
+          "time": 4619.5
+        },
+        "complete": true,
+        "nodeCount": 20000,
+        "outputSha256": "e951a3b279496338b1d4e826a3b8ecd79209c3b15317770eccb5e584087ff955",
+        "first": "勇敢的士兵在軟體開發中心使用滑鼠。0",
+        "maxTimerDriftMs": 55.29999999701977,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "auto-dynamic-1000-roots",
+        "elapsedMs": 2563.800000011921,
+        "expectedHash": "e596afb2693daca760552a9c59d26d6507f60dcc0968ec8bb3164a7ec2afd04b",
+        "response": null,
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "e596afb2693daca760552a9c59d26d6507f60dcc0968ec8bb3164a7ec2afd04b",
+        "first": "勇敢的士兵在軟體開發中心使用滑鼠。0",
+        "maxTimerDriftMs": 20.80000001192093,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      }
+    ],
+    "variant": "baseline",
+    "identity": "2-jieba-unique-baseline",
+    "recordedAt": "2026-10-23T22:15:37.944Z"
+  },
+  {
+    "trial": 2,
+    "mode": "jieba",
+    "kind": "unique",
+    "edgeVersion": "155.0.4283.62",
+    "cases": [
+      {
+        "name": "manual-cold-1000",
+        "elapsedMs": 2420,
+        "expectedHash": "e596afb2693daca760552a9c59d26d6507f60dcc0968ec8bb3164a7ec2afd04b",
+        "response": {
+          "kind": "success",
+          "count": 1000,
+          "time": 2417.9000000059605
+        },
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "e596afb2693daca760552a9c59d26d6507f60dcc0968ec8bb3164a7ec2afd04b",
+        "first": "勇敢的士兵在軟體開發中心使用滑鼠。0",
+        "maxTimerDriftMs": 15.300000011920929,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "manual-warm-20000",
+        "elapsedMs": 1507.300000011921,
+        "expectedHash": "e951a3b279496338b1d4e826a3b8ecd79209c3b15317770eccb5e584087ff955",
+        "response": {
+          "kind": "success",
+          "count": 20000,
+          "time": 1503.5999999940395
+        },
+        "complete": true,
+        "nodeCount": 20000,
+        "outputSha256": "e951a3b279496338b1d4e826a3b8ecd79209c3b15317770eccb5e584087ff955",
+        "first": "勇敢的士兵在軟體開發中心使用滑鼠。0",
+        "maxTimerDriftMs": 81.70000000298023,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "auto-dynamic-1000-roots",
+        "elapsedMs": 66.1000000089407,
+        "expectedHash": "e596afb2693daca760552a9c59d26d6507f60dcc0968ec8bb3164a7ec2afd04b",
+        "response": null,
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "e596afb2693daca760552a9c59d26d6507f60dcc0968ec8bb3164a7ec2afd04b",
+        "first": "勇敢的士兵在軟體開發中心使用滑鼠。0",
+        "maxTimerDriftMs": 11.400000005960464,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      }
+    ],
+    "variant": "candidate",
+    "identity": "2-jieba-unique-candidate",
+    "recordedAt": "2026-10-23T22:15:51.568Z"
+  },
+  {
+    "trial": 2,
+    "mode": "jieba",
+    "kind": "repeated",
+    "edgeVersion": "155.0.4283.62",
+    "cases": [
+      {
+        "name": "manual-cold-1000",
+        "elapsedMs": 2441.5999999940395,
+        "expectedHash": "790a1f04f72040a695db754a830df970e2ce8aa2a0563686fa457024a59bfe1a",
+        "response": {
+          "kind": "success",
+          "count": 1000,
+          "time": 2438.7000000029802
+        },
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "790a1f04f72040a695db754a830df970e2ce8aa2a0563686fa457024a59bfe1a",
+        "first": "勇敢的士兵在軟體開發中心使用滑鼠。",
+        "maxTimerDriftMs": 4.0999999940395355,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "manual-warm-20000",
+        "elapsedMs": 4347.29999999702,
+        "expectedHash": "e011d884ba9ec52c635e981d9adbe778e7766d0a918c68e8ea4a97870733f5e6",
+        "response": {
+          "kind": "success",
+          "count": 20000,
+          "time": 4341.70000000298
+        },
+        "complete": true,
+        "nodeCount": 20000,
+        "outputSha256": "e011d884ba9ec52c635e981d9adbe778e7766d0a918c68e8ea4a97870733f5e6",
+        "first": "勇敢的士兵在軟體開發中心使用滑鼠。",
+        "maxTimerDriftMs": 86.29999999701977,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "auto-dynamic-1000-roots",
+        "elapsedMs": 3778.199999988079,
+        "expectedHash": "790a1f04f72040a695db754a830df970e2ce8aa2a0563686fa457024a59bfe1a",
+        "response": null,
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "790a1f04f72040a695db754a830df970e2ce8aa2a0563686fa457024a59bfe1a",
+        "first": "勇敢的士兵在軟體開發中心使用滑鼠。",
+        "maxTimerDriftMs": 20.899999991059303,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      }
+    ],
+    "variant": "baseline",
+    "identity": "2-jieba-repeated-baseline",
+    "recordedAt": "2026-10-23T22:16:13.357Z"
+  },
+  {
+    "trial": 2,
+    "mode": "jieba",
+    "kind": "repeated",
+    "edgeVersion": "155.0.4283.62",
+    "cases": [
+      {
+        "name": "manual-cold-1000",
+        "elapsedMs": 2652.5999999940395,
+        "expectedHash": "790a1f04f72040a695db754a830df970e2ce8aa2a0563686fa457024a59bfe1a",
+        "response": {
+          "kind": "success",
+          "count": 1000,
+          "time": 2650.9000000059605
+        },
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "790a1f04f72040a695db754a830df970e2ce8aa2a0563686fa457024a59bfe1a",
+        "first": "勇敢的士兵在軟體開發中心使用滑鼠。",
+        "maxTimerDriftMs": 10.399999991059303,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "manual-warm-20000",
+        "elapsedMs": 496.19999998807907,
+        "expectedHash": "e011d884ba9ec52c635e981d9adbe778e7766d0a918c68e8ea4a97870733f5e6",
+        "response": {
+          "kind": "success",
+          "count": 20000,
+          "time": 490.5
+        },
+        "complete": true,
+        "nodeCount": 20000,
+        "outputSha256": "e011d884ba9ec52c635e981d9adbe778e7766d0a918c68e8ea4a97870733f5e6",
+        "first": "勇敢的士兵在軟體開發中心使用滑鼠。",
+        "maxTimerDriftMs": 70.79999999701977,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "auto-dynamic-1000-roots",
+        "elapsedMs": 72,
+        "expectedHash": "790a1f04f72040a695db754a830df970e2ce8aa2a0563686fa457024a59bfe1a",
+        "response": null,
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "790a1f04f72040a695db754a830df970e2ce8aa2a0563686fa457024a59bfe1a",
+        "first": "勇敢的士兵在軟體開發中心使用滑鼠。",
+        "maxTimerDriftMs": 26.100000008940697,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      }
+    ],
+    "variant": "candidate",
+    "identity": "2-jieba-repeated-candidate",
+    "recordedAt": "2026-10-23T22:16:28.932Z"
+  },
+  {
+    "trial": 3,
+    "mode": "jieba",
+    "kind": "repeated",
+    "edgeVersion": "155.0.4283.62",
+    "cases": [
+      {
+        "name": "manual-cold-1000",
+        "elapsedMs": 3658.2999999970198,
+        "expectedHash": "790a1f04f72040a695db754a830df970e2ce8aa2a0563686fa457024a59bfe1a",
+        "response": {
+          "kind": "success",
+          "count": 1000,
+          "time": 3654.8999999910593
+        },
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "790a1f04f72040a695db754a830df970e2ce8aa2a0563686fa457024a59bfe1a",
+        "first": "勇敢的士兵在軟體開發中心使用滑鼠。",
+        "maxTimerDriftMs": 22.200000002980232,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "manual-warm-20000",
+        "elapsedMs": 484.3999999910593,
+        "expectedHash": "e011d884ba9ec52c635e981d9adbe778e7766d0a918c68e8ea4a97870733f5e6",
+        "response": {
+          "kind": "success",
+          "count": 20000,
+          "time": 479.5
+        },
+        "complete": true,
+        "nodeCount": 20000,
+        "outputSha256": "e011d884ba9ec52c635e981d9adbe778e7766d0a918c68e8ea4a97870733f5e6",
+        "first": "勇敢的士兵在軟體開發中心使用滑鼠。",
+        "maxTimerDriftMs": 59.70000000298023,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "auto-dynamic-1000-roots",
+        "elapsedMs": 47.599999994039536,
+        "expectedHash": "790a1f04f72040a695db754a830df970e2ce8aa2a0563686fa457024a59bfe1a",
+        "response": null,
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "790a1f04f72040a695db754a830df970e2ce8aa2a0563686fa457024a59bfe1a",
+        "first": "勇敢的士兵在軟體開發中心使用滑鼠。",
+        "maxTimerDriftMs": 11.700000002980232,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      }
+    ],
+    "variant": "candidate",
+    "identity": "3-jieba-repeated-candidate",
+    "recordedAt": "2026-10-23T22:16:42.524Z"
+  },
+  {
+    "trial": 3,
+    "mode": "jieba",
+    "kind": "repeated",
+    "edgeVersion": "155.0.4283.62",
+    "cases": [
+      {
+        "name": "manual-cold-1000",
+        "elapsedMs": 2581.0999999940395,
+        "expectedHash": "790a1f04f72040a695db754a830df970e2ce8aa2a0563686fa457024a59bfe1a",
+        "response": {
+          "kind": "success",
+          "count": 1000,
+          "time": 2563.2999999970198
+        },
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "790a1f04f72040a695db754a830df970e2ce8aa2a0563686fa457024a59bfe1a",
+        "first": "勇敢的士兵在軟體開發中心使用滑鼠。",
+        "maxTimerDriftMs": 8.400000005960464,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "manual-warm-20000",
+        "elapsedMs": 4259.20000000298,
+        "expectedHash": "e011d884ba9ec52c635e981d9adbe778e7766d0a918c68e8ea4a97870733f5e6",
+        "response": {
+          "kind": "success",
+          "count": 20000,
+          "time": 4255.5
+        },
+        "complete": true,
+        "nodeCount": 20000,
+        "outputSha256": "e011d884ba9ec52c635e981d9adbe778e7766d0a918c68e8ea4a97870733f5e6",
+        "first": "勇敢的士兵在軟體開發中心使用滑鼠。",
+        "maxTimerDriftMs": 39.5,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "auto-dynamic-1000-roots",
+        "elapsedMs": 2818.2999999970198,
+        "expectedHash": "790a1f04f72040a695db754a830df970e2ce8aa2a0563686fa457024a59bfe1a",
+        "response": null,
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "790a1f04f72040a695db754a830df970e2ce8aa2a0563686fa457024a59bfe1a",
+        "first": "勇敢的士兵在軟體開發中心使用滑鼠。",
+        "maxTimerDriftMs": 8.099999994039536,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      }
+    ],
+    "variant": "baseline",
+    "identity": "3-jieba-repeated-baseline",
+    "recordedAt": "2026-10-23T22:17:06.039Z"
+  },
+  {
+    "trial": 3,
+    "mode": "jieba",
+    "kind": "unique",
+    "edgeVersion": "155.0.4283.62",
+    "cases": [
+      {
+        "name": "manual-cold-1000",
+        "elapsedMs": 1240.6000000089407,
+        "expectedHash": "e596afb2693daca760552a9c59d26d6507f60dcc0968ec8bb3164a7ec2afd04b",
+        "response": {
+          "kind": "success",
+          "count": 1000,
+          "time": 1239
+        },
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "e596afb2693daca760552a9c59d26d6507f60dcc0968ec8bb3164a7ec2afd04b",
+        "first": "勇敢的士兵在軟體開發中心使用滑鼠。0",
+        "maxTimerDriftMs": 7.0999999940395355,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "manual-warm-20000",
+        "elapsedMs": 933,
+        "expectedHash": "e951a3b279496338b1d4e826a3b8ecd79209c3b15317770eccb5e584087ff955",
+        "response": {
+          "kind": "success",
+          "count": 20000,
+          "time": 931.4000000059605
+        },
+        "complete": true,
+        "nodeCount": 20000,
+        "outputSha256": "e951a3b279496338b1d4e826a3b8ecd79209c3b15317770eccb5e584087ff955",
+        "first": "勇敢的士兵在軟體開發中心使用滑鼠。0",
+        "maxTimerDriftMs": 37.599999994039536,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "auto-dynamic-1000-roots",
+        "elapsedMs": 68.3999999910593,
+        "expectedHash": "e596afb2693daca760552a9c59d26d6507f60dcc0968ec8bb3164a7ec2afd04b",
+        "response": null,
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "e596afb2693daca760552a9c59d26d6507f60dcc0968ec8bb3164a7ec2afd04b",
+        "first": "勇敢的士兵在軟體開發中心使用滑鼠。0",
+        "maxTimerDriftMs": 12.300000011920929,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      }
+    ],
+    "variant": "candidate",
+    "identity": "3-jieba-unique-candidate",
+    "recordedAt": "2026-10-23T22:17:15.416Z"
+  },
+  {
+    "trial": 3,
+    "mode": "jieba",
+    "kind": "unique",
+    "edgeVersion": "155.0.4283.62",
+    "cases": [
+      {
+        "name": "manual-cold-1000",
+        "elapsedMs": 1878.2999999970198,
+        "expectedHash": "e596afb2693daca760552a9c59d26d6507f60dcc0968ec8bb3164a7ec2afd04b",
+        "response": {
+          "kind": "success",
+          "count": 1000,
+          "time": 1875.699999988079
+        },
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "e596afb2693daca760552a9c59d26d6507f60dcc0968ec8bb3164a7ec2afd04b",
+        "first": "勇敢的士兵在軟體開發中心使用滑鼠。0",
+        "maxTimerDriftMs": 4.4000000059604645,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "manual-warm-20000",
+        "elapsedMs": 4070.5999999940395,
+        "expectedHash": "e951a3b279496338b1d4e826a3b8ecd79209c3b15317770eccb5e584087ff955",
+        "response": {
+          "kind": "success",
+          "count": 20000,
+          "time": 4068.4000000059605
+        },
+        "complete": true,
+        "nodeCount": 20000,
+        "outputSha256": "e951a3b279496338b1d4e826a3b8ecd79209c3b15317770eccb5e584087ff955",
+        "first": "勇敢的士兵在軟體開發中心使用滑鼠。0",
+        "maxTimerDriftMs": 55.79999999701977,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "auto-dynamic-1000-roots",
+        "elapsedMs": 2429.1000000089407,
+        "expectedHash": "e596afb2693daca760552a9c59d26d6507f60dcc0968ec8bb3164a7ec2afd04b",
+        "response": null,
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "e596afb2693daca760552a9c59d26d6507f60dcc0968ec8bb3164a7ec2afd04b",
+        "first": "勇敢的士兵在軟體開發中心使用滑鼠。0",
+        "maxTimerDriftMs": 37.70000000298023,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      }
+    ],
+    "variant": "baseline",
+    "identity": "3-jieba-unique-baseline",
+    "recordedAt": "2026-10-23T22:17:34.682Z"
+  },
+  {
+    "trial": 3,
+    "mode": "mmseg",
+    "kind": "repeated",
+    "edgeVersion": "155.0.4283.62",
+    "cases": [
+      {
+        "name": "manual-cold-1000",
+        "elapsedMs": 341.3999999910593,
+        "expectedHash": "1d2f8f0e8a387fa45f4a74a1e3e85b49d41053b8f346924374f7ec5be5829f0c",
+        "response": {
+          "kind": "success",
+          "count": 1000,
+          "time": 339.5
+        },
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "1d2f8f0e8a387fa45f4a74a1e3e85b49d41053b8f346924374f7ec5be5829f0c",
+        "first": "勇敢計程車兵在軟體開發中心使用滑鼠。",
+        "maxTimerDriftMs": 6.200000002980232,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "manual-warm-20000",
+        "elapsedMs": 339.59999999403954,
+        "expectedHash": "183d331fee196c0d521ad4246e5cccc22b1479c07f130f48a1c9d70729fce88f",
+        "response": {
+          "kind": "success",
+          "count": 20000,
+          "time": 335.79999999701977
+        },
+        "complete": true,
+        "nodeCount": 20000,
+        "outputSha256": "183d331fee196c0d521ad4246e5cccc22b1479c07f130f48a1c9d70729fce88f",
+        "first": "勇敢計程車兵在軟體開發中心使用滑鼠。",
+        "maxTimerDriftMs": 25.100000008940697,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "auto-dynamic-1000-roots",
+        "elapsedMs": 39.6000000089407,
+        "expectedHash": "1d2f8f0e8a387fa45f4a74a1e3e85b49d41053b8f346924374f7ec5be5829f0c",
+        "response": null,
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "1d2f8f0e8a387fa45f4a74a1e3e85b49d41053b8f346924374f7ec5be5829f0c",
+        "first": "勇敢計程車兵在軟體開發中心使用滑鼠。",
+        "maxTimerDriftMs": 7.100000008940697,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      }
+    ],
+    "variant": "candidate",
+    "identity": "3-mmseg-repeated-candidate",
+    "recordedAt": "2026-10-23T22:17:43.241Z"
+  },
+  {
+    "trial": 3,
+    "mode": "mmseg",
+    "kind": "repeated",
+    "edgeVersion": "155.0.4283.62",
+    "cases": [
+      {
+        "name": "manual-cold-1000",
+        "elapsedMs": 271.90000000596046,
+        "expectedHash": "1d2f8f0e8a387fa45f4a74a1e3e85b49d41053b8f346924374f7ec5be5829f0c",
+        "response": {
+          "kind": "success",
+          "count": 1000,
+          "time": 270.20000000298023
+        },
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "1d2f8f0e8a387fa45f4a74a1e3e85b49d41053b8f346924374f7ec5be5829f0c",
+        "first": "勇敢計程車兵在軟體開發中心使用滑鼠。",
+        "maxTimerDriftMs": 7.700000002980232,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "manual-warm-20000",
+        "elapsedMs": 2011.5999999940395,
+        "expectedHash": "183d331fee196c0d521ad4246e5cccc22b1479c07f130f48a1c9d70729fce88f",
+        "response": {
+          "kind": "success",
+          "count": 20000,
+          "time": 2009
+        },
+        "complete": true,
+        "nodeCount": 20000,
+        "outputSha256": "183d331fee196c0d521ad4246e5cccc22b1479c07f130f48a1c9d70729fce88f",
+        "first": "勇敢計程車兵在軟體開發中心使用滑鼠。",
+        "maxTimerDriftMs": 28.299999997019768,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "auto-dynamic-1000-roots",
+        "elapsedMs": 2499.5,
+        "expectedHash": "1d2f8f0e8a387fa45f4a74a1e3e85b49d41053b8f346924374f7ec5be5829f0c",
+        "response": null,
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "1d2f8f0e8a387fa45f4a74a1e3e85b49d41053b8f346924374f7ec5be5829f0c",
+        "first": "勇敢計程車兵在軟體開發中心使用滑鼠。",
+        "maxTimerDriftMs": 5.700000002980232,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      }
+    ],
+    "variant": "baseline",
+    "identity": "3-mmseg-repeated-baseline",
+    "recordedAt": "2026-10-23T22:17:56.097Z"
+  },
+  {
+    "trial": 3,
+    "mode": "mmseg",
+    "kind": "unique",
+    "edgeVersion": "155.0.4283.62",
+    "cases": [
+      {
+        "name": "manual-cold-1000",
+        "elapsedMs": 345.09999999403954,
+        "expectedHash": "d2243c37f7695186cbd1dda48a19459cc50ab728b03fc7037c2da85a6882eb91",
+        "response": {
+          "kind": "success",
+          "count": 1000,
+          "time": 340.79999999701977
+        },
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "d2243c37f7695186cbd1dda48a19459cc50ab728b03fc7037c2da85a6882eb91",
+        "first": "勇敢計程車兵在軟體開發中心使用滑鼠。0",
+        "maxTimerDriftMs": 12.900000005960464,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "manual-warm-20000",
+        "elapsedMs": 974.5999999940395,
+        "expectedHash": "dfcebc062ee2ce4794ac4c1271fe9dd2221d3339c50604a512b0f3e5e633ee2f",
+        "response": {
+          "kind": "success",
+          "count": 20000,
+          "time": 966.5999999940395
+        },
+        "complete": true,
+        "nodeCount": 20000,
+        "outputSha256": "dfcebc062ee2ce4794ac4c1271fe9dd2221d3339c50604a512b0f3e5e633ee2f",
+        "first": "勇敢計程車兵在軟體開發中心使用滑鼠。0",
+        "maxTimerDriftMs": 45.30000001192093,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "auto-dynamic-1000-roots",
+        "elapsedMs": 87.09999999403954,
+        "expectedHash": "d2243c37f7695186cbd1dda48a19459cc50ab728b03fc7037c2da85a6882eb91",
+        "response": null,
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "d2243c37f7695186cbd1dda48a19459cc50ab728b03fc7037c2da85a6882eb91",
+        "first": "勇敢計程車兵在軟體開發中心使用滑鼠。0",
+        "maxTimerDriftMs": 11.799999997019768,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      }
+    ],
+    "variant": "candidate",
+    "identity": "3-mmseg-unique-candidate",
+    "recordedAt": "2026-10-23T22:18:05.391Z"
+  },
+  {
+    "trial": 3,
+    "mode": "mmseg",
+    "kind": "unique",
+    "edgeVersion": "155.0.4283.62",
+    "cases": [
+      {
+        "name": "manual-cold-1000",
+        "elapsedMs": 252,
+        "expectedHash": "d2243c37f7695186cbd1dda48a19459cc50ab728b03fc7037c2da85a6882eb91",
+        "response": {
+          "kind": "success",
+          "count": 1000,
+          "time": 250.8999999910593
+        },
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "d2243c37f7695186cbd1dda48a19459cc50ab728b03fc7037c2da85a6882eb91",
+        "first": "勇敢計程車兵在軟體開發中心使用滑鼠。0",
+        "maxTimerDriftMs": 4.899999991059303,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "manual-warm-20000",
+        "elapsedMs": 2067.2000000029802,
+        "expectedHash": "dfcebc062ee2ce4794ac4c1271fe9dd2221d3339c50604a512b0f3e5e633ee2f",
+        "response": {
+          "kind": "success",
+          "count": 20000,
+          "time": 2065.7999999970198
+        },
+        "complete": true,
+        "nodeCount": 20000,
+        "outputSha256": "dfcebc062ee2ce4794ac4c1271fe9dd2221d3339c50604a512b0f3e5e633ee2f",
+        "first": "勇敢計程車兵在軟體開發中心使用滑鼠。0",
+        "maxTimerDriftMs": 21.599999994039536,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "auto-dynamic-1000-roots",
+        "elapsedMs": 1663.6000000089407,
+        "expectedHash": "d2243c37f7695186cbd1dda48a19459cc50ab728b03fc7037c2da85a6882eb91",
+        "response": null,
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "d2243c37f7695186cbd1dda48a19459cc50ab728b03fc7037c2da85a6882eb91",
+        "first": "勇敢計程車兵在軟體開發中心使用滑鼠。0",
+        "maxTimerDriftMs": 10.200000002980232,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      }
+    ],
+    "variant": "baseline",
+    "identity": "3-mmseg-unique-baseline",
+    "recordedAt": "2026-10-23T22:18:16.569Z"
+  },
+  {
+    "trial": 4,
+    "mode": "mmseg",
+    "kind": "unique",
+    "edgeVersion": "155.0.4283.62",
+    "cases": [
+      {
+        "name": "manual-cold-1000",
+        "elapsedMs": 381.3999999910593,
+        "expectedHash": "d2243c37f7695186cbd1dda48a19459cc50ab728b03fc7037c2da85a6882eb91",
+        "response": {
+          "kind": "success",
+          "count": 1000,
+          "time": 379.5
+        },
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "d2243c37f7695186cbd1dda48a19459cc50ab728b03fc7037c2da85a6882eb91",
+        "first": "勇敢計程車兵在軟體開發中心使用滑鼠。0",
+        "maxTimerDriftMs": 7,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "manual-warm-20000",
+        "elapsedMs": 3661.0999999940395,
+        "expectedHash": "dfcebc062ee2ce4794ac4c1271fe9dd2221d3339c50604a512b0f3e5e633ee2f",
+        "response": {
+          "kind": "success",
+          "count": 20000,
+          "time": 3658.9000000059605
+        },
+        "complete": true,
+        "nodeCount": 20000,
+        "outputSha256": "dfcebc062ee2ce4794ac4c1271fe9dd2221d3339c50604a512b0f3e5e633ee2f",
+        "first": "勇敢計程車兵在軟體開發中心使用滑鼠。0",
+        "maxTimerDriftMs": 78.1000000089407,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "auto-dynamic-1000-roots",
+        "elapsedMs": 2189.7000000029802,
+        "expectedHash": "d2243c37f7695186cbd1dda48a19459cc50ab728b03fc7037c2da85a6882eb91",
+        "response": null,
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "d2243c37f7695186cbd1dda48a19459cc50ab728b03fc7037c2da85a6882eb91",
+        "first": "勇敢計程車兵在軟體開發中心使用滑鼠。0",
+        "maxTimerDriftMs": 4.9000000059604645,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      }
+    ],
+    "variant": "baseline",
+    "identity": "4-mmseg-unique-baseline",
+    "recordedAt": "2026-10-23T22:18:31.515Z"
+  },
+  {
+    "trial": 4,
+    "mode": "mmseg",
+    "kind": "unique",
+    "edgeVersion": "155.0.4283.62",
+    "cases": [
+      {
+        "name": "manual-cold-1000",
+        "elapsedMs": 452.59999999403954,
+        "expectedHash": "d2243c37f7695186cbd1dda48a19459cc50ab728b03fc7037c2da85a6882eb91",
+        "response": {
+          "kind": "success",
+          "count": 1000,
+          "time": 450.5
+        },
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "d2243c37f7695186cbd1dda48a19459cc50ab728b03fc7037c2da85a6882eb91",
+        "first": "勇敢計程車兵在軟體開發中心使用滑鼠。0",
+        "maxTimerDriftMs": 15.799999997019768,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "manual-warm-20000",
+        "elapsedMs": 750,
+        "expectedHash": "dfcebc062ee2ce4794ac4c1271fe9dd2221d3339c50604a512b0f3e5e633ee2f",
+        "response": {
+          "kind": "success",
+          "count": 20000,
+          "time": 747
+        },
+        "complete": true,
+        "nodeCount": 20000,
+        "outputSha256": "dfcebc062ee2ce4794ac4c1271fe9dd2221d3339c50604a512b0f3e5e633ee2f",
+        "first": "勇敢計程車兵在軟體開發中心使用滑鼠。0",
+        "maxTimerDriftMs": 38.8999999910593,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "auto-dynamic-1000-roots",
+        "elapsedMs": 67.69999998807907,
+        "expectedHash": "d2243c37f7695186cbd1dda48a19459cc50ab728b03fc7037c2da85a6882eb91",
+        "response": null,
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "d2243c37f7695186cbd1dda48a19459cc50ab728b03fc7037c2da85a6882eb91",
+        "first": "勇敢計程車兵在軟體開發中心使用滑鼠。0",
+        "maxTimerDriftMs": 11.700000002980232,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      }
+    ],
+    "variant": "candidate",
+    "identity": "4-mmseg-unique-candidate",
+    "recordedAt": "2026-10-23T22:18:41.801Z"
+  },
+  {
+    "trial": 4,
+    "mode": "mmseg",
+    "kind": "repeated",
+    "edgeVersion": "155.0.4283.62",
+    "cases": [
+      {
+        "name": "manual-cold-1000",
+        "elapsedMs": 348.70000000298023,
+        "expectedHash": "1d2f8f0e8a387fa45f4a74a1e3e85b49d41053b8f346924374f7ec5be5829f0c",
+        "response": {
+          "kind": "success",
+          "count": 1000,
+          "time": 346.79999999701977
+        },
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "1d2f8f0e8a387fa45f4a74a1e3e85b49d41053b8f346924374f7ec5be5829f0c",
+        "first": "勇敢計程車兵在軟體開發中心使用滑鼠。",
+        "maxTimerDriftMs": 2.8999999910593033,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "manual-warm-20000",
+        "elapsedMs": 2934.2999999970198,
+        "expectedHash": "183d331fee196c0d521ad4246e5cccc22b1479c07f130f48a1c9d70729fce88f",
+        "response": {
+          "kind": "success",
+          "count": 20000,
+          "time": 2930.7999999970198
+        },
+        "complete": true,
+        "nodeCount": 20000,
+        "outputSha256": "183d331fee196c0d521ad4246e5cccc22b1479c07f130f48a1c9d70729fce88f",
+        "first": "勇敢計程車兵在軟體開發中心使用滑鼠。",
+        "maxTimerDriftMs": 31.400000005960464,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "auto-dynamic-1000-roots",
+        "elapsedMs": 2331.8999999910593,
+        "expectedHash": "1d2f8f0e8a387fa45f4a74a1e3e85b49d41053b8f346924374f7ec5be5829f0c",
+        "response": null,
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "1d2f8f0e8a387fa45f4a74a1e3e85b49d41053b8f346924374f7ec5be5829f0c",
+        "first": "勇敢計程車兵在軟體開發中心使用滑鼠。",
+        "maxTimerDriftMs": 10.5,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      }
+    ],
+    "variant": "baseline",
+    "identity": "4-mmseg-repeated-baseline",
+    "recordedAt": "2026-10-23T22:18:56.441Z"
+  },
+  {
+    "trial": 4,
+    "mode": "mmseg",
+    "kind": "repeated",
+    "edgeVersion": "155.0.4283.62",
+    "cases": [
+      {
+        "name": "manual-cold-1000",
+        "elapsedMs": 241.19999998807907,
+        "expectedHash": "1d2f8f0e8a387fa45f4a74a1e3e85b49d41053b8f346924374f7ec5be5829f0c",
+        "response": {
+          "kind": "success",
+          "count": 1000,
+          "time": 239.80000001192093
+        },
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "1d2f8f0e8a387fa45f4a74a1e3e85b49d41053b8f346924374f7ec5be5829f0c",
+        "first": "勇敢計程車兵在軟體開發中心使用滑鼠。",
+        "maxTimerDriftMs": 6.0999999940395355,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "manual-warm-20000",
+        "elapsedMs": 198.29999999701977,
+        "expectedHash": "183d331fee196c0d521ad4246e5cccc22b1479c07f130f48a1c9d70729fce88f",
+        "response": {
+          "kind": "success",
+          "count": 20000,
+          "time": 196.5
+        },
+        "complete": true,
+        "nodeCount": 20000,
+        "outputSha256": "183d331fee196c0d521ad4246e5cccc22b1479c07f130f48a1c9d70729fce88f",
+        "first": "勇敢計程車兵在軟體開發中心使用滑鼠。",
+        "maxTimerDriftMs": 35.099999994039536,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "auto-dynamic-1000-roots",
+        "elapsedMs": 42.29999999701977,
+        "expectedHash": "1d2f8f0e8a387fa45f4a74a1e3e85b49d41053b8f346924374f7ec5be5829f0c",
+        "response": null,
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "1d2f8f0e8a387fa45f4a74a1e3e85b49d41053b8f346924374f7ec5be5829f0c",
+        "first": "勇敢計程車兵在軟體開發中心使用滑鼠。",
+        "maxTimerDriftMs": 5,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      }
+    ],
+    "variant": "candidate",
+    "identity": "4-mmseg-repeated-candidate",
+    "recordedAt": "2026-10-23T22:19:05.136Z"
+  },
+  {
+    "trial": 4,
+    "mode": "jieba",
+    "kind": "unique",
+    "edgeVersion": "155.0.4283.62",
+    "cases": [
+      {
+        "name": "manual-cold-1000",
+        "elapsedMs": 2082.0999999940395,
+        "expectedHash": "e596afb2693daca760552a9c59d26d6507f60dcc0968ec8bb3164a7ec2afd04b",
+        "response": {
+          "kind": "success",
+          "count": 1000,
+          "time": 2080.3999999910593
+        },
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "e596afb2693daca760552a9c59d26d6507f60dcc0968ec8bb3164a7ec2afd04b",
+        "first": "勇敢的士兵在軟體開發中心使用滑鼠。0",
+        "maxTimerDriftMs": 3.300000011920929,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "manual-warm-20000",
+        "elapsedMs": 4112.0999999940395,
+        "expectedHash": "e951a3b279496338b1d4e826a3b8ecd79209c3b15317770eccb5e584087ff955",
+        "response": {
+          "kind": "success",
+          "count": 20000,
+          "time": 4109.0999999940395
+        },
+        "complete": true,
+        "nodeCount": 20000,
+        "outputSha256": "e951a3b279496338b1d4e826a3b8ecd79209c3b15317770eccb5e584087ff955",
+        "first": "勇敢的士兵在軟體開發中心使用滑鼠。0",
+        "maxTimerDriftMs": 57.1000000089407,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "auto-dynamic-1000-roots",
+        "elapsedMs": 3816.5,
+        "expectedHash": "e596afb2693daca760552a9c59d26d6507f60dcc0968ec8bb3164a7ec2afd04b",
+        "response": null,
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "e596afb2693daca760552a9c59d26d6507f60dcc0968ec8bb3164a7ec2afd04b",
+        "first": "勇敢的士兵在軟體開發中心使用滑鼠。0",
+        "maxTimerDriftMs": 10.299999997019768,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      }
+    ],
+    "variant": "baseline",
+    "identity": "4-jieba-unique-baseline",
+    "recordedAt": "2026-10-23T22:19:25.880Z"
+  },
+  {
+    "trial": 4,
+    "mode": "jieba",
+    "kind": "unique",
+    "edgeVersion": "155.0.4283.62",
+    "cases": [
+      {
+        "name": "manual-cold-1000",
+        "elapsedMs": 1834.2999999970198,
+        "expectedHash": "e596afb2693daca760552a9c59d26d6507f60dcc0968ec8bb3164a7ec2afd04b",
+        "response": {
+          "kind": "success",
+          "count": 1000,
+          "time": 1832.5
+        },
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "e596afb2693daca760552a9c59d26d6507f60dcc0968ec8bb3164a7ec2afd04b",
+        "first": "勇敢的士兵在軟體開發中心使用滑鼠。0",
+        "maxTimerDriftMs": 15.700000002980232,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "manual-warm-20000",
+        "elapsedMs": 932.5999999940395,
+        "expectedHash": "e951a3b279496338b1d4e826a3b8ecd79209c3b15317770eccb5e584087ff955",
+        "response": {
+          "kind": "success",
+          "count": 20000,
+          "time": 928.2000000029802
+        },
+        "complete": true,
+        "nodeCount": 20000,
+        "outputSha256": "e951a3b279496338b1d4e826a3b8ecd79209c3b15317770eccb5e584087ff955",
+        "first": "勇敢的士兵在軟體開發中心使用滑鼠。0",
+        "maxTimerDriftMs": 55.900000005960464,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "auto-dynamic-1000-roots",
+        "elapsedMs": 64.5,
+        "expectedHash": "e596afb2693daca760552a9c59d26d6507f60dcc0968ec8bb3164a7ec2afd04b",
+        "response": null,
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "e596afb2693daca760552a9c59d26d6507f60dcc0968ec8bb3164a7ec2afd04b",
+        "first": "勇敢的士兵在軟體開發中心使用滑鼠。0",
+        "maxTimerDriftMs": 12.900000005960464,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      }
+    ],
+    "variant": "candidate",
+    "identity": "4-jieba-unique-candidate",
+    "recordedAt": "2026-10-23T22:19:39.402Z"
+  },
+  {
+    "trial": 4,
+    "mode": "jieba",
+    "kind": "repeated",
+    "edgeVersion": "155.0.4283.62",
+    "cases": [
+      {
+        "name": "manual-cold-1000",
+        "elapsedMs": 1449.7999999970198,
+        "expectedHash": "790a1f04f72040a695db754a830df970e2ce8aa2a0563686fa457024a59bfe1a",
+        "response": {
+          "kind": "success",
+          "count": 1000,
+          "time": 1447.4000000059605
+        },
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "790a1f04f72040a695db754a830df970e2ce8aa2a0563686fa457024a59bfe1a",
+        "first": "勇敢的士兵在軟體開發中心使用滑鼠。",
+        "maxTimerDriftMs": 7.899999991059303,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "manual-warm-20000",
+        "elapsedMs": 3484.699999988079,
+        "expectedHash": "e011d884ba9ec52c635e981d9adbe778e7766d0a918c68e8ea4a97870733f5e6",
+        "response": {
+          "kind": "success",
+          "count": 20000,
+          "time": 3474.5999999940395
+        },
+        "complete": true,
+        "nodeCount": 20000,
+        "outputSha256": "e011d884ba9ec52c635e981d9adbe778e7766d0a918c68e8ea4a97870733f5e6",
+        "first": "勇敢的士兵在軟體開發中心使用滑鼠。",
+        "maxTimerDriftMs": 101,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "auto-dynamic-1000-roots",
+        "elapsedMs": 1997,
+        "expectedHash": "790a1f04f72040a695db754a830df970e2ce8aa2a0563686fa457024a59bfe1a",
+        "response": null,
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "790a1f04f72040a695db754a830df970e2ce8aa2a0563686fa457024a59bfe1a",
+        "first": "勇敢的士兵在軟體開發中心使用滑鼠。",
+        "maxTimerDriftMs": 17.69999998807907,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      }
+    ],
+    "variant": "baseline",
+    "identity": "4-jieba-repeated-baseline",
+    "recordedAt": "2026-10-23T22:19:56.832Z"
+  },
+  {
+    "trial": 4,
+    "mode": "jieba",
+    "kind": "repeated",
+    "edgeVersion": "155.0.4283.62",
+    "cases": [
+      {
+        "name": "manual-cold-1000",
+        "elapsedMs": 3291.6000000089407,
+        "expectedHash": "790a1f04f72040a695db754a830df970e2ce8aa2a0563686fa457024a59bfe1a",
+        "response": {
+          "kind": "success",
+          "count": 1000,
+          "time": 3282.699999988079
+        },
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "790a1f04f72040a695db754a830df970e2ce8aa2a0563686fa457024a59bfe1a",
+        "first": "勇敢的士兵在軟體開發中心使用滑鼠。",
+        "maxTimerDriftMs": 41.1000000089407,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "manual-warm-20000",
+        "elapsedMs": 468.40000000596046,
+        "expectedHash": "e011d884ba9ec52c635e981d9adbe778e7766d0a918c68e8ea4a97870733f5e6",
+        "response": {
+          "kind": "success",
+          "count": 20000,
+          "time": 465.5
+        },
+        "complete": true,
+        "nodeCount": 20000,
+        "outputSha256": "e011d884ba9ec52c635e981d9adbe778e7766d0a918c68e8ea4a97870733f5e6",
+        "first": "勇敢的士兵在軟體開發中心使用滑鼠。",
+        "maxTimerDriftMs": 67,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      },
+      {
+        "name": "auto-dynamic-1000-roots",
+        "elapsedMs": 50.29999999701977,
+        "expectedHash": "790a1f04f72040a695db754a830df970e2ce8aa2a0563686fa457024a59bfe1a",
+        "response": null,
+        "complete": true,
+        "nodeCount": 1000,
+        "outputSha256": "790a1f04f72040a695db754a830df970e2ce8aa2a0563686fa457024a59bfe1a",
+        "first": "勇敢的士兵在軟體開發中心使用滑鼠。",
+        "maxTimerDriftMs": 5.899999991059303,
+        "longTaskCount": 0,
+        "maxLongTaskMs": 0,
+        "note": "Timer window includes 80ms after completion. Longtask API may omit isolated content-script work; zero is not proof of no blocking."
+      }
+    ],
+    "variant": "candidate",
+    "identity": "4-jieba-repeated-candidate",
+    "recordedAt": "2026-10-23T22:20:09.990Z"
+  }
+]

@@ -1,0 +1,80 @@
+{
+  "edgeVersion": "155.0.4283.62",
+  "tests": [
+    {
+      "name": "disable-auto-during-cold-Jieba",
+      "pass": true,
+      "beforeDisable": {
+        "converted": 0,
+        "mutations": 0
+      },
+      "afterDisable": {
+        "original": true,
+        "mutations": 0
+      },
+      "limitation": "Cold conversion start inferred from enabled auto debounce and100ms wait; no internal request pause/hook. Actual DOM remained unchanged throughout observer window."
+    },
+    {
+      "name": "edit-text-during-pending-manual",
+      "pass": true,
+      "pendingBeforeEdit": true,
+      "response": {
+        "kind": "success",
+        "count": 1999,
+        "time": 373.30000001192093
+      },
+      "sameNode": true,
+      "value": "網站新內容",
+      "otherNodesConverted": true,
+      "limitation": "Confirms unresolved request at edit; no internal snapshot hook."
+    },
+    {
+      "name": "selection-element-identity",
+      "pass": true,
+      "response": {
+        "kind": "success",
+        "count": 1,
+        "time": 4
+      },
+      "text": "前漢字後",
+      "sameElement": true
+    },
+    {
+      "name": "page-editable-keyboard-while-conversion-pending",
+      "pass": true,
+      "requestStillPendingAfterTyping": true,
+      "valueAfterConversion": "汉字 stays",
+      "limitation": "Automated click/key/input interaction; no IME or subjective latency claim."
+    },
+    {
+      "name": "popup-keyboard-while-page-request-pending",
+      "pass": true,
+      "keyboardState": {
+        "value": "汉字!",
+        "pageRequestPending": true
+      },
+      "response": {
+        "kind": "success",
+        "count": 20000,
+        "time": 3004.2000000029802
+      },
+      "preview": "漢字!",
+      "limitation": "Automated click/key/input and DOM state check in popup.html extension tab; does not claim human-perceived latency, actual toolbar popup lifecycle, or input-latency measurement."
+    },
+    {
+      "name": "settings-change-invalidates-pending-Jieba-output",
+      "pass": true,
+      "pendingBeforeSettingsChange": true,
+      "originalsPreserved": true,
+      "response": {
+        "kind": "no-op",
+        "count": 0,
+        "time": 2055.9000000059605
+      }
+    }
+  ],
+  "allPass": true,
+  "note": "Separate non-timed automated operational validation of the frozen candidate. No Firefox runtime or manual human interaction.",
+  "recordedAt": "2026-10-23T22:20:48.875Z",
+  "candidateSHA": "6adc025f4af62bc7c766e354e8227423624f50d6"
+}

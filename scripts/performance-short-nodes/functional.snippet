@@ -1,0 +1,61 @@
+async(page)=>{
+ const list=await page.evaluate(()=>new Promise(r=>chrome.developerPrivate.getExtensionsInfo({includeDisabled:true},r)));
+ const ext=list.find(x=>x.name==='OpenCC'&&x.state==='ENABLED');if(!ext)throw Error('Extension missing');
+ await page.goto(`chrome-extension://${ext.id}/popup.html`);await page.locator('#textbox:enabled').waitFor();
+ const ctx=page.context(),url='https://short-node-functional.test/';
+ await ctx.route(url+'**',r=>r.fulfill({contentType:'text/html',body:'<!doctype html><html lang="zh"><head><meta charset="utf-8"><title>Functional</title></head><body></body></html>'}));
+ const target=await ctx.newPage();await target.goto(url);await target.waitForTimeout(200);
+ const id=await page.evaluate(async()=> (await chrome.tabs.query({url:'https://short-node-functional.test/*'}))[0].id);
+ const tests=[];
+ // First conversion is a cold Jieba initialization. Disable the site while its request is unresolved.
+ await page.evaluate(()=>chrome.runtime.sendMessage({type:'official-settings',action:'site',hostname:'short-node-functional.test',options:{preset:'s2twp',mode:'jieba'}}));await target.waitForTimeout(100);
+ await target.evaluate(()=>{document.body.innerHTML='<p>汉字</p>'.repeat(1000);window.functionalMutations=0;window.functionalObserver=new MutationObserver(rs=>window.functionalMutations+=rs.filter(r=>r.type==='characterData').length);window.functionalObserver.observe(document.body,{subtree:true,characterData:true});});
+ await target.waitForTimeout(100);
+ const beforeDisable=await target.evaluate(()=>({converted:[...document.querySelectorAll('p')].filter(n=>n.textContent==='漢字').length,mutations:window.functionalMutations}));
+ await page.evaluate(()=>chrome.runtime.sendMessage({type:'official-settings',action:'site',hostname:'short-node-functional.test',options:null}));
+ await page.evaluate(()=>chrome.runtime.sendMessage({type:'official-convert',config:'s2twp_jieba',texts:[]}));await target.waitForTimeout(100);
+ const afterDisable=await target.evaluate(()=>({original:[...document.querySelectorAll('p')].every(n=>n.textContent==='汉字'),mutations:window.functionalMutations}));
+ tests.push({name:'disable-auto-during-cold-Jieba',pass:beforeDisable.converted===0&&afterDisable.original&&afterDisable.mutations===0,beforeDisable,afterDisable,limitation:'Cold conversion start inferred from enabled auto debounce and100ms wait; no internal request pause/hook. Actual DOM remained unchanged throughout observer window.'});
+ await target.evaluate(()=>window.functionalObserver.disconnect());
+ await page.evaluate(()=>chrome.runtime.sendMessage({type:'official-settings',action:'defaults',options:{preset:'s2twp',mode:'mmseg'}}));await target.waitForTimeout(100);
+ // Preserve the same Text object while editing it after conversion is requested and before response.
+ await target.evaluate(()=>{document.body.innerHTML=Array.from({length:2000},(_,i)=>'<p>汉字'+i+'</p>').join('');window.functionalEditNode=document.querySelector('p').firstChild;});
+ await page.evaluate(id=>{window.functionalDone=false;window.functionalPending=chrome.tabs.sendMessage(id,{type:'convert-page'}).then(r=>(window.functionalDone=true,r));},id);
+ await target.waitForTimeout(10);
+ const pendingBeforeEdit=await page.evaluate(()=>!window.functionalDone);
+ await target.evaluate(()=>window.functionalEditNode.data='網站新內容');
+ const editResponse=await page.evaluate(()=>window.functionalPending);
+ const editResult=await target.evaluate(()=>({sameNode:window.functionalEditNode===document.querySelector('p').firstChild,value:window.functionalEditNode.data,otherNodesConverted:[...document.querySelectorAll('p')].slice(1).every(n=>n.textContent.startsWith('漢字'))}));
+ tests.push({name:'edit-text-during-pending-manual',pass:pendingBeforeEdit&&editResult.sameNode&&editResult.value==='網站新內容'&&editResult.otherNodesConverted,pendingBeforeEdit,response:editResponse,...editResult,limitation:'Confirms unresolved request at edit; no internal snapshot hook.'});
+ // A real selection request must retain the original inline element object.
+ await target.evaluate(()=>{document.body.innerHTML='<p>前汉<b>字</b>後</p>';window.functionalB=document.querySelector('b');const r=document.createRange();r.setStart(document.querySelector('p').firstChild,1);r.setEnd(window.functionalB.firstChild,1);const s=getSelection();s.removeAllRanges();s.addRange(r);});
+ const selectionResponse=await page.evaluate(id=>chrome.tabs.sendMessage(id,{type:'convert-selection'}),id);
+ const selection=await target.evaluate(()=>({text:document.body.textContent,sameElement:document.querySelector('b')===window.functionalB}));
+ tests.push({name:'selection-element-identity',pass:selection.text==='前漢字後'&&selection.sameElement,response:selectionResponse,...selection});
+ // Keyboard editing through Playwright while the independent page conversion request is pending.
+ await page.evaluate(()=>chrome.runtime.sendMessage({type:'official-settings',action:'defaults',options:{preset:'s2twp',mode:'jieba'}}));
+ await target.goto(url+'keyboard');await target.waitForTimeout(200);
+ await target.evaluate(()=>{document.body.innerHTML='<input id="functional-editable">'+Array.from({length:20000},(_,i)=>'<p>软件开发'+i+'</p>').join('');});
+ await page.evaluate(id=>{window.functionalDone=false;window.functionalPending=chrome.tabs.sendMessage(id,{type:'convert-page'}).then(r=>(window.functionalDone=true,r));},id);
+ await target.locator('#functional-editable').click();await target.locator('#functional-editable').pressSequentially('汉字 stays');
+ const inputPending=await page.evaluate(()=>!window.functionalDone);
+ await page.locator('#textbox').click();await page.locator('#textbox').fill('');await page.locator('#textbox').pressSequentially('汉字');await page.locator('#textbox').press('End');await page.locator('#textbox').press('!');
+ const keyboardState=await page.evaluate(()=>({value:document.querySelector('#textbox').value,pageRequestPending:!window.functionalDone}));
+ const parallelResponse=await page.evaluate(()=>window.functionalPending);
+ await page.waitForFunction(()=>document.querySelector('#result').value==='漢字!',null,{timeout:15000});
+ const editableValue=await target.locator('#functional-editable').inputValue();
+ tests.push({name:'page-editable-keyboard-while-conversion-pending',pass:inputPending&&editableValue==='汉字 stays',requestStillPendingAfterTyping:inputPending,valueAfterConversion:editableValue,limitation:'Automated click/key/input interaction; no IME or subjective latency claim.'});
+ tests.push({name:'popup-keyboard-while-page-request-pending',pass:keyboardState.value==='汉字!'&&keyboardState.pageRequestPending&&parallelResponse.kind==='success',keyboardState,response:parallelResponse,preview:await page.locator('#result').inputValue(),limitation:'Automated click/key/input and DOM state check in popup.html extension tab; does not claim human-perceived latency, actual toolbar popup lifecycle, or input-latency measurement.'});
+ // New document, no prior applied config. Changing settings while a cold Jieba request waits must invalidate its output.
+ await page.evaluate(()=>chrome.runtime.sendMessage({type:'official-convert',config:'s2twp',texts:['汉']}));
+ await target.goto(url+'settings-change');await target.waitForTimeout(200);
+ await page.evaluate(()=>chrome.runtime.sendMessage({type:'official-settings',action:'defaults',options:{preset:'s2twp',mode:'jieba'}}));await target.waitForTimeout(100);
+ await target.evaluate(()=>{document.body.innerHTML='<p>汉字</p>'.repeat(2000);});
+ await page.evaluate(id=>{window.functionalDone=false;window.functionalPending=chrome.tabs.sendMessage(id,{type:'convert-page'}).then(r=>(window.functionalDone=true,r));},id);
+ await target.waitForTimeout(100);const pendingBeforeSettingsChange=await page.evaluate(()=>!window.functionalDone);
+ await page.evaluate(()=>chrome.runtime.sendMessage({type:'official-settings',action:'defaults',options:{preset:'s2twp',mode:'mmseg'}}));
+ const settingsResponse=await page.evaluate(()=>window.functionalPending);await target.waitForTimeout(100);
+ const settingsOriginal=await target.evaluate(()=>[...document.querySelectorAll('p')].every(n=>n.textContent==='汉字'));
+ tests.push({name:'settings-change-invalidates-pending-Jieba-output',pass:pendingBeforeSettingsChange&&settingsOriginal,pendingBeforeSettingsChange,originalsPreserved:settingsOriginal,response:settingsResponse});
+ await target.close();return {edgeVersion:ctx.browser().version(),tests,allPass:tests.every(x=>x.pass),note:'Separate non-timed automated operational validation of the frozen candidate. No Firefox runtime or manual human interaction.'};
+}
