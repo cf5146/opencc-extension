@@ -1,0 +1,4 @@
+# Preserve reviewed upstream/build bytes across Windows autocrlf checkouts.
+public/opencc/** -text
+public/opencc-offscreen.html -text
+scripts/opencc-feasibility/** -text

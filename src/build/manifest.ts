@@ -1,7 +1,7 @@
-export type TargetBrowser = 'chrome' | 'edge' | 'firefox';
+export type TargetBrowser = "chrome" | "edge" | "firefox";
 
-type ChromiumBackground = { service_worker: string; type: 'module' };
-type FirefoxBackground = { scripts: string[]; type: 'module' };
+type ChromiumBackground = { service_worker: string; type: "module" };
+type FirefoxBackground = { scripts: string[]; type: "module" };
 
 export interface ExtensionManifest {
   manifest_version: 3;
@@ -19,38 +19,41 @@ export interface ExtensionManifest {
   };
   background: ChromiumBackground | FirefoxBackground;
   permissions: string[];
+  content_security_policy?: { extension_pages: string };
   host_permissions: string[];
   browser_specific_settings?: { gecko: { id: string } };
 }
 
 const commonManifest = {
   manifest_version: 3 as const,
-  name: 'OpenCC',
-  author: 'Tony Chan',
-  description: 'Convert webpages between different Chinese variants.',
-  homepage_url: 'https://github.com/tnychn/opencc-extension',
-  icons: { 128: 'icon.png' },
-  options_ui: { page: 'options.html', open_in_tab: false },
+  name: "OpenCC",
+  author: "Tony Chan",
+  description: "Convert webpages between different Chinese variants.",
+  homepage_url: "https://github.com/tnychn/opencc-extension",
+  icons: { 128: "icon.png" },
+  options_ui: { page: "options.html", open_in_tab: false },
   action: {
-    default_icon: { 128: 'icon.png' },
-    default_title: 'OpenCC',
-    default_popup: 'popup.html',
+    default_icon: { 128: "icon.png" },
+    default_title: "OpenCC",
+    default_popup: "popup.html",
   },
-  permissions: ['storage', 'contextMenus', 'scripting', 'activeTab'],
-  host_permissions: ['http://*/*', 'https://*/*'],
+  permissions: ["storage", "contextMenus", "scripting", "activeTab"],
+  content_security_policy: { extension_pages: "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'" },
+  host_permissions: ["http://*/*", "https://*/*"],
 };
 
 export function createManifest(browser: TargetBrowser): ExtensionManifest {
-  if (browser === 'firefox') {
+  if (browser === "firefox") {
     return {
       ...commonManifest,
-      background: { scripts: ['background.js'], type: 'module' },
-      browser_specific_settings: { gecko: { id: 'opencc.extension@tnychn' } },
+      background: { scripts: ["background.js"], type: "module" },
+      browser_specific_settings: { gecko: { id: "opencc.extension@tnychn" } },
     };
   }
 
   return {
     ...commonManifest,
-    background: { service_worker: 'background.js', type: 'module' },
+    permissions: [...commonManifest.permissions, "offscreen"],
+    background: { service_worker: "background.js", type: "module" },
   };
 }

@@ -30,7 +30,10 @@
     "format:check": "prettier . --check",
     "test": "vitest run",
     "test:ui": "vitest --ui",
-    "ci": "npm run lint && npm run typecheck && npm test && npm run build:chrome && node scripts/verify-build-output.mjs chrome && npm run build:firefox && node scripts/verify-build-output.mjs firefox && npm run build:edge && node scripts/verify-build-output.mjs edge"
+    "ci": "npm run verify:official && npm run lint && npm run typecheck && npm test && npm run build:chrome && node scripts/verify-build-output.mjs chrome && node scripts/verify-official-assets.mjs .output/chrome-mv3/opencc/engine && npm run build:firefox && node scripts/verify-build-output.mjs firefox && node scripts/verify-official-assets.mjs .output/firefox-mv3/opencc/engine && npm run build:edge && node scripts/verify-build-output.mjs edge && node scripts/verify-official-assets.mjs .output/edge-mv3/opencc/engine",
+    "verify:official": "node scripts/verify-official-assets.mjs",
+    "update:official": "node scripts/stage-official-engine.mjs",
+    "verify:official:parity": "node scripts/check-official-parity.mjs"
   },
   "devDependencies": {
     "@aklinker1/zero-zip": "1.0.1",

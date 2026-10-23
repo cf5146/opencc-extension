@@ -1,0 +1,36 @@
+{
+  "manual": {
+    "kind": "success",
+    "count": 3,
+    "time": 27.900000005960464
+  },
+  "after": {
+    "text": "勇敢的士兵在軟體開發中心使用滑鼠。",
+    "code": "软件",
+    "editable": "汉字",
+    "title": "漢字"
+  },
+  "selection": {
+    "kind": "success",
+    "count": 1,
+    "time": 6.4000000059604645
+  },
+  "selected": {
+    "text": "前漢字後",
+    "identity": true,
+    "clicks": 1
+  },
+  "dynamic": true,
+  "exactHostOnly": true,
+  "disabledAuto": "鼠标",
+  "long": {
+    "kind": "success",
+    "count": 3,
+    "time": 862.2000000029802
+  },
+  "complete": {
+    "length": 1000000,
+    "complete": true
+  },
+  "strictPageCsp": true
+}

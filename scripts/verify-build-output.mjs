@@ -27,7 +27,13 @@ export async function verifyBuildOutput(browser, root = process.cwd()) {
   const manifest = JSON.parse(await fs.readFile(manifestPath, "utf8"));
   const packageJson = JSON.parse(await fs.readFile(path.join(root, "package.json"), "utf8"));
   const [httpMatch, httpsMatch] = webMatches;
-  const expectedPermissions = ["storage", "contextMenus", "scripting", "activeTab"];
+  const expectedPermissions = [
+    "storage",
+    "contextMenus",
+    "scripting",
+    "activeTab",
+    ...(browser === "firefox" ? [] : ["offscreen"]),
+  ];
 
   if (manifest.manifest_version !== 3) throw new Error(`${browser}: manifest_version must be 3`);
   if (manifest.version !== packageJson.version) {

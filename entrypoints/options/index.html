@@ -3,46 +3,20 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="color-scheme" content="light dark" />
-    <title>OpenCC 設定</title>
+    <title>OpenCC 網站設定</title>
     <link rel="stylesheet" href="./style.css" />
   </head>
   <body>
     <main>
-      <header>
-        <h1>OpenCC 設定</h1>
-        <p>自動轉換、網站規則與排除設定也可直接在擴充功能彈出視窗修改。</p>
-      </header>
-      <section aria-labelledby="default-title">
-        <h2 id="default-title">預設設定</h2>
-        <label class="checkbox"><input id="auto" type="checkbox" /> 預設自動轉換網頁</label>
-        <p>自動轉換使用彈出視窗所選的來源與目標語言。網頁若明確標示為非中文，將略過自動轉換。</p>
-      </section>
-      <section aria-labelledby="sites-title">
-        <h2 id="sites-title">網站規則</h2>
-        <p>
-          在網站上開啟擴充功能，選擇「一律自動轉換」、「不要自動轉換」或「使用預設設定」。規則僅適用於完全相同的主機名稱，排除規則仍會生效。
-        </p>
-        <ul id="site-rules"></ul>
-      </section>
-      <section aria-labelledby="advanced-title">
-        <h2 id="advanced-title">進階排除設定</h2>
-        <label for="whitelist">排除的網址規則</label>
-        <p id="whitelist-description">
-          每行一個 JavaScript
-          正規表示式，比對完整網址；不支援萬用字元格式。現有規則會原樣顯示，無效的正規表示式無法儲存。
-        </p>
-        <textarea
-          id="whitelist"
-          aria-describedby="whitelist-description"
-          spellcheck="false"
-          placeholder="^https://example\.com/private/"
-        ></textarea>
-      </section>
-      <div class="actions">
-        <button id="save" type="button">儲存變更</button><button id="retry" type="button" hidden>重新載入設定</button>
-      </div>
-      <output id="status" aria-live="polite"></output>
+      <h1>網站自動轉換</h1>
+      <p>
+        在目標網站開啟
+        OpenCC，選擇官方轉換設定與分詞方式，再勾選「對此主機名稱自動轉換」。每個網站個別儲存，不會套用至子網域。
+      </p>
+      <p>舊版全域自動轉換與正規表示式規則已停用，原始設定資料仍保留。變更設定後，已轉換的頁面需要重新載入。</p>
+      <ul id="site-rules"></ul>
+      <button id="retry" type="button">重新載入設定</button
+      ><output id="status" role="status" aria-live="polite"></output>
     </main>
     <script type="module" src="./main.ts"></script>
   </body>

@@ -53,3 +53,19 @@ jobs:
             .output/SHA256SUMS
           if-no-files-found: error
           retention-days: 14
+  official-parity:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: scripts/opencc-feasibility/package-lock.json
+      - name: Install fixed native reference tools
+        run: npm ci --prefix scripts/opencc-feasibility --ignore-scripts
+      - name: Compare bundled engine against matching native OpenCC and Jieba
+        run: node scripts/check-official-parity.mjs
