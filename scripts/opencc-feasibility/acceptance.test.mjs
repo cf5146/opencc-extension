@@ -5,7 +5,7 @@ import path from 'node:path';
 import {fileURLToPath,pathToFileURL} from 'node:url';
 const root=path.dirname(fileURLToPath(import.meta.url)),out=path.join(root,'dist');
 test('official source-built runtime artifacts exist',()=>{
-  for(const f of ['opencc.mjs','opencc.wasm','runtime.mjs','manifest.json'])assert.ok(fs.existsSync(path.join(out,f)),`missing built artifact: ${f}`);
+  for(const f of ['opencc.mjs','opencc.wasm','runtime.mjs','engine-resources.json'])assert.ok(fs.existsSync(path.join(out,f)),`missing built artifact: ${f}`);
 });
 test('complete UTF-8 inputs survive heap transfer, NULs, and lifecycle',async t=>{
   if(!fs.existsSync(path.join(out,'runtime.mjs')))return t.skip('artifacts not built yet');

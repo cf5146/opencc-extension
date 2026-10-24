@@ -114,7 +114,7 @@ const environment = {
   measuredAt: new Date().toISOString(),
   baseline: "d0ac03266941667e94d0cdaf61eb2ea1fbc4547c",
   head: "9ba9550c2743dba84b623fb01e74f1e85eb2689a",
-  manifestSha256: hash(fs.readFileSync(path.join(headOutput, "opencc/engine/manifest.json"))),
+  manifestSha256: hash(fs.readFileSync(path.join(headOutput, "opencc/engine/engine-resources.json"))),
 };
 write("environment.json", environment);
 let engines;
