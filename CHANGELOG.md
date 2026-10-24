@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.6.2 - 2026-10-24
+[Compare changes](https://github.com/cf5146/opencc-extension/compare/v0.6.1...v0.6.2)
+
+
+### Documentation
+- rewrite bilingual guides and remove obsolete records
+
+### Fixes
+- reserve manifest.json for the browser extension
+
 版本紀錄 / Version history。最新發布輸入見 [CHANGELOG_RELEASE.md](./CHANGELOG_RELEASE.md)。
 Current publication input: [CHANGELOG_RELEASE.md](./CHANGELOG_RELEASE.md).
 
