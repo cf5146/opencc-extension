@@ -6,7 +6,7 @@ import assert from "node:assert/strict";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 export async function verifyOfficialAssets(directory = path.join(root, "public/opencc/engine")) {
   const lock = JSON.parse(await fs.readFile(path.join(root, "scripts/opencc-feasibility/artifact-lock.json"), "utf8"));
-  const actual = JSON.parse(await fs.readFile(path.join(directory, "manifest.json"), "utf8"));
+  const actual = JSON.parse(await fs.readFile(path.join(directory, "engine-resources.json"), "utf8"));
   assert.deepEqual(actual, lock, "Official engine manifest differs from the reviewed lock");
   await Promise.all(
     [...lock.resources, ...lock.artifacts].map(async (item) => {

@@ -4,7 +4,7 @@ import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
 import assert from 'node:assert/strict';
 const root=path.dirname(fileURLToPath(import.meta.url)),dist=path.join(root,'dist');
-const m=JSON.parse(fs.readFileSync(path.join(dist,'manifest.json')));
+const m=JSON.parse(fs.readFileSync(path.join(dist,'engine-resources.json')));
 assert.deepEqual(m,JSON.parse(fs.readFileSync(path.join(root,'artifact-lock.json'))),'Bundle matches reviewed artifact lock');
 assert.equal(m.official.commit,'025f371dc76b598d77384fbdab90c937471844d8');
 assert.equal(m.toolchain.emsdk,'4.0.22');

@@ -87,7 +87,8 @@ const manifest = {
   artifacts,
   resources,
 };
-await fs.writeFile(path.join(dist, "manifest.json"), JSON.stringify(manifest, null, 2) + "\n");
+await fs.writeFile(path.join(dist, "engine-resources.json"), JSON.stringify(manifest, null, 2) + "\n");
+await fs.rm(path.join(dist, "manifest.json"), { force: true });
 console.log(
   JSON.stringify({
     resources: resources.length,

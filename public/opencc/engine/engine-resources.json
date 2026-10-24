@@ -42,7 +42,7 @@
     },
     {
       "path": "adapter/runtime.mjs",
-      "sha256": "3ad2e11ae3b642258c5fc39d2f44a40dcba4fa39686c716f3d6701f2c9ef1c6e"
+      "sha256": "ff3f7dd4c0fbd6608534261c0e8b8207d18b5661b3b621393c71a7d753490068"
     }
   ],
   "artifacts": [
@@ -58,8 +58,8 @@
     },
     {
       "path": "runtime.mjs",
-      "bytes": 3094,
-      "sha256": "3ad2e11ae3b642258c5fc39d2f44a40dcba4fa39686c716f3d6701f2c9ef1c6e"
+      "bytes": 3102,
+      "sha256": "ff3f7dd4c0fbd6608534261c0e8b8207d18b5661b3b621393c71a7d753490068"
     }
   ],
   "resources": [

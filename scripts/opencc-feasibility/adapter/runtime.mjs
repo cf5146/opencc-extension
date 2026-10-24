@@ -15,7 +15,7 @@ export async function loadOpenCC() {
     if (!r.ok) throw new Error(`Resource ${relative}: ${r.status}`);
     return new Uint8Array(await r.arrayBuffer());
   };
-  const manifest = JSON.parse(decoder.decode(await read("manifest.json")));
+  const manifest = JSON.parse(decoder.decode(await read("engine-resources.json")));
   const mod = await createModule({ locateFile: (f) => new URL(f, base).href });
   await Promise.all(
     manifest.resources.map(async (resource) => {

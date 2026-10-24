@@ -62,7 +62,7 @@ for (const config of bases.flatMap((x) => [x, x + "_jieba"]))
         memoryBytes: session.memoryBytes,
       });
     }
-const manifest = JSON.parse(fs.readFileSync(new URL("./dist/manifest.json", import.meta.url)));
+const manifest = JSON.parse(fs.readFileSync(new URL("./dist/engine-resources.json", import.meta.url)));
 result.manifestSha256 = hash(JSON.stringify(manifest));
 result.package = {
   selectedFiles: manifest.resources.length + manifest.artifacts.length,

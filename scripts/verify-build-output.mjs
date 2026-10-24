@@ -23,6 +23,11 @@ export async function verifyBuildOutput(browser, root = process.cwd()) {
       throw new Error("Usage: node scripts/verify-build-output.mjs <chrome|firefox|edge>");
   }
 
+  const entries = await fs.readdir(outputDir, { recursive: true });
+  if (entries.some((file) => path.basename(file).toLowerCase() === "manifest.json" && file !== "manifest.json")) {
+    throw new Error(browser + ": only the root manifest.json is allowed");
+  }
+
   const manifestPath = path.join(outputDir, "manifest.json");
   const manifest = JSON.parse(await fs.readFile(manifestPath, "utf8"));
   const packageJson = JSON.parse(await fs.readFile(path.join(root, "package.json"), "utf8"));

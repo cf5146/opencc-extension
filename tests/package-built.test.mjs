@@ -1,5 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import os from "node:os";
 import { createHash } from "node:crypto";
 import { describe, it, expect } from "vitest";
 import { artifactFixture } from "./helpers/artifact-fixture.mjs";
@@ -28,9 +29,33 @@ describe("built artifact packaging", () => {
         }
         expect(names).toEqual([...names].sort());
         expect(names).toContain("nested/a.txt");
+        expect(names.filter((name) => path.posix.basename(name).toLowerCase() === "manifest.json")).toEqual([
+          "manifest.json",
+        ]);
         expect(sums).toContain(`${createHash("sha256").update(zip).digest("hex")}  opencc.${browser}.zip\n`);
       }
     } finally {
+      await fs.rm(root, { recursive: true, force: true });
+    }
+  });
+
+  it.each([
+    ["chrome", "manifest.json"],
+    ["firefox", "manifest.json"],
+    ["edge", "manifest.json"],
+    ["edge", "MANIFEST.JSON"],
+  ])("rejects an extra %s engine/%s before writing any ZIP", async (browser, name) => {
+    const root = await artifactFixture();
+    try {
+      const dir = path.join(root, ".output", browser + "-mv3", "opencc/engine");
+      await fs.mkdir(dir, { recursive: true });
+      await fs.writeFile(path.join(dir, name), "{}");
+      const { packageBuilt } = await packager();
+      await expect(packageBuilt(root)).rejects.toThrow("only the root manifest.json is allowed");
+      for (const target of ["chrome", "firefox", "edge"])
+        await expect(fs.access(path.join(root, ".output/opencc." + target + ".zip"))).rejects.toThrow();
+    } finally {
+      expect(path.dirname(root)).toBe(os.tmpdir());
       await fs.rm(root, { recursive: true, force: true });
     }
   });
