@@ -18,15 +18,15 @@ afterEach(() => {
   for (const dir of temporaryDirectories.splice(0)) rmSync(dir, { recursive: true, force: true });
 });
 
-function fixture() {
+function fixture({ version = "1.2.3", latest = {} } = {}) {
   const dir = mkdtempSync(join(tmpdir(), "opencc-publication-"));
   temporaryDirectories.push(dir);
-  const notes = "## v1.2.3 - 2026-10-18\n\nReviewed release notes.\n";
+  const notes = `## v${version} - 2026-10-18\n\nReviewed release notes.\n`;
   const files = Object.fromEntries(names.map((name) => [name, Buffer.from(name)]));
   files["CHANGELOG_RELEASE.md"] = Buffer.from(notes);
   const hashes = Object.fromEntries(Object.entries(files).map(([name, data]) => [name, hash(data)]));
   files.SHA256SUMS = Buffer.from(names.map((name) => `${hashes[name]}  ${name}\n`).join(""));
-  files["release-metadata.json"] = Buffer.from(JSON.stringify({ version: "1.2.3", commit: sha, sha256: hashes }));
+  files["release-metadata.json"] = Buffer.from(JSON.stringify({ version, commit: sha, sha256: hashes }));
   for (const [name, data] of Object.entries(files)) writeFileSync(join(dir, name), data);
   const state = {
     tag: null,
@@ -43,7 +43,7 @@ function fixture() {
     rest: {
       git: {
         async getRef({ ref }) {
-          assert.equal(ref, "tags/v1.2.3");
+          assert.equal(ref, `tags/v${version}`);
           if (!state.tag) throw missing();
           return { data: { object: state.tag } };
         },
@@ -51,7 +51,7 @@ function fixture() {
           return { data: { object: state.annotated[tag_sha] } };
         },
         async createRef({ ref, sha: commit }) {
-          assert.equal(ref, "refs/tags/v1.2.3");
+          assert.equal(ref, `refs/tags/v${version}`);
           state.writes++;
           state.tag = { type: "commit", sha: commit };
         },
@@ -87,9 +87,17 @@ function fixture() {
           assert.equal(headers.accept, "application/octet-stream");
           return { data: state.assets.find((asset) => asset.id === asset_id).data };
         },
-        async updateRelease({ draft }) {
+        async updateRelease({ draft, make_latest = "true" }) {
           state.writes++;
           state.release.draft = draft;
+          // Model GitHub's default promotion and its version-aware legacy policy.
+          if (
+            !draft &&
+            (make_latest === "true" ||
+              (make_latest === "legacy" &&
+                (!latest.version || version.localeCompare(latest.version, undefined, { numeric: true }) > 0)))
+          )
+            latest.version = version;
           return { data: state.release };
         },
       },
@@ -109,7 +117,7 @@ function fixture() {
       VERSION: process.env.VERSION,
       ARTIFACT_DIR: process.env.ARTIFACT_DIR,
     };
-    Object.assign(process.env, { SOURCE_SHA: sha, VERSION: "1.2.3", ARTIFACT_DIR: dir });
+    Object.assign(process.env, { SOURCE_SHA: sha, VERSION: version, ARTIFACT_DIR: dir });
     try {
       await new AsyncFunction("github", "context", "core", "require", script)(
         github,
@@ -126,6 +134,17 @@ function fixture() {
   }
   return { dir, files, state, run, github };
 }
+
+test("publishing an older release last keeps the higher version Latest", async () => {
+  const latest = {};
+  const newer = fixture({ version: "1.10.0", latest });
+  const older = fixture({ version: "1.2.3", latest });
+  await newer.run();
+  assert.equal(latest.version, "1.10.0");
+  await older.run();
+  assert.equal(older.state.release.draft, false);
+  assert.equal(latest.version, "1.10.0");
+});
 
 test("rejects missing checksums before creating a tag", async () => {
   const f = fixture();

@@ -2,57 +2,38 @@ name: CI
 
 on:
   push:
-    branches: [main, dev]
-  pull_request:
     branches: [main]
+  pull_request:
+  # Preparation explicitly dispatches CI because GITHUB_TOKEN does not trigger PR runs.
   workflow_dispatch:
 
 concurrency:
-  group: ci-${{ github.workflow }}-${{ github.ref }}
+  group: ci-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 permissions:
   contents: read
 
 jobs:
+  checks:
+    uses: ./.github/workflows/validate.yml
+    with:
+      source_ref: ${{ github.sha }}
+      artifact_prefix: ci
+      retention_days: ${{ github.event_name == 'pull_request' && 7 || startsWith(github.ref, 'refs/heads/codex/release-v') && 7 || 14 }}
+
   verify:
+    if: always()
+    needs: [checks, official-parity]
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 5
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - name: Validate workflows
-        run: |
-          archive="$RUNNER_TEMP/actionlint.tar.gz"
-          curl --proto '=https' --proto-redir '=https' --fail --silent --show-error --location https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_linux_amd64.tar.gz --output "$archive"
-          echo "8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8  $archive" | sha256sum --check
-          tar -xzf "$archive" -C "$RUNNER_TEMP" actionlint
-          "$RUNNER_TEMP/actionlint"
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version: 24
-          cache: npm
-      - name: Install dependencies
-        run: |
-          npm ci --ignore-scripts
-          node_modules/.bin/wxt prepare
-      - name: Verify and build Chrome, Firefox, and Edge
-        run: npm --ignore-scripts run ci
-      - name: Package verified builds
-        run: npm run package:built
-      - name: Upload build artifacts
-        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        with:
-          name: webext-zips-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
-          path: |
-            .output/opencc.chrome.zip
-            .output/opencc.firefox.zip
-            .output/opencc.edge.zip
-            .output/SHA256SUMS
-          if-no-files-found: error
-          retention-days: 14
+      - name: Require all checks and browser packages
+        env:
+          RESULT: ${{ needs.checks.result }}
+          PARITY_RESULT: ${{ needs.official-parity.result }}
+        run: test "$RESULT" = success && test "$PARITY_RESULT" = success
+
   official-parity:
     runs-on: windows-latest
     timeout-minutes: 15
