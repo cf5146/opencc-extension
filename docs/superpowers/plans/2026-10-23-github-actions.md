@@ -28,7 +28,7 @@
 ### Task 1: 共用驗證 / Shared validation
 
 **Files:** .github/workflows/validate.yml, .github/workflows/ci.yml
-**Interfaces:** Inputs source_ref, artifact_prefix, retention_days, release_version; outputs artifact_name and version. / 輸入來源、產物前綴、保存天數、發布版本；輸出產物名稱與版本。
+**Interfaces:** Uses immutable github.sha; inputs artifact_prefix, retention_days, release_version; outputs artifact_name and version. / 使用固定事件 SHA；輸入產物前綴、保存天數、發布版本，輸出產物名稱與版本。
 
 - [x] 建立品質工作、三瀏覽器矩陣、品質與建置成功後才封裝。Create quality, browser matrix and success-gated packaging jobs.
 - [x] CI 呼叫共用流程並以 always() verify 檢查成功。Call it from CI and aggregate success with always() verify.
@@ -37,7 +37,7 @@
 ### Task 2: 發布資格與重試 / Release eligibility and recovery
 
 **Files:** scripts/prepare-release.mjs, tests/prepare-release.test.mjs, tests/release-eligibility.test.mjs, .github/workflows/prepare-release.yml, .github/workflows/release.yml
-**Interfaces:** Preparation records verifiable provenance on the PR; eligibility outputs immutable source SHA/version; release passes these to Task 1. / 準備留下可驗證來源；資格閘輸出 SHA 與版本，傳入工作一。
+**Interfaces:** Preparation records verifiable provenance on the PR; eligibility binds the reviewed merge to github.sha and passes its version to Task 1. / 準備留下可驗證來源；資格閘確認合併與事件 SHA 一致，將版本傳入工作一。
 
 - [x] 先新增準備來源與資格失敗測試並確認失敗。Write provenance and eligibility regressions and observe failure.
 - [x] 實作準備來源及合併事件資格閘，保留原發布程式。Implement preparation provenance and merged-event eligibility while retaining the publisher.
@@ -77,3 +77,9 @@ PR integration: the user subsequently authorized PR creation. Base the isolated 
 
 整合驗證：npm run ci 通過 300 個測試與三瀏覽器建置、manifest 及 32 個官方資產雜湊驗證；原生 parity 通過 779 個案例與 40 組完整長輸入比對。封裝、actionlint、格式檢查及獨立整合審查均通過。沒有修改套件版本、引擎程式或託管設定。
 Integration verification: npm run ci passed 300 tests plus all three browser builds, manifest checks and 32 official asset hashes. Native parity passed 779 cases and 40 complete long-input comparisons. Packaging, actionlint, formatting and independent integration review passed. Package versions, engine code and hosted settings remain unchanged.
+
+CodeQL 修正：移除可設定的 source_ref，所有共用工作固定簽出 github.sha。發布資格閘另外拒絕事件 SHA 與已審查合併提交不一致的執行；此回歸先失敗再通過。不停用快取，也不略過安全掃描。
+CodeQL fix: remove configurable source_ref and pin every shared checkout to github.sha. Release eligibility rejects any event SHA differing from the reviewed merge commit; the regression failed before the guard and passed afterward. Keep caching and security scanning enabled.
+
+此修正的 npm run ci 通過 301 個測試與全部瀏覽器建置、manifest 及官方資產雜湊檢查；actionlint、格式與獨立修正審查通過。託管 CodeQL 結果需在推送後確認。
+For this fix, npm run ci passed 301 tests and all browser builds, manifest checks and official asset hashes. Actionlint, formatting and independent fix review passed. Confirm hosted CodeQL after pushing.

@@ -23,6 +23,7 @@ function fixture() {
     conclusion: "success",
     repository: { full_name: "owner/repo" },
   };
+  const context = { repo: { owner: "owner", repo: "repo" }, sha: merge, payload: { pull_request: pr } };
   const outputs = {};
   const jobs = [{ name: "Prepared release PR #7 v1.2.3", conclusion: "success" }];
   const comments = [];
@@ -31,6 +32,7 @@ function fixture() {
     pr,
     run,
     outputs,
+    context,
     jobs,
     comments,
     runs,
@@ -65,11 +67,9 @@ function fixture() {
           },
         },
       };
-      await new AsyncFunction("github", "context", "core", script)(
-        github,
-        { repo: { owner: "owner", repo: "repo" }, payload: { pull_request: pr } },
-        { setOutput: (name, value) => (outputs[name] = value) },
-      );
+      await new AsyncFunction("github", "context", "core", script)(github, context, {
+        setOutput: (name, value) => (outputs[name] = value),
+      });
     },
   };
 }
@@ -123,6 +123,7 @@ it.each([
   ["zero version", (f) => (f.pr.head.ref = "codex/release-v0.0.0")],
   ["human-authored PR", (f) => (f.pr.user = { login: "maintainer", id: 42 })],
   ["spoofed bot login", (f) => (f.pr.user.id = 42)],
+  ["workflow SHA differs from reviewed merge", (f) => (f.context.sha = "c".repeat(40))],
   ["missing merge SHA", (f) => (f.pr.merge_commit_sha = null)],
   ["missing provenance", (f) => (f.pr.body = "Review notes")],
   ["ambiguous provenance", (f) => (f.pr.body += f.pr.body)],
