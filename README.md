@@ -62,6 +62,8 @@ npm run build:edge
 
 Load .output/edge-mv3 as an unpacked extension from edge://extensions. Chrome uses .output/chrome-mv3; Firefox uses .output/firefox-mv3 through about:debugging.
 
+For development, run `npm run dev:edge` (or `dev` / `dev:firefox`) and manually load the output directory printed by WXT. These commands keep watching and rebuilding; reload the extension/page after changes. Browser auto-launch is intentionally unavailable because the optional `web-ext` runner brings an unpatched development dependency. See [dependency risk assessment](docs/dependency-risk-assessment.md).
+
 Normal builds verify the committed source-built engine/data hashes before packaging. They do not download newer OpenCC data. The offscreen permission on Chromium supports the bundled Worker. Extension CSP permits local WebAssembly compilation.
 
 ## Fixed-source update and verification
