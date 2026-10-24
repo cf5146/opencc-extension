@@ -45,11 +45,11 @@ Raw evidence: [results](evidence/short-node-performance/results.json), [referenc
 
 ## Correctness and operational validation
 
-`npm run ci` passes: **258 tests**, lint/typecheck, all three MV3 builds, generated artifact checks and 32 official resource hashes. Focused regression tests cover independent node strings, page/config cache separation, entry/byte LRU limits, oversized/invalid responses, canceled cache refill, automatic additions during an in-flight batch, and existing selection/DOM safety contracts.
+The measured candidate's initial `npm run ci` passes: **258 tests**, lint/typecheck, all three MV3 builds, generated artifact checks and 32 official resource hashes. Focused regression tests cover independent node strings, page/config cache separation, entry/byte LRU limits, oversized/invalid responses, canceled cache refill, automatic additions during an in-flight batch, and existing selection/DOM safety contracts.
 
 Six separate headless Edge checks pass: actual click/keyboard typing in a page input and popup.html while page conversion is still pending; selected element identity; editing the same Text during a pending request; changing settings during pending Jieba; disabling automatic conversion during cold Jieba. [Exact observations](evidence/short-node-performance/functional.json), [operational method and limits](evidence/short-node-performance/functional.md). These are automated browser interactions, not subjective human latency, IME or real toolbar-popup lifecycle tests.
 
-One fresh read-only code review found no actionable Critical, Important or Minor issue and independently recomputed the eight warm acceptance gates from raw results.
+The initial read-only review independently recomputed the eight warm acceptance gates from raw results. A later review found that the operational CLI could exit successfully on failed browser checks; the follow-up preserves evidence, then rejects failed, missing, duplicate or renamed checks. Nine CLI regression tests cover that guard and trusted absolute Git selection. Summary gate math and the measured product remain unchanged.
 
 ## Cold-start and scale limits
 

@@ -39,10 +39,10 @@ function call(args, json = false) {
     maxBuffer: 8 * 1024 * 1024,
     windowsHide: true,
   });
-  if (r.error || r.status !== 0) throw r.error ?? Error(r.stdout + r.stderr);
+  if (r.error || r.status !== 0) throw r.error ?? new Error(r.stdout + r.stderr);
   if (!json) return r.stdout;
   const p = JSON.parse(r.stdout);
-  if (p.isError || p.error) throw Error(r.stdout);
+  if (p.isError || p.error) throw new Error(r.stdout);
   return typeof p.result === "string" ? JSON.parse(p.result) : p.result;
 }
 try {
@@ -59,6 +59,20 @@ try {
     "\nExact observations/responses are retained in functional.json. An unresolved-request check is required before claiming typing/editing overlapped conversion.\n";
   fs.writeFileSync(path.join(lab, "FUNCTIONAL.md"), md);
   console.log(JSON.stringify(result, null, 2));
+  const expectedChecks = new Set([
+    "disable-auto-during-cold-Jieba",
+    "edit-text-during-pending-manual",
+    "selection-element-identity",
+    "page-editable-keyboard-while-conversion-pending",
+    "popup-keyboard-while-page-request-pending",
+    "settings-change-invalidates-pending-Jieba-output",
+  ]);
+  assert.equal(result.allPass, true, "Operational browser checks failed");
+  assert.equal(result.tests.length, expectedChecks.size, "Expected all six operational browser checks");
+  for (const test of result.tests) {
+    assert.equal(test.pass, true, "Operational browser check failed: " + test.name);
+    assert.ok(expectedChecks.delete(test.name), "Unexpected or duplicate browser check: " + test.name);
+  }
 } catch (e) {
   fs.writeFileSync(path.join(lab, "functional-error.json"), JSON.stringify({ error: e.stack ?? String(e) }, null, 2));
   throw e;
