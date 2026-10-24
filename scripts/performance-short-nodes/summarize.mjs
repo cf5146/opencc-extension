@@ -18,7 +18,8 @@ for (const r of rows) {
     assert.ok(c.complete && !c.timeout);
     assert.equal(c.outputSha256, c.expectedHash);
     const k = [r.mode, r.kind, c.name].join("/");
-    (groups[k] ??= { baseline: [], candidate: [] })[r.variant].push(c);
+    groups[k] ??= { baseline: [], candidate: [] };
+    groups[k][r.variant].push(c);
   }
 }
 const summary = Object.entries(groups).map(([scenario, variants]) => {
@@ -61,8 +62,11 @@ fs.writeFileSync(path.join(lab, "summary.json"), JSON.stringify(report, null, 2)
 let md =
   "# Short-node acceptance measurements\n\nFive sequential alternating trial pairs; uninstrumented clean-built artifacts. Median [min-max], milliseconds. Full output arrays match the frozen baseline engine reference. Cold1000 recorded but not gated. No p95/significance claim.\n\n| Scenario | Baseline completion | Candidate completion | Reduction | Drift change | Gate |\n|---|---:|---:|---:|---:|---|\n";
 const fmt = (x) => `${x.median.toFixed(1)} [${x.min.toFixed(1)}-${x.max.toFixed(1)}]`;
-for (const r of summary)
-  md += `| ${r.scenario} | ${fmt(r.baseline.elapsedMs)} | ${fmt(r.candidate.elapsedMs)} | ${r.completionReductionPercent.toFixed(1)}% | ${r.driftIncreaseMs.toFixed(1)}ms | ${r.gated ? (r.completionPass && r.driftPass ? "PASS" : "FAIL") : "not gated"} |\n`;
+for (const r of summary) {
+  let gate = "not gated";
+  if (r.gated) gate = r.completionPass && r.driftPass ? "PASS" : "FAIL";
+  md += `| ${r.scenario} | ${fmt(r.baseline.elapsedMs)} | ${fmt(r.candidate.elapsedMs)} | ${r.completionReductionPercent.toFixed(1)}% | ${r.driftIncreaseMs.toFixed(1)}ms | ${gate} |\n`;
+}
 md += `\nOverall acceptance: ${report.acceptancePass ? "PASS" : "FAIL"}. Required each of8cells: candidate median completion <=50% ofbaseline; median oftrial maximum timerdrift <=baseline+10ms. SeeREADME.md for workload/method limitations.\n`;
 fs.writeFileSync(path.join(lab, "RESULTS.md"), md);
 console.log(md);

@@ -10,12 +10,13 @@ $env:SHORT_NODE_LAB = 'C:\bench\short-node-run-1'
 $env:SHORT_NODE_BASELINE_ROOT = 'C:\bench\baseline-source'
 $env:SHORT_NODE_BASELINE_SHA = 'fd37dac3925092c403ac1f6695a157ec8ec01217'
 $env:SHORT_NODE_CANDIDATE_ROOT = 'C:\code\candidate-source'
+$env:GIT_EXECUTABLE = 'C:\Program Files\Git\cmd\git.exe'
 $env:PLAYWRIGHT_CLI = 'C:\tools\node_modules\@playwright\cli\playwright-cli.js'
 node scripts/performance-short-nodes/run.mjs
 node scripts/performance-short-nodes/summarize.mjs
 ```
 
-The results directory must be fresh. The baseline root must contain `.output/edge-mv3/manifest.json`; the candidate has the same layout. Candidate root defaults to this repository. Baseline SHA is metadata: the caller must build the stated revision; the runner inventories both loaded artifacts and candidate tracked source files so they can be audited. It snapshots both artifacts before timing and refuses to overwrite an existing run.
+GIT_EXECUTABLE must name a trusted absolute Git executable path (on Linux, for example, /usr/bin/git); PATH lookup is rejected. The results directory must be fresh. The baseline root must contain `.output/edge-mv3/manifest.json`; the candidate has the same layout. Candidate root defaults to this repository. Baseline SHA is metadata: the caller must build the stated revision; the runner inventories both loaded artifacts and candidate tracked source files so they can be audited. It snapshots both artifacts before timing and refuses to overwrite an existing run.
 
 40 serial Edge sessions run five alternating baseline/candidate trial pairs per mode (`mmseg`, `jieba`) and input (`unique`, `repeated`). Each session records:
 
@@ -31,4 +32,4 @@ Completion requires a SHA256 match of the entire output array against the frozen
 
 Firefox runtime, actual browser RAM, real website overlap and simultaneous-tab contention are outside this benchmark. Firefox build/tests are part of the normal project CI. Functional browser checks are recorded separately from timing.
 
-After timing, run `node scripts/performance-short-nodes/functional.mjs` with the same environment for the separate six-check operational validation against the frozen candidate artifact. It uses another dedicated profile and refuses to overwrite existing functional evidence.
+After timing, run `node scripts/performance-short-nodes/functional.mjs` with the same environment for the separate six-check operational validation against the frozen candidate artifact. It uses another dedicated profile and refuses to overwrite existing functional evidence. After saving the observations, it exits nonzero if any expected check fails, is missing, duplicated or renamed.

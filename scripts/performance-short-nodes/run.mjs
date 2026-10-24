@@ -19,10 +19,12 @@ const cli = process.env.PLAYWRIGHT_CLI;
 assert.ok(cli && path.isAbsolute(cli), "Set PLAYWRIGHT_CLI to the installed CLI JavaScript entrypoint");
 const baselineSHA = process.env.SHORT_NODE_BASELINE_SHA;
 assert.match(baselineSHA ?? "", /^[0-9a-f]{40}$/, "Set SHORT_NODE_BASELINE_SHA to the exact baseline source commit");
+const gitExecutable = process.env.GIT_EXECUTABLE;
+if (!gitExecutable || !path.isAbsolute(gitExecutable)) throw new Error("GIT_EXECUTABLE must be an absolute path");
 const sha = (x) => createHash("sha256").update(x).digest("hex");
 const write = (name, value) => fs.writeFileSync(path.join(lab, name), JSON.stringify(value, null, 2) + "\n");
 const git = (args) => {
-  const r = spawnSync("git", args, { cwd: candidateRoot, encoding: "utf8", windowsHide: true });
+  const r = spawnSync(gitExecutable, args, { cwd: candidateRoot, encoding: "utf8", windowsHide: true });
   assert.equal(r.status, 0, r.stderr);
   return r.stdout.trim();
 };
@@ -112,10 +114,10 @@ const call = (args, json = false) => {
     maxBuffer: 8 * 1024 * 1024,
     windowsHide: true,
   });
-  if (r.error || r.status !== 0) throw r.error ?? Error(r.stdout + r.stderr);
+  if (r.error || r.status !== 0) throw r.error ?? new Error(r.stdout + r.stderr);
   if (!json) return r.stdout;
   const p = JSON.parse(r.stdout);
-  if (p.isError || p.error) throw Error(r.stdout);
+  if (p.isError || p.error) throw new Error(r.stdout);
   return typeof p.result === "string" ? JSON.parse(p.result) : p.result;
 };
 const rows = [];
