@@ -1,53 +1,29 @@
-# Copilot instructions for `opencc-extension`
+# 專案代理指引 / Repository Agent Instructions
 
-## Big picture (what talks to what)
+## 文件入口 / Documentation
 
-- **WXT entrypoints**: `entrypoints/background.ts`, `entrypoints/content.ts`, `entrypoints/popup/*`, `entrypoints/options/*`
-- **Core API (stable façade)**: `src/core/conversion.ts` + `src/core/whitelist.ts`
-- **Application logic**: `src/application/conversion/conversion-service.ts` (caching + DOM traversal)
-- **Infrastructure**: `src/infrastructure/conversion/opencc-factory.ts` (converter memoization)
-- **OpenCC engine/data**: `src/lib/opencc/*` (Trie-based converter)
-- **Browser API boundary**: `src/platform/browser-platform.ts`; application code uses `src/platform/types.ts` ports
+使用者行為見 [README](../README.md)；修改執行流程先讀 [MV3_NOTES](../MV3_NOTES.md)；修改開發、CI 或發布先讀 [CONTRIBUTING](../CONTRIBUTING.md)；用語採用 [GLOSSARY](../GLOSSARY.md)。
+Read [README](../README.md) for user behavior, [MV3_NOTES](../MV3_NOTES.md) before runtime changes, and [CONTRIBUTING](../CONTRIBUTING.md) before development, CI, or release changes. Use [GLOSSARY](../GLOSSARY.md) terminology.
 
-## Runtime data flow (follow these files)
+## 程式邊界 / Code boundaries
 
-1. Popup asks the background runtime to convert the active tab through the runtime port (`entrypoints/popup/main.ts`).
-2. Background runtime handles context-menu dispatch, badge state, active-tab conversion, and one-shot fallback injection (`entrypoints/background.ts` and `src/application/runtime/background-runtime.ts`).
-3. The statically declared content script loads settings through the settings store and runs conversions (`entrypoints/content.ts`).
-4. Conversion pipeline is: `src/core/conversion.ts` → `ConversionService` → `OpenCCFactory` → `lib/opencc/Converter`.
+- 正式入口使用 src/application/official/；舊同步模組僅供回歸參考。追蹤實際 entrypoints 匯入，避免將舊引擎誤認為正式路徑。
+  Production entrypoints use src/application/official/. Legacy synchronous modules are regression references. Follow entrypoint imports to identify the active engine.
+- Worker、offscreen 與 WASM 位於 public/opencc/；重建與鎖定資訊見 scripts/opencc-feasibility/README.md 及 artifact-lock.json。維持產物雜湊及第三方聲明。
+  Worker, offscreen, and WASM files live under public/opencc/. Consult scripts/opencc-feasibility/README.md and artifact-lock.json for rebuilds and pins. Preserve artifact hashes and third-party notices.
+- 自動轉換採逐主機 opt-in 與 officialOpenCC 第 2 版設定；舊語言配對、全域開關與正規表示式不套用。
+  Automatic conversion uses exact-host opt-in and version-2 officialOpenCC settings. Legacy locale pairs, global toggles, and regex rules are not applied.
+- DOM 非同步結果須驗證快照、網址、組態與取消狀態；選取轉換保留元素與事件處理器。單一 Text 節點維持完整輸入。
+  Validate snapshots, URL, configuration, and cancellation before committing asynchronous DOM results. Preserve selection elements and event handlers; keep each Text-node input whole.
+- 快取僅限頁面本機且有大小上限；瀏覽器訊息維持 callback-only Chromium 相容性。
+  Keep caches page-local and bounded; preserve callback-only Chromium messaging compatibility.
+- 保留使用者既有修改，新增文件採繁體中文與英文對照。
+  Preserve existing user changes and write new documentation in Traditional Chinese and English.
 
-## MV3 / cross-browser rules that matter here
+## 驗證 / Verification
 
-- WXT statically declares the top-frame content script for HTTP and HTTPS pages in every MV3 target.
-- Auto mode controls the observer inside the content runtime; it does not register or unregister scripts.
-- If you change the content script entrypoint or matches, update `entrypoints/content.ts`, the platform manifest-path lookup, and the artifact verifier.
-- When static injection was missed, the background runtime performs one manifest-declared injection and one message retry.
+行為變更執行相關回歸測試及 npm run ci；引擎變更另執行原生 parity 與實機驗證。僅文件變更核對格式、連結、程式一致性與發布標題契約。
+Run relevant regression tests and npm run ci for behavior changes. Engine changes also require native parity and browser checks. For documentation-only changes, check formatting, links, consistency with code, and release-heading contracts.
 
-## Project-specific conventions
-
-- Runtime ports normalize browser API errors into `PlatformError` values.
-- Auto mode relies on caching to avoid duplicate conversions:
-  - `ConversionService` tracks per-Text-node locale pair via `WeakMap<Text, {from,to}>`
-  - `convertedOutputs` avoids repeated work in dynamic pages (`src/application/conversion/conversion-service.ts`).
-- Auto mode observer resets caches on URL changes and does incremental work + fallback full scan (`src/application/auto/auto-conversion-controller.ts`).
-- Whitelist is stored as **regex strings** through the storage port:
-  - Options UI accepts `*` wildcards and translates them to `[^ ]*` (`src/application/ui/options-controller.ts`).
-  - Matching/compilation is centralized in `src/core/whitelist.ts`.
-
-## Build / run workflows (use these scripts, not guesses)
-
-- Watch Chrome, Firefox, or Edge with `npm run dev`, `npm run dev:firefox`, or `npm run dev:edge`.
-- Build explicit MV3 targets with `npm run build:chrome`, `npm run build:firefox`, and `npm run build:edge`.
-- Generated output lives in `.output/<browser>-mv3/`; verify each target with `node scripts/verify-build-output.mjs <browser>`.
-- Package all targets with `npm run dist`, producing `opencc.chrome.zip`, `opencc.firefox.zip`, and `opencc.edge.zip`.
-
-## Generated data (don’t hand-edit)
-
-- `src/lib/opencc/raw-data.ts` is auto-generated.
-- Regenerate after updating `opencc-js` via: `node scripts/generate-opencc-data.mjs`.
-
-## Tests (how they’re structured)
-
-- Vitest + JSDOM (`vitest.config.mjs`), tests live in `tests/`.
-- DOM globals are manually installed in tests (e.g. `tests/conversion-service.test.ts`).
-- Background MV3 behavior is tested through `src/application/runtime/background-runtime.ts` and platform fakes; browser API calls stay behind the platform boundary.
+歷史效能數字須連到方法與證據，不得當成本次測量。GitHub 產物、建置檢查、實機驗證及商店簽署各自獨立，回報時精確區分。
+Link historical performance figures to their methods and evidence rather than presenting them as current measurements. Distinguish GitHub artifacts, build checks, runtime acceptance, and store signing.
