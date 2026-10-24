@@ -1,38 +1,31 @@
 ## v0.6.1 - 2026-10-23
 
-[Compare changes](https://github.com/cf5146/opencc-extension/compare/v0.6.0...v0.6.1)
+[比較版本 / Compare changes](https://github.com/cf5146/opencc-extension/compare/v0.6.0...v0.6.1)
 
-### Candidate status
+### 候選狀態 / Candidate status
 
-Prepared for review and testing; this preparation does not publish a release, create a tag, sign Firefox packages or submit to a browser store. Edge has recorded runtime evidence; Chrome and Firefox currently have build checks only. Firefox runtime acceptance remains open.
+供審查與測試；尚不代表建立標籤、公開 Release、商店上架或 Firefox 簽署。Chrome／Firefox 有建置檢查，Firefox 實機驗收仍待完成。
+Prepared for review and testing. This does not create a tag, publish a release, submit to stores, or sign Firefox packages. Chrome/Firefox have build checks; Firefox runtime acceptance remains open.
 
-### Features
+- 採用官方 OpenCC 1.4.2、離線字典與 WASM Jieba，提供五種預設組態；預設 s2twp/Jieba，mmseg 可手動選擇。
+  Adopt official OpenCC 1.4.2, offline dictionaries, and WASM Jieba with five presets; default to s2twp/Jieba with mmseg as an explicit alternative.
+- 以序列化 Worker 執行轉換，Chromium 使用 offscreen document，Firefox 使用背景頁面。文字與模型留在本機。
+  Run conversions in a serialized Worker using a Chromium offscreen document or Firefox background page. Text and models stay local.
+- 批次處理短文字與自動轉換根節點，使用有上限的頁面本機快取；歷史量測與限制見[效能證據](./docs/short-node-performance.md)。
+  Batch short text and automatic roots with a bounded page-local cache; see [performance evidence](./docs/short-node-performance.md) for historical measurements and limits.
+- 丟棄過時的文字、選取範圍、網址或設定結果，保留元素與事件處理器，保護輸入法組字及非同步預覽。
+  Discard stale text, selection, URL, or settings results; preserve elements and handlers, IME composition, and asynchronous preview correctness.
+- 採 officialOpenCC 第 2 版獨立設定，逐主機重新啟用自動轉換；舊設定保留但不套用。已轉換頁面切換組態須重新載入。
+  Use separate version-2 officialOpenCC settings with exact-host opt-in; legacy settings remain stored but are not applied. Reload converted pages before changing configuration.
+- 由 cf5146 獨立維護並保留 Tony Chan 原始聲明。Firefox ID 改為 opencc-extension@cf5146，未確認 AMO 識別或提供已簽署 XPI；原商店安裝不自動移轉。
+  Independently maintained by cf5146 with Tony Chan’s attribution retained. Firefox uses opencc-extension@cf5146 without AMO confirmation or a signed XPI; original store installations do not migrate automatically.
+- 移除有風險的選用 web-ext 啟動器依賴鏈；開發模式維持編譯與監看，改為手動載入。見[依賴評估](./docs/dependency-risk-assessment.md)。
+  Remove the risky optional web-ext launcher dependency chain. Development still compiles and watches; load manually. See the [dependency assessment](./docs/dependency-risk-assessment.md).
 
-- Adopt official BYVoid/OpenCC 1.4.2 with bundled offline dictionaries and the official Jieba plugin compiled to WebAssembly. Jieba is the default; mmseg remains an explicit alternative.
-- Offer five official presets: s2t, s2tw, s2twp (default), s2hk and tw2sp, in popup previews, page conversion and selection conversion.
-- Run conversion in a serialized Worker, using Chromium offscreen documents or the Firefox background page. Models and page text stay local.
+### 已知限制 / Known limits
 
-### Performance and reliability
+Chrome／Edge 需要 runtime.getContexts（116+）。Jieba 首次初始化可能需數秒，歷史量測約 111 MiB WASM 線性記憶體，另有程序與暫存成本；大型輸入可能持續增長至 Worker 終止。
+Chrome/Edge require runtime.getContexts (116+). Jieba initialization may take seconds; a historical measurement used about 111 MiB WASM linear memory, excluding process and transient overhead. Large inputs can grow memory until Worker termination.
 
-- Batch short Text-node requests, group pending automatic roots and reuse exact strings in a bounded page-local cache. Each Text node remains an independent input; there is no cross-tab cache.
-- In the recorded Edge benchmark, warm 20,000-node completion medians improved by 75.1–91.6%, and automatic 1,000-root completion medians by 96.6–98.5%, against the pre-optimization official-engine baseline. These are workload-specific results, not cold-start or cross-browser guarantees. See [methods and evidence](https://github.com/cf5146/opencc-extension/blob/a8cb280573399372b698493a4bcfcac4d0f25a26/docs/short-node-performance.md).
-- Reject stale conversion results after text, selection, URL or settings changes; preserve selection elements/handlers, protect IME input, and recover popup previews after asynchronous failures.
-
-### Upgrade and compatibility
-
-- This fork is independently maintained by cf5146 and retains Tony Chan's original authorship and license notices. Existing store installations do not automatically move to this fork.
-- Settings use the separate officialOpenCC version-2 storage key. Legacy settings are retained but not applied: re-enable automatic conversion for each exact hostname and choose a preset/mode explicitly. Subdomains do not inherit rules; legacy arbitrary locale pairs and regex exclusions are not migrated.
-- After converting a page, reload it before applying a different configuration. Excluded script/style, code/pre, editable and translate=no content stays unchanged. Linguistic context does not cross DOM Text-node boundaries.
-- Chrome/Edge require runtime.getContexts (116+). Firefox uses the new ID opencc-extension@cf5146; AMO has not confirmed the ID, and no signed XPI or verified store listing is provided.
-
-### Dependency security and development
-
-- Remove the optional web-ext launcher and its unpatched node-forge dependency chain, together with the affected fast-uri tooling dependency. Both npm lockfiles reported zero known advisories during preparation; this is a dated advisory snapshot.
-- Development commands still compile/watch, but no longer launch a browser automatically. Manually load the output directory printed by WXT and reload the extension/page after edits. See [dependency assessment](https://github.com/cf5146/opencc-extension/blob/a8cb280573399372b698493a4bcfcac4d0f25a26/docs/dependency-risk-assessment.md).
-
-### Known limits
-
-- Firefox runtime behavior and store signing remain unverified; a generated Firefox ZIP is not an installable signed release for ordinary Firefox installations.
-- Jieba initialization can take seconds. One measured default converter used roughly 111 MiB of WASM linear memory, excluding process overhead and transient copies; large inputs can grow it until Worker termination.
-- Two cold-start benchmark cells were approximately 8% slower after the short-node optimization. Very large root sets beyond the measured workloads remain unmeasured.
-- Embedded NUL and malformed UTF-16 inputs are rejected. On page conversion failure, completed batches remain converted while pending originals stay intact.
+文字節點之間不共享語境；內嵌 NUL 及不合法 UTF-16 會拒絕。頁面失敗時已完成批次仍維持轉換，待處理原文保留。歷史量測有兩個冷啟動情境約慢 8%，更大的根節點集合尚未量測。
+Context does not cross Text-node boundaries. Embedded NUL and malformed UTF-16 are rejected. On page failure, completed batches remain converted and pending originals stay intact. Two historical cold-start cells were about 8% slower; larger root sets remain unmeasured.
