@@ -63,9 +63,11 @@ Consult the [glossary](./GLOSSARY.md) before changing terminology and the [archi
 原生引擎比對另需安裝 scripts/opencc-feasibility 的依賴並執行 npm run verify:official:parity；重建程序見 [官方引擎指南](./scripts/opencc-feasibility/README.md)。
 Native parity additionally requires dependencies under scripts/opencc-feasibility and npm run verify:official:parity; see the [official engine guide](./scripts/opencc-feasibility/README.md) for rebuilds.
 
-CI 在 main/dev 的 push、以 main 為目標的 PR，以及手動執行時運作。verify 工作會檢查工作流程、安裝依賴、準備 WXT，再執行完整檢查與封裝；push 與手動執行會上傳保存 14 天的產物。
-CI runs on pushes to main/dev, PRs targeting main, and manual dispatches. Its verify job checks workflows, installs dependencies, prepares WXT, runs the complete gate, and packages outputs. Push and manual runs upload artifacts retained for 14 days. A separate official-parity job runs the pinned native comparison on Windows.
-另有 official-parity 工作在 Windows 執行固定原生參考比對。
+CI 在每個 PR、main push 與手動執行時運作；dev push 不再單獨觸發。ci.yml 呼叫共用的 validate.yml，在 Ubuntu 與 Node.js 24 上平行執行品質檢查及 Chrome、Firefox、Edge 建置矩陣。品質工作執行 actionlint、官方資產雜湊、ESLint、TypeScript 與 Vitest；三個建置各自驗證產物與官方資產雜湊，全部成功後才下載並封裝。最終 verify 工作要求整個共用流程成功，失敗、略過或取消均不會通過。既有 official-parity 工作仍在 Windows 比對原生 OpenCC 與 Jieba，verify 亦要求此工作成功。
+CI runs on every PR, main push, and manual dispatch; dev pushes no longer trigger separate runs. ci.yml calls validate.yml to run quality checks and a Chrome/Firefox/Edge build matrix in parallel on Ubuntu and Node.js 24. Quality runs actionlint, official asset hashes, ESLint, TypeScript, and Vitest. Each build verifies its output and official asset hashes; packaging downloads all three builds only after every check succeeds. The final verify job requires the entire reusable workflow to succeed; failure, skipping, or cancellation cannot pass it. The existing official-parity job still compares native OpenCC and Jieba on Windows, and verify also requires it to succeed.
+
+成功執行會提供三個可安裝 ZIP 與 SHA256SUMS。PR 與準備流程手動觸發的發布分支產物保存 7 天，main 與其他手動執行保存 14 天；矩陣中繼產物採相同期限。重跑失敗工作時只取代該瀏覽器的中繼產物，最終套件名稱包含執行及嘗試編號。
+Successful runs provide three installable ZIPs and SHA256SUMS. PR artifacts and explicitly dispatched release-branch artifacts are retained for 7 days; main and other manual artifacts are retained for 14 days. Matrix intermediates use the same retention. Failed-job reruns replace only the affected browser's intermediate output; final package names include the run and attempt numbers.
 
 ## 發布 / Releases
 
@@ -78,8 +80,8 @@ GitHub releases are separate from store submission and Firefox signing. The Fire
    Run **Prepare release** on main. An empty version selects the next patch above the package version and existing tags. Alternatively, specify a version without v and optional notes.
 2. 工作流程更新套件版本、鎖定檔與兩份版本文件，建立 codex/release-vX.Y.Z 分支及 PR，並手動觸發該分支的 CI。
    The workflow updates package versions, the lockfile, and both release documents, creates codex/release-vX.Y.Z and a PR, and explicitly dispatches CI for that branch.
-3. 審查差異與檢查結果後，透過正常 PR 流程合併。重新執行準備流程會沿用現有分支，不會覆寫審查中的編輯。
-   Review the diff and checks, then merge through the normal PR process. Repeating preparation reuses the existing branch without overwriting review edits.
+3. 等待準備流程成功，審查差異與檢查結果後，透過正常 PR 流程合併；合併至 main 後會自動發布。重新執行準備流程會沿用現有分支，保留分支與 PR 說明的審查編輯，以新的 bot 留言記錄準備來源並重新觸發 CI，不會覆寫 PR 說明。
+   Wait for preparation to succeed, review the diff and checks, and merge through the normal PR process; merging into main publishes automatically. Repeating preparation reuses the existing branch, preserves reviewed branch changes and PR prose, records refreshed provenance in a new bot comment, and dispatches CI again without replacing the PR description.
 
 CHANGELOG.md 是精簡版本歷史；CHANGELOG_RELEASE.md 是發布程式讀取的最新說明，首行必須維持「## vX.Y.Z - YYYY-MM-DD」。CHANGELOG.md 的「# Changelog」標題也由產生器使用。準備流程會從提交訊息產生說明，審查時應整理成中英對照。
 CHANGELOG.md holds concise version history. CHANGELOG_RELEASE.md is the current publication input and must begin with “## vX.Y.Z - YYYY-MM-DD”. The generator also relies on the “# Changelog” heading in CHANGELOG.md. Preparation generates notes from commits; edit them into bilingual form during review.
@@ -89,15 +91,15 @@ The repository must allow GitHub Actions to create PRs. Preparation uses content
 
 ### 發布已審查的提交 / Publish the reviewed commit
 
-1. 合併後在 main 執行 **Release**。expected_version 可用來確認版本，不會修改版本號。
-   After merging, run **Release** on main. expected_version checks the intended version without changing it.
-2. 建置工作鎖定該次執行的提交，驗證版本與說明，執行完整檢查並封裝相同產物。產物整理使用可信任的 Git 絕對路徑；託管流程設定 GIT_EXECUTABLE=/usr/bin/git。
-   The build job freezes the dispatch commit, validates versions and notes, runs the complete gate, and packages those outputs. Artifact staging uses a trusted absolute Git path; the hosted workflow sets GIT_EXECUTABLE=/usr/bin/git.
+1. **Release** 由 PR 合併至 main 自動觸發。資格閘要求同儲存庫的 codex/release-vX.Y.Z 分支、GitHub Actions bot 建立的 PR，以及 PR 初始說明或 bot 留言中的隱藏標記所對應的成功 main 手動準備執行。該執行還必須有成功的「Prepared release PR #N vX.Y.Z」工作回條，對應此 PR 與版本；人類留言與複製其他發布的標記無效。較新的失敗準備留言不會使既有有效來源失效。回條保存在 Actions 工作紀錄中，不依賴可過期的產物。一般 PR、fork PR 或單純修改版本不會發布。請保留來源標記與 bot 留言；既有未帶標記或回條的發布 PR，須在合併前重新執行準備流程。
+   **Release** starts automatically when a PR merges into main. Eligibility requires a same-repository codex/release-vX.Y.Z branch, a PR authored by the GitHub Actions bot, and a hidden marker in the initial description or a bot comment referencing a successful preparation dispatch from main. That run must also contain a successful “Prepared release PR #N vX.Y.Z” receipt job matching this PR and version; human comments and markers copied from another release are insufficient. A newer failed preparation comment does not invalidate existing valid provenance. Receipts live in Actions job history rather than expiring artifacts. Ordinary PRs, fork PRs, and version edits alone do not publish. Preserve provenance markers and bot comments; rerun preparation before merging older release PRs that lack the marker or receipt.
+2. 共用驗證工作流程鎖定該 PR 的確切 merge_commit_sha，重新執行完整品質檢查及三瀏覽器建置，並要求套件、鎖定檔、說明與分支版本相符。它不使用當下的 main 或 PR 測試產物。產物整理使用可信任的 Git 絕對路徑；託管流程設定 GIT_EXECUTABLE=/usr/bin/git。
+   The reusable validation workflow freezes that PR's exact merge_commit_sha, reruns all quality checks and three-browser builds, and requires package, lockfile, notes, and branch versions to agree. It uses neither the current main tip nor PR test artifacts. Artifact staging uses a trusted absolute Git path; the hosted workflow sets GIT_EXECUTABLE=/usr/bin/git.
 3. 獨立發布工作下載產物並驗證中繼資料與雜湊；建立版本標籤及草稿 Release，上傳並驗證遠端檔案後公開。
    A separate publication job downloads artifacts and validates metadata and hashes. It creates the version tag and draft release, then uploads and verifies remote assets before publishing.
 
-發布工作不執行儲存庫程式，不修改 main，也不自動上架瀏覽器商店。
-The publication job executes no repository code, does not modify main, and does not submit to browser stores.
+只有獨立發布工作具有 contents: write；建置只有 contents: read，資格閘只有 actions: read 與 pull-requests: read。發布工作不執行儲存庫程式、不修改 main，也不自動上架瀏覽器商店。各發布 PR 使用獨立且不取消進行中執行的併發群組，避免其他版本取代等待中的發布。公開版本時明確使用 make_latest: legacy，讓 GitHub 依版本判定 Latest，避免較舊版本較晚完成時降級 Latest。
+Only the isolated publication job has contents: write; builds have contents: read and eligibility has actions: read plus pull-requests: read. Publication executes no repository code, does not modify main, and does not submit to browser stores. Each release PR uses its own concurrency group without canceling active runs, so another version cannot replace its pending publication. Publishing explicitly uses make_latest: legacy so GitHub determines Latest by version, preventing an older release finishing later from downgrading Latest.
 
 ### 失敗復原 / Recovery
 
@@ -105,6 +107,8 @@ The publication job executes no repository code, does not modify main, and does 
   Preparation failure: rerun with the same version to reuse the branch and PR.
 - 發布失敗：在原執行使用 **Re-run failed jobs**，沿用成功建置的產物與提交；相符檔案會保留，缺漏檔案會補上。
   Publication failure: use **Re-run failed jobs** on the original run to reuse its successful build artifacts and commit. Matching assets are preserved and missing assets are uploaded.
+- 不提供獨立的手動發布入口；不要為了復原改用最新 main。若資格閘失敗，檢查準備執行是否成功，以及 PR 初始說明或 bot 留言的標記是否完整。
+  There is no standalone manual publishing trigger; do not switch recovery to the latest main. If eligibility fails, check the preparation run's success and the marker in the initial description or bot comments.
 - 產物在 14 天後過期：重跑原執行的所有工作，重建原本鎖定的提交。
   After artifacts expire at 14 days, rerun all jobs in the original run to rebuild its frozen commit.
 - 標籤指向其他提交、說明或檔案內容衝突：先查明差異；流程不會自動移動標籤或覆寫已發布檔案。

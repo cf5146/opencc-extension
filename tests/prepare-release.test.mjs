@@ -43,6 +43,7 @@ function fixture() {
       GITHUB_SHA: git("rev-parse", "HEAD"),
       GITHUB_REPOSITORY: "actual/project",
       GITHUB_SERVER_URL: "https://github.com",
+      GITHUB_RUN_ID: "123",
     },
   };
 }
@@ -56,6 +57,15 @@ function githubRunner(calls, { prs = [] } = {}) {
       calls.createdBody = fs.readFileSync(args[args.indexOf("--body-file") + 1], "utf8");
       return "https://github.com/actual/project/pull/7";
     }
+    if (args[0] === "pr" && args[1] === "edit") {
+      calls.editedBody = fs.readFileSync(args[args.indexOf("--body-file") + 1], "utf8");
+      prs[0].body = calls.editedBody;
+      return "";
+    }
+    if (args[0] === "pr" && args[1] === "comment") {
+      calls.provenanceBody = fs.readFileSync(args[args.indexOf("--body-file") + 1], "utf8");
+      return "";
+    }
     if (args[0] === "workflow") return "";
     throw new Error(`Unexpected gh call: ${args.join(" ")}`);
   };
@@ -68,7 +78,12 @@ it("prepares a separate release branch, root versions and changelog, PR and expl
   const f = fixture();
   const calls = [];
   const notes = "Keep $(touch forbidden) and `literal` text";
-  const result = prepareRelease({ ...f, env: { ...f.env, RELEASE_NOTES: notes }, run: githubRunner(calls) });
+  const output = path.join(f.cwd, "github-output");
+  const result = prepareRelease({
+    ...f,
+    env: { ...f.env, RELEASE_NOTES: notes, GITHUB_OUTPUT: output },
+    run: githubRunner(calls),
+  });
   expect(result.version).toBe("1.0.1");
   expect(JSON.parse(fs.readFileSync(path.join(f.cwd, "package.json"))).version).toBe("1.0.1");
   expect(f.git("show", "origin/main:package.json")).toContain('"1.0.0"');
@@ -81,6 +96,8 @@ it("prepares a separate release branch, root versions and changelog, PR and expl
   expect(changelog).toContain("https://github.com/actual/project/pull/43");
   expect(changelog).toContain(notes);
   expect(calls.createdBody).toContain(notes);
+  expect(calls.createdBody).toContain(`<!-- opencc-release-preparation:123:${f.env.GITHUB_SHA} -->`);
+  expect(fs.readFileSync(output, "utf8")).toBe("version=1.0.1\npr_number=7\n");
   expect(calls.find((a) => a[0] === "pr" && a[1] === "create")).toEqual(
     expect.arrayContaining(["--base", "main", "--head", "codex/release-v1.0.1"]),
   );
@@ -109,16 +126,32 @@ it("reuses a branch and open PR without overwriting manual edits or advancing it
   f.git("commit", "--allow-empty", "-m", "new main work");
   f.env.GITHUB_SHA = f.git("rev-parse", "HEAD");
   const calls = [];
+  const prs = [
+    {
+      state: "OPEN",
+      url: "https://github.com/actual/project/pull/7",
+      baseRefName: "main",
+      body: `Human-reviewed notes\n<!-- opencc-release-preparation:122:${f.env.GITHUB_SHA} -->\n`,
+    },
+  ];
+  const baseRun = githubRunner(calls, { prs });
+  const editedBody = "New reviewer notes added during fetch\n";
   const result = prepareRelease({
     ...f,
-    run: githubRunner(calls, {
-      prs: [{ state: "OPEN", url: "https://github.com/actual/project/pull/7", baseRefName: "main" }],
-    }),
+    run(file, args, options) {
+      const result = baseRun(file, args, options);
+      if (file !== "gh" && args[0] === "fetch" && args.some((arg) => arg.includes("refs/remotes/origin/")))
+        prs[0].body = editedBody;
+      return result;
+    },
   });
   expect(result.prUrl).toContain("/pull/7");
   expect(f.git("rev-parse", `origin/${branch}`)).toBe(branchSha);
   expect(f.git("show", `origin/${branch}:CHANGELOG.md`)).toBe("Human notes");
   expect(calls.filter((a) => a[0] === "pr" && a[1] === "create")).toHaveLength(0);
+  expect(prs[0].body).toBe(editedBody);
+  expect(calls.editedBody).toBeUndefined();
+  expect(calls.provenanceBody).toContain(`<!-- opencc-release-preparation:123:${f.env.GITHUB_SHA} -->`);
 });
 it("rejects a closed PR collision before changing the branch", async () => {
   const { prepareRelease } = await import("../scripts/prepare-release.mjs");

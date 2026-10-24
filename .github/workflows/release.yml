@@ -1,71 +1,83 @@
 name: Release
 
 on:
-  workflow_dispatch:
-    inputs:
-      expected_version:
-        description: "Optional assertion of the checked-in version (without leading v)"
-        required: false
-        type: string
+  pull_request:
+    types: [closed]
+    branches: [main]
 
 permissions:
   contents: read
 
 concurrency:
-  group: release-publication
+  group: release-publication-${{ github.event.pull_request.number }}
   cancel-in-progress: false
 
 jobs:
-  build:
+  eligibility:
+    if: >-
+      github.event.pull_request.merged == true &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      startsWith(github.event.pull_request.head.ref, 'codex/release-v')
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 5
+    permissions:
+      actions: read
+      pull-requests: read
+    outputs:
+      source_sha: ${{ steps.release.outputs.source_sha }}
+      version: ${{ steps.release.outputs.version }}
+    steps:
+      - name: Identify reviewed release and preparation run
+        id: release
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            // BEGIN ELIGIBILITY
+            const pr = context.payload.pull_request;
+            const repository = `${context.repo.owner}/${context.repo.repo}`;
+            const fail = (message) => { throw new Error(message); };
+            if (!pr?.merged || pr.base?.ref !== 'main' || pr.base.repo?.full_name !== repository || pr.head?.repo?.full_name !== repository) fail('Release requires a merged same-repository PR into main');
+            if (pr.user?.login !== 'github-actions[bot]' || pr.user.id !== 41898282) fail('Release PR must be authored by the preparation bot');
+            const match = /^codex\/release-v((0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*))$/.exec(pr.head.ref);
+            if (!match || match.slice(2).some((part) => Number(part) > 65535) || match[1] === '0.0.0') fail('Invalid release branch version');
+            if (!/^[a-f0-9]{40}$/.test(pr.merge_commit_sha || '')) fail('Invalid release merge commit');
+            const comments = await github.paginate(github.rest.issues.listComments, { ...context.repo, issue_number: pr.number, per_page: 100 });
+            const candidates = comments.filter((comment) => comment.user?.login === 'github-actions[bot]' && comment.user.id === 41898282)
+              .reverse().map((comment) => comment.body || '');
+            // Retain initial-description markers for existing preparation PRs.
+            candidates.push(pr.body || '');
+            for (const body of candidates) {
+              const markers = [...body.matchAll(/^<!-- opencc-release-preparation:([1-9]\d*):([a-f0-9]{40}) -->$/gm)];
+              if (markers.length !== 1 || !Number.isSafeInteger(Number(markers[0][1]))) continue;
+              const [, runId, preparedFrom] = markers[0];
+              let run;
+              try { ({ data: run } = await github.rest.actions.getWorkflowRun({ ...context.repo, run_id: Number(runId) })); }
+              catch (error) { if (error.status === 404) continue; throw error; }
+              if (run.path !== '.github/workflows/prepare-release.yml' || run.event !== 'workflow_dispatch' || run.head_branch !== 'main' || run.head_sha !== preparedFrom || run.conclusion !== 'success' || run.repository?.full_name !== repository) continue;
+              // Job names are recorded by Actions, so a copied marker cannot forge this receipt.
+              const jobs = await github.paginate(github.rest.actions.listJobsForWorkflowRun, { ...context.repo, run_id: Number(runId), filter: 'latest', per_page: 100 });
+              const receipt = `Prepared release PR #${pr.number} v${match[1]}`;
+              if (!jobs.some((job) => job.name === receipt && job.conclusion === 'success')) continue;
+              core.setOutput('source_sha', pr.merge_commit_sha);
+              core.setOutput('version', match[1]);
+              return;
+            }
+            fail('No successful preparation provenance matches this release PR and version');
+            // END ELIGIBILITY
+
+  build:
+    needs: eligibility
     permissions:
       contents: read
-    outputs:
-      version: ${{ steps.metadata.outputs.version }}
-      artifact_name: ${{ steps.artifact.outputs.artifact_name }}
-    steps:
-      - name: Require main branch
-        if: github.ref != 'refs/heads/main'
-        run: echo "Release publication must be dispatched from main" >&2; exit 1
-      - name: Checkout frozen source
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          ref: ${{ github.sha }}
-          persist-credentials: false
-      - name: Setup Node.js
-        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version: 24
-          cache: npm
-      - name: Install dependencies
-        run: |
-          npm ci --ignore-scripts
-          node_modules/.bin/wxt prepare
-      - name: Verify source and build all browsers
-        run: npm --ignore-scripts run ci
-      - name: Package verified builds
-        run: npm run package:built
-      - name: Prepare immutable release artifacts
-        id: metadata
-        run: node scripts/release-artifacts.mjs
-        env:
-          EXPECTED_VERSION: ${{ inputs.expected_version }}
-          GITHUB_SHA: ${{ github.sha }}
-          GIT_EXECUTABLE: /usr/bin/git
-      - name: Save artifact identity for publication retries
-        id: artifact
-        run: echo "artifact_name=release-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" >> "$GITHUB_OUTPUT"
-      - name: Upload verified release artifacts
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        with:
-          name: ${{ steps.artifact.outputs.artifact_name }}
-          path: .output/release-artifacts/*
-          if-no-files-found: error
-          retention-days: 14
+    uses: ./.github/workflows/validate.yml
+    with:
+      source_ref: ${{ needs.eligibility.outputs.source_sha }}
+      artifact_prefix: release
+      retention_days: 14
+      release_version: ${{ needs.eligibility.outputs.version }}
 
   publish:
-    needs: build
+    needs: [eligibility, build]
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
@@ -79,7 +91,7 @@ jobs:
       - name: Verify and publish release
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
-          SOURCE_SHA: ${{ github.sha }}
+          SOURCE_SHA: ${{ needs.eligibility.outputs.source_sha }}
           VERSION: ${{ needs.build.outputs.version }}
           ARTIFACT_DIR: ${{ github.workspace }}/release-artifacts
         with:
@@ -169,6 +181,6 @@ jobs:
               }
             }
             await verifyAssets(await listAssets(), true);
-            await github.rest.repos.updateRelease({ ...repo, release_id: release.id, draft: false });
+            await github.rest.repos.updateRelease({ ...repo, release_id: release.id, draft: false, make_latest: 'legacy' });
             core.info(`Published verified release ${tag} at ${commit}`);
             // END PUBLICATION

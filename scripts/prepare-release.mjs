@@ -15,6 +15,7 @@ export function prepareRelease({
 } = {}) {
   if (env.GITHUB_REF !== "refs/heads/main") throw new Error("Release preparation must be dispatched from main");
   if (!/^[\w.-]+\/[\w.-]+$/.test(env.GITHUB_REPOSITORY || "")) throw new Error("GITHUB_REPOSITORY is required");
+  if (!/^[1-9]\d*$/.test(env.GITHUB_RUN_ID || "")) throw new Error("GITHUB_RUN_ID is required for release provenance");
   const command = (file, args) => String(run(file, args, { cwd, env: { ...process.env, ...env } })).trim();
   const git = (...args) => command(env.GIT_EXECUTABLE || process.env.GIT_EXECUTABLE || "git", args);
   const gh = (...args) => command("gh", args);
@@ -29,6 +30,7 @@ export function prepareRelease({
   });
   const branch = `codex/release-v${version}`;
   const repository = env.GITHUB_REPOSITORY;
+  const server = env.GITHUB_SERVER_URL || "https://github.com";
   const prs = JSON.parse(
     gh("pr", "list", "--repo", repository, "--head", branch, "--state", "all", "--json", "state,url,baseRefName"),
   );
@@ -59,16 +61,25 @@ export function prepareRelease({
     git("push", "origin", `HEAD:refs/heads/${branch}`);
   }
   let prUrl = prs[0]?.url;
-  if (!prUrl) {
-    const temporary = fs.mkdtempSync(path.join(os.tmpdir(), "opencc-release-pr-"));
-    try {
+  const temporary = fs.mkdtempSync(path.join(os.tmpdir(), "opencc-release-pr-"));
+  try {
+    const marker = `<!-- opencc-release-preparation:${env.GITHUB_RUN_ID}:${env.GITHUB_SHA} -->`;
+    const body = path.join(temporary, "body.md");
+    if (prUrl) {
+      // Append bot-owned provenance instead of replacing a description reviewers may be editing.
+      fs.writeFileSync(
+        body,
+        `[準備執行 / Preparation run](${server}/${repository}/actions/runs/${env.GITHUB_RUN_ID})\n\n${marker}\n`,
+      );
+      gh("pr", "comment", prUrl, "--repo", repository, "--body-file", body);
+    } else {
       const notes = existing
         ? git("show", `refs/remotes/origin/${branch}:CHANGELOG_RELEASE.md`)
         : fs.readFileSync(path.join(cwd, "CHANGELOG_RELEASE.md"), "utf8");
-      const body = path.join(temporary, "body.md");
+      const prose = notes.replace(/^<!-- opencc-release-preparation:.* -->\r?\n?/gm, "").trimEnd();
       fs.writeFileSync(
         body,
-        `${notes}\nPrepared from main commit ${env.GITHUB_SHA}. Review and merge this PR through the normal process.\n`,
+        `${prose}\n\n審查版本與說明；合併此 PR 至 main 後會自動發布。\nReview the version and notes; merging this PR into main publishes automatically.\n\n${marker}\n`,
       );
       prUrl = gh(
         "pr",
@@ -84,12 +95,16 @@ export function prepareRelease({
         "--body-file",
         body,
       );
-    } finally {
-      fs.rmSync(temporary, { recursive: true, force: true });
     }
+  } finally {
+    fs.rmSync(temporary, { recursive: true, force: true });
   }
+  const prPrefix = `${server}/${repository}/pull/`;
+  const prNumber = prUrl.startsWith(prPrefix) ? prUrl.slice(prPrefix.length) : "";
+  if (!/^[1-9]\d*$/.test(prNumber) || !Number.isSafeInteger(Number(prNumber)))
+    throw new Error("Release PR URL must identify a pull request in this repository");
   gh("workflow", "run", "ci.yml", "--repo", repository, "--ref", branch);
-  const server = env.GITHUB_SERVER_URL || "https://github.com";
+  if (env.GITHUB_OUTPUT) fs.appendFileSync(env.GITHUB_OUTPUT, `version=${version}\npr_number=${prNumber}\n`);
   const ciUrl = `${server}/${repository}/actions/workflows/ci.yml?query=branch%3A${encodeURIComponent(branch)}`;
   if (env.GITHUB_STEP_SUMMARY)
     fs.appendFileSync(
