@@ -7,21 +7,25 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { resolveReleaseVersion } from "./resolve-release-version.mjs";
 
 const scripts = path.dirname(fileURLToPath(import.meta.url));
+function requirePreparationSource(env, git) {
+  if (env.GITHUB_REF !== "refs/heads/main") throw new Error("Release preparation must be dispatched from main");
+  if (!/^[\w.-]+\/[\w.-]+$/.test(env.GITHUB_REPOSITORY || "")) throw new Error("GITHUB_REPOSITORY is required");
+  if (!/^[1-9]\d*$/.test(env.GITHUB_RUN_ID || "")) throw new Error("GITHUB_RUN_ID is required for release provenance");
+  if (!env.GITHUB_SHA || git("rev-parse", "HEAD") !== env.GITHUB_SHA)
+    throw new Error("Checkout must match the dispatch GITHUB_SHA commit");
+  if (git("status", "--porcelain")) throw new Error("Release preparation requires a clean working tree");
+}
+
 export function prepareRelease({
   cwd = process.cwd(),
   env = process.env,
   run = (file, args, options) =>
     execFileSync(file, args, { ...options, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }).trim(),
 } = {}) {
-  if (env.GITHUB_REF !== "refs/heads/main") throw new Error("Release preparation must be dispatched from main");
-  if (!/^[\w.-]+\/[\w.-]+$/.test(env.GITHUB_REPOSITORY || "")) throw new Error("GITHUB_REPOSITORY is required");
-  if (!/^[1-9]\d*$/.test(env.GITHUB_RUN_ID || "")) throw new Error("GITHUB_RUN_ID is required for release provenance");
   const command = (file, args) => String(run(file, args, { cwd, env: { ...process.env, ...env } })).trim();
   const git = (...args) => command(env.GIT_EXECUTABLE || process.env.GIT_EXECUTABLE || "git", args);
   const gh = (...args) => command("gh", args);
-  if (!env.GITHUB_SHA || git("rev-parse", "HEAD") !== env.GITHUB_SHA)
-    throw new Error("Checkout must match the dispatch GITHUB_SHA commit");
-  if (git("status", "--porcelain")) throw new Error("Release preparation requires a clean working tree");
+  requirePreparationSource(env, git);
   git("fetch", "origin", "--tags");
   const version = resolveReleaseVersion({
     packageVersion: JSON.parse(fs.readFileSync(path.join(cwd, "package.json"), "utf8")).version,
