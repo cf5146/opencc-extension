@@ -18,7 +18,6 @@ jobs:
   checks:
     uses: ./.github/workflows/validate.yml
     with:
-      source_ref: ${{ github.sha }}
       artifact_prefix: ci
       retention_days: ${{ github.event_name == 'pull_request' && 7 || startsWith(github.ref, 'refs/heads/codex/release-v') && 7 || 14 }}
 
